@@ -23,6 +23,7 @@
 //
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
+//require("ts-node/register");
 
 module.exports = {
   /**
@@ -34,6 +35,10 @@ module.exports = {
    *
    * $ truffle test --network <network-name>
    */
+
+  // this is required by truffle to find any ts test files
+  test_file_extension_regexp: /.*\.ts$/,
+
 
   networks: {
     // Useful for testing. The `development` name is special - truffle uses it by default
