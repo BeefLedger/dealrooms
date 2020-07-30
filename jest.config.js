@@ -3,9 +3,15 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
+  moduleFileExtensions: ["js", "json", "jsx", "ts", "d.ts", "tsx", "node"],
   globals: {
-    'ts-jest': {
-      // ts-jest configuration goes here
+    "ts-jest": {
+      diagnostics: {
+        // Do not fail on TS compilation errors
+        // https://kulshekhar.github.io/ts-jest/user/config/diagnostics#do-not-fail-on-first-error
+        warnOnly: true
+      }
     }
-  }
+  },
 };
+

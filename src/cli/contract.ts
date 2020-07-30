@@ -1,5 +1,5 @@
 import * as yargs from "yargs";
-import { deployDealRoomDeployer, DeployedEnvironment, deployErc20, deployErc721 } from "../deploy/deploy";
+import { deployErc20, deployErc721, deployDealRoomDeployer, DeployedEnvironment } from "../../deploy/deploy";
 
 type Args = {
     name: string;
@@ -51,6 +51,7 @@ async function main() {
                     default: Names.ALL,  
                 }
             )
+            .help()
         },
         async (yargs) => {
             const args: Args = yargs.argv as Args;
@@ -67,7 +68,7 @@ async function main() {
             }
             console.log(JSON.stringify(result, undefined, 4));
         }
-    )
+    ).help().argv
 
 }
 

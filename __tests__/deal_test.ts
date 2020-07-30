@@ -5,16 +5,17 @@
 //const ERC20Detailed = artifacts.require("ERC20Detailed.sol");
 //const DealRoomDeployer = artifacts.require("DealRoomDeployer.sol");
 //const DealRoom = artifacts.require("DealRoom.sol");
-import { DealRoom } from "../build/types/DealRoom"
-import { deployContract, getContract } from "../services/chain/contractFactory";
+
+import { deployContract, getContract } from "../src/services/chain/contractFactory";
 import { deployAll, DeployedEnvironment } from "../deploy/deploy";
 import { isAssertionExpression } from "typescript";
-import { getProvider } from "../services/chain/providerFactory";
+import { getProvider } from "../src/services/chain/providerFactory";
 import * as artifactDealRoom from "../build/contracts/DealRoom.json";
-import { DealRoomDeployer } from "../build/types/DealRoomDeployer";
-import { Erc20Detailed } from "../build/types/Erc20Detailed";
-import { Erc721Detailed } from "../build/types/Erc721Detailed";
-import { getDealRoomContract, getErc721Contract, getErc20Contract } from "../services/chain/prefabContractFactory";
+
+import { getDealRoomContract, getErc721Contract, getErc20Contract } from "../src/services/chain/prefabContractFactory";
+import { DealRoom } from "../src/types/DealRoom";
+import { Erc20Detailed } from "../src/types/Erc20Detailed";
+import { Erc721Detailed } from "../src/types/Erc721Detailed";
 
 const buyerIdx = 2;
 const sellerIdx = 3;

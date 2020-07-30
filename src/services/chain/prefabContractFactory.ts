@@ -1,8 +1,10 @@
-import { DealRoomDeployer } from "../../build/types/DealRoomDeployer";
-import { DealRoom } from "../../build/types/DealRoom";
-import { Erc20Detailed } from "../../build/types/Erc20Detailed";
-import { Erc721Detailed } from "../../build/types/Erc721Detailed";
-import { getContract } from "./contractFactory";
+
+
+import { Erc20Detailed } from "../../types/Erc20Detailed"
+import { Erc721Detailed } from "../../types/Erc721Detailed"
+import { getContract } from "./contractFactory"
+import { DealRoomDeployer } from "../../types/DealRoomDeployer"
+import { DealRoom } from "../../types/DealRoom"
 
 export async function getDealRoomDeployerContract(address: string, signerIdxOrAddress?: number | string): Promise<DealRoomDeployer> {
     return getContract(address, DealRoomDeployer, signerIdxOrAddress)
