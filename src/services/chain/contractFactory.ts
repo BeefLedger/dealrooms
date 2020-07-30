@@ -19,7 +19,7 @@ export async function getContract <T extends Contract>(
     addressOrIndex?: string | number
 ): Promise<T> {
     if (addressOrIndex !== undefined) {
-        const signer = await getSigner(address);
+        const signer = await getSigner(addressOrIndex);
         return new Contract(address, abi, signer) as T;
     } else {
         const provider = getProvider();
