@@ -1,13 +1,13 @@
 
-import * as artifactDealRoomDeployer from "../build/contracts/DealRoomDeployer.json";
-import * as artifactErc20 from "../build/contracts/ERC20Detailed.json";
-import * as artifactErc721 from "../build/contracts/ERC721Detailed.json";
-import { getSigner } from "../src/services/chain/signerFactory";
+import * as artifactDealRoomDeployer from "../abi/DealRoomDeployer.json";
+import * as artifactErc20 from "../abi/ERC20Detailed.json";
+import * as artifactErc721 from "../abi/ERC721Detailed.json";
+import { getSigner } from "../services/chain/signerFactory";
 
-import { deployContract } from "../src/services/chain/contractFactory";
-import { Erc20Detailed } from "../src/types/Erc20Detailed";
-import { Erc721Detailed } from "../src/types/Erc721Detailed";
-import { DealRoomDeployer } from "../src/types/DealRoomDeployer";
+import { deployContract } from "../services/chain/contractFactory";
+import { Erc20Detailed } from "../types/Erc20Detailed";
+import { Erc721Detailed } from "../types/Erc721Detailed";
+import { DealRoomDeployer } from "../types/DealRoomDeployer";
 
 export type DeployedEnvironment = {
     dealRoomDeployer?: DealRoomDeployer

@@ -1,5 +1,5 @@
-import * as Erc20DetailedCompiled  from "../../abi/Erc20Detailed.json"
-import * as Erc721DetailedCompiled from "../../abi/Erc721Detailed.json"
+import * as Erc20DetailedCompiled  from "../../abi/ERC20Detailed.json"
+import * as Erc721DetailedCompiled from "../../abi/ERC721Detailed.json"
 import * as DealRoomDeployerCompiled from "../../abi/DealRoomDeployer.json"
 import * as DealRoomCompiled from "../../abi/DealRoom.json"
 
