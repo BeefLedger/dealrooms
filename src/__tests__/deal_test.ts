@@ -18,7 +18,6 @@ import { Erc20Detailed } from "../types/Erc20Detailed";
 import { Erc721Detailed } from "../types/Erc721Detailed";
 
 //import { BigNumber } from "ethers";
-import { EthersMatchers } from "../util/jest";
 import { bnEquals, bnToNumber } from "../util/bigNumbers";
 
 const buyerIdx = 2;
@@ -194,7 +193,7 @@ describe("Reset", () => {
         }); 
     });
 
-    describe("Using the GREEN deal room", () => {
+    /*describe("Using the GREEN deal room", () => {
     
         beforeAll(async () => {
             if (!de.dealRoomDeployer) {
@@ -203,6 +202,7 @@ describe("Reset", () => {
             let roomAddress = await de.dealRoomDeployer.getRoom(DealRooms.GREEN.id)
             dealRoom = await getDealRoomContract(roomAddress, Actors.ADMIN.address)
         })
+        
         it("Make GREEN deal", async () => {
             if (!de.erc20 || !de.erc721 || !dealRoom) {
                 fail("Not all contracts deployed")
@@ -293,5 +293,5 @@ describe("Reset", () => {
             let newBalance = await buyerErc721.balanceOf(Deals.GREEN_1.room.buyer.address);
             expect(bnEquals(newBalance, bnToNumber(oldBalance) + Deals.GREEN_1.assets.length)).toBeTruthy();
         });
-    });
+    });*/
 });

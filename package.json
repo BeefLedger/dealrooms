@@ -28,7 +28,8 @@
     "contracts:clear": "rm -rf ./abis && rm -rf ./types",
     "contracts:build": "yarn contracts:clear && yarn contracts:compile && yarn contracts:type",
     "contracts:compile": "yarn truffle compile",
-    "build:src": "rm -rf ./dist && tsc",
+    "src:build": "rm -rf ./dist && tsc",
+    "build": "yarn contracts:build && yarn src:build",
     "test:contracts": "jest --detectOpenHandles --forceExit --runInBand --testPathPattern=./test",
     "cli:contract": "ts-node ./cli/contract.ts",
     "cli": "yarn cli:contract deploy all"

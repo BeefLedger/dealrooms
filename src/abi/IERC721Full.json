@@ -387,14 +387,14 @@
     "absolutePath": "/projects/beefledger/investor-engine/contracts/ERC721/IERC721Full.sol",
     "exportedSymbols": {
       "IERC721Full": [
-        2985
+        2980
       ]
     },
-    "id": 2986,
+    "id": 2981,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2975,
+        "id": 2970,
         "literals": [
           "solidity",
           "^",
@@ -407,10 +407,10 @@
       {
         "absolutePath": "/projects/beefledger/investor-engine/contracts/ERC721/IERC721.sol",
         "file": "./IERC721.sol",
-        "id": 2976,
+        "id": 2971,
         "nodeType": "ImportDirective",
-        "scope": 2986,
-        "sourceUnit": 2947,
+        "scope": 2981,
+        "sourceUnit": 2942,
         "src": "25:23:21",
         "symbolAliases": [],
         "unitAlias": ""
@@ -418,10 +418,10 @@
       {
         "absolutePath": "/projects/beefledger/investor-engine/contracts/ERC721/IERC721Enumerable.sol",
         "file": "./IERC721Enumerable.sol",
-        "id": 2977,
+        "id": 2972,
         "nodeType": "ImportDirective",
-        "scope": 2986,
-        "sourceUnit": 2974,
+        "scope": 2981,
+        "sourceUnit": 2969,
         "src": "49:33:21",
         "symbolAliases": [],
         "unitAlias": ""
@@ -429,10 +429,10 @@
       {
         "absolutePath": "/projects/beefledger/investor-engine/contracts/ERC721/IERC721Metadata.sol",
         "file": "./IERC721Metadata.sol",
-        "id": 2978,
+        "id": 2973,
         "nodeType": "ImportDirective",
-        "scope": 2986,
-        "sourceUnit": 3009,
+        "scope": 2981,
+        "sourceUnit": 3004,
         "src": "83:31:21",
         "symbolAliases": [],
         "unitAlias": ""
@@ -443,17 +443,17 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2979,
+              "id": 2974,
               "name": "IERC721",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2946,
+              "referencedDeclaration": 2941,
               "src": "276:7:21",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IERC721_$2946",
+                "typeIdentifier": "t_contract$_IERC721_$2941",
                 "typeString": "contract IERC721"
               }
             },
-            "id": 2980,
+            "id": 2975,
             "nodeType": "InheritanceSpecifier",
             "src": "276:7:21"
           },
@@ -461,17 +461,17 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2981,
+              "id": 2976,
               "name": "IERC721Enumerable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2973,
+              "referencedDeclaration": 2968,
               "src": "285:17:21",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IERC721Enumerable_$2973",
+                "typeIdentifier": "t_contract$_IERC721Enumerable_$2968",
                 "typeString": "contract IERC721Enumerable"
               }
             },
-            "id": 2982,
+            "id": 2977,
             "nodeType": "InheritanceSpecifier",
             "src": "285:17:21"
           },
@@ -479,42 +479,42 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2983,
+              "id": 2978,
               "name": "IERC721Metadata",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3008,
+              "referencedDeclaration": 3003,
               "src": "304:15:21",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IERC721Metadata_$3008",
+                "typeIdentifier": "t_contract$_IERC721Metadata_$3003",
                 "typeString": "contract IERC721Metadata"
               }
             },
-            "id": 2984,
+            "id": 2979,
             "nodeType": "InheritanceSpecifier",
             "src": "304:15:21"
           }
         ],
         "contractDependencies": [
-          2946,
-          2973,
-          3008,
-          3928
+          2941,
+          2968,
+          3003,
+          3923
         ],
         "contractKind": "contract",
         "documentation": "@title ERC-721 Non-Fungible Token Standard, full implementation interface\n@dev See https://eips.ethereum.org/EIPS/eip-721",
         "fullyImplemented": false,
-        "id": 2985,
+        "id": 2980,
         "linearizedBaseContracts": [
-          2985,
-          3008,
-          2973,
-          2946,
-          3928
+          2980,
+          3003,
+          2968,
+          2941,
+          3923
         ],
         "name": "IERC721Full",
         "nodeType": "ContractDefinition",
         "nodes": [],
-        "scope": 2986,
+        "scope": 2981,
         "src": "252:124:21"
       }
     ],
@@ -524,14 +524,14 @@
     "absolutePath": "/projects/beefledger/investor-engine/contracts/ERC721/IERC721Full.sol",
     "exportedSymbols": {
       "IERC721Full": [
-        2985
+        2980
       ]
     },
-    "id": 2986,
+    "id": 2981,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 2975,
+        "id": 2970,
         "literals": [
           "solidity",
           "^",
@@ -544,10 +544,10 @@
       {
         "absolutePath": "/projects/beefledger/investor-engine/contracts/ERC721/IERC721.sol",
         "file": "./IERC721.sol",
-        "id": 2976,
+        "id": 2971,
         "nodeType": "ImportDirective",
-        "scope": 2986,
-        "sourceUnit": 2947,
+        "scope": 2981,
+        "sourceUnit": 2942,
         "src": "25:23:21",
         "symbolAliases": [],
         "unitAlias": ""
@@ -555,10 +555,10 @@
       {
         "absolutePath": "/projects/beefledger/investor-engine/contracts/ERC721/IERC721Enumerable.sol",
         "file": "./IERC721Enumerable.sol",
-        "id": 2977,
+        "id": 2972,
         "nodeType": "ImportDirective",
-        "scope": 2986,
-        "sourceUnit": 2974,
+        "scope": 2981,
+        "sourceUnit": 2969,
         "src": "49:33:21",
         "symbolAliases": [],
         "unitAlias": ""
@@ -566,10 +566,10 @@
       {
         "absolutePath": "/projects/beefledger/investor-engine/contracts/ERC721/IERC721Metadata.sol",
         "file": "./IERC721Metadata.sol",
-        "id": 2978,
+        "id": 2973,
         "nodeType": "ImportDirective",
-        "scope": 2986,
-        "sourceUnit": 3009,
+        "scope": 2981,
+        "sourceUnit": 3004,
         "src": "83:31:21",
         "symbolAliases": [],
         "unitAlias": ""
@@ -580,17 +580,17 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2979,
+              "id": 2974,
               "name": "IERC721",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2946,
+              "referencedDeclaration": 2941,
               "src": "276:7:21",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IERC721_$2946",
+                "typeIdentifier": "t_contract$_IERC721_$2941",
                 "typeString": "contract IERC721"
               }
             },
-            "id": 2980,
+            "id": 2975,
             "nodeType": "InheritanceSpecifier",
             "src": "276:7:21"
           },
@@ -598,17 +598,17 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2981,
+              "id": 2976,
               "name": "IERC721Enumerable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 2973,
+              "referencedDeclaration": 2968,
               "src": "285:17:21",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IERC721Enumerable_$2973",
+                "typeIdentifier": "t_contract$_IERC721Enumerable_$2968",
                 "typeString": "contract IERC721Enumerable"
               }
             },
-            "id": 2982,
+            "id": 2977,
             "nodeType": "InheritanceSpecifier",
             "src": "285:17:21"
           },
@@ -616,42 +616,42 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 2983,
+              "id": 2978,
               "name": "IERC721Metadata",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3008,
+              "referencedDeclaration": 3003,
               "src": "304:15:21",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IERC721Metadata_$3008",
+                "typeIdentifier": "t_contract$_IERC721Metadata_$3003",
                 "typeString": "contract IERC721Metadata"
               }
             },
-            "id": 2984,
+            "id": 2979,
             "nodeType": "InheritanceSpecifier",
             "src": "304:15:21"
           }
         ],
         "contractDependencies": [
-          2946,
-          2973,
-          3008,
-          3928
+          2941,
+          2968,
+          3003,
+          3923
         ],
         "contractKind": "contract",
         "documentation": "@title ERC-721 Non-Fungible Token Standard, full implementation interface\n@dev See https://eips.ethereum.org/EIPS/eip-721",
         "fullyImplemented": false,
-        "id": 2985,
+        "id": 2980,
         "linearizedBaseContracts": [
-          2985,
-          3008,
-          2973,
-          2946,
-          3928
+          2980,
+          3003,
+          2968,
+          2941,
+          3923
         ],
         "name": "IERC721Full",
         "nodeType": "ContractDefinition",
         "nodes": [],
-        "scope": 2986,
+        "scope": 2981,
         "src": "252:124:21"
       }
     ],
@@ -662,8 +662,8 @@
     "version": "0.5.5+commit.47a71e8f.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.1.0",
-  "updatedAt": "2020-07-30T12:28:01.392Z",
+  "schemaVersion": "3.2.3",
+  "updatedAt": "2020-07-31T06:30:01.992Z",
   "devdoc": {
     "details": "See https://eips.ethereum.org/EIPS/eip-721",
     "methods": {

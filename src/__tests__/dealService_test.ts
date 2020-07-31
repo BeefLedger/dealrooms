@@ -1,10 +1,7 @@
-import { deployAll, DeployedEnvironment, deployMultisig } from "../deploy/deploy";
+import { deployAll, DeployedEnvironment } from "../deploy/deploy";
 import { getProvider } from "../services/chain/providerFactory";
 
-import { getErc721Contract, getErc20Contract } from "../services/chain/prefabContractFactory";
 import { DealRoom } from "../types/DealRoom";
-import { Erc20Detailed } from "../types/Erc20Detailed";
-import { Erc721Detailed } from "../types/Erc721Detailed";
 
 import { bnEquals, bnToNumber } from "../util/bigNumbers";
 import { MultiSigWallet } from "../types/MultiSigWallet";
