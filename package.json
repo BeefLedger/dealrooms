@@ -24,11 +24,11 @@
   },
   "scripts": {
     "test": "jest",
-    "contracts:type": "yarn typechain --target ./node_modules/@typechain/ethers-v5 --outDir ./src/types './build/contracts/*.json'",
+    "contracts:type": "yarn typechain --target ./node_modules/@typechain/ethers-v5 --outDir ./src/types './src/abi/*.json'",
     "contracts:clear": "rm -rf ./abis && rm -rf ./types",
     "contracts:build": "yarn contracts:clear && yarn contracts:compile && yarn contracts:type",
     "contracts:compile": "yarn truffle compile",
-    "build:src": "tsc",
+    "build:src": "rm -rf ./dist && tsc",
     "test:contracts": "jest --detectOpenHandles --forceExit --runInBand --testPathPattern=./test",
     "cli:contract": "ts-node ./cli/contract.ts",
     "cli": "yarn cli:contract deploy all"

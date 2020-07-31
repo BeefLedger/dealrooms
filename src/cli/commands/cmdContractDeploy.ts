@@ -13,6 +13,7 @@ type Args = {
     verbose?: boolean;
     erc20Owner?: string;
     erc721Owner?: string;
+    drdOwner?: string;
 };
 
 

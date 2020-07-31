@@ -18,4 +18,5 @@ export * from "./Erc721MetadataFactory";
 export * from "./Erc721MintableFactory";
 export * from "./Erc721PausableFactory";
 export * from "./MigrationsFactory";
+export * from "./MultiSigWalletFactory";
 export * from "./WhitelistedRoleFactory";

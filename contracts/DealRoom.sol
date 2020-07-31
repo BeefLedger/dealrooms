@@ -18,7 +18,6 @@ contract DealRoom {
 
     struct Deal {
         uint256 id;
-        address arbitrator;
         IERC20 erc20;
         IERC721Full erc721;
         uint256 price;
@@ -44,7 +43,6 @@ contract DealRoom {
 
     function makeDeal(
         uint256 _id,
-        address _arbitrator,
         IERC20 _erc20,
         IERC721Full _erc721,
         uint256 _price,
@@ -53,7 +51,6 @@ contract DealRoom {
 
         deals[_id] = Deal({
             id: _id,
-            arbitrator: _arbitrator,
             erc721: _erc721,
             erc20: _erc20,
             price: _price,

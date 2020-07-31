@@ -16,10 +16,15 @@ export async function deployContract <T extends Contract>(
 export async function getContract <T extends Contract>(
     address: string,
     abi: any,
-    addressOrIndex?: string | number
+    addressOrIndexOrSigner?: string | number | Signer
 ): Promise<T> {
-    if (addressOrIndex !== undefined) {
-        const signer = await getSigner(addressOrIndex);
+    let signer: Signer
+    if (addressOrIndexOrSigner !== undefined) {
+        if (addressOrIndexOrSigner instanceof Signer) {
+            signer = addressOrIndexOrSigner as Signer
+        } else {
+            signer = await getSigner(addressOrIndexOrSigner as string | number);
+        }
         return new Contract(address, abi, signer) as T;
     } else {
         const provider = getProvider();

@@ -9,19 +9,20 @@ import { Erc20Detailed } from "../../types/Erc20Detailed"
 import { Erc721Detailed } from "../../types/Erc721Detailed"
 
 import { getContract } from "./contractFactory"
+import { Signer } from "ethers"
 
-export async function getDealRoomDeployerContract(address: string, signerIdxOrAddress?: number | string): Promise<DealRoomDeployer> {
-    return getContract(address, DealRoomDeployerCompiled.abi, signerIdxOrAddress)
+export async function getDealRoomDeployerContract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<DealRoomDeployer> {
+    return getContract(address, DealRoomDeployerCompiled.abi, signerIdxOrAddressOrSigner)
 }
 
-export async function getDealRoomContract(address: string, signerIdxOrAddress?: number | string): Promise<DealRoom> {
-    return getContract(address, DealRoomCompiled.abi, signerIdxOrAddress)
+export async function getDealRoomContract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<DealRoom> {
+    return getContract(address, DealRoomCompiled.abi, signerIdxOrAddressOrSigner)
 }
 
-export async function getErc20Contract(address: string, signerIdxOrAddress?: number | string): Promise<Erc20Detailed> {
-    return getContract(address, Erc20DetailedCompiled.abi, signerIdxOrAddress)
+export async function getErc20Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<Erc20Detailed> {
+    return getContract(address, Erc20DetailedCompiled.abi, signerIdxOrAddressOrSigner)
 }
 
-export async function getErc721Contract(address: string, signerIdxOrAddress?: number | string): Promise<Erc721Detailed> {
-    return getContract(address, Erc721DetailedCompiled.abi, signerIdxOrAddress)
+export async function getErc721Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<Erc721Detailed> {
+    return getContract(address, Erc721DetailedCompiled.abi, signerIdxOrAddressOrSigner)
 }

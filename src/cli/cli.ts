@@ -1,6 +1,4 @@
-#!/usr/bin/env ts-node
-
-
+#!/usr/bin/env node
 require('yargs')
     .demandCommand()
     .command(require('./commands/cmdContractDeploy'))

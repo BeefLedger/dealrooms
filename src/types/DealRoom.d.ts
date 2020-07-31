@@ -24,7 +24,7 @@ interface DealRoomInterface extends ethers.utils.Interface {
     "erc20()": FunctionFragment;
     "erc721()": FunctionFragment;
     "dealCount()": FunctionFragment;
-    "makeDeal(uint256,address,address,address,uint256,uint256[])": FunctionFragment;
+    "makeDeal(uint256,address,address,uint256,uint256[])": FunctionFragment;
     "missingDealAssets(uint256)": FunctionFragment;
     "missingDealTokens(uint256)": FunctionFragment;
     "settle(uint256)": FunctionFragment;
@@ -41,7 +41,7 @@ interface DealRoomInterface extends ethers.utils.Interface {
   encodeFunctionData(functionFragment: "dealCount", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "makeDeal",
-    values: [BigNumberish, string, string, string, BigNumberish, BigNumberish[]]
+    values: [BigNumberish, string, string, BigNumberish, BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "missingDealAssets",
@@ -143,7 +143,6 @@ export class DealRoom extends Contract {
 
     makeDeal(
       _id: BigNumberish,
-      _arbitrator: string,
       _erc20: string,
       _erc721: string,
       _price: BigNumberish,
@@ -198,7 +197,6 @@ export class DealRoom extends Contract {
     ): Promise<{
       0: {
         id: BigNumber;
-        arbitrator: string;
         erc20: string;
         erc721: string;
         price: BigNumber;
@@ -208,11 +206,10 @@ export class DealRoom extends Contract {
         0: BigNumber;
         1: string;
         2: string;
-        3: string;
-        4: BigNumber;
-        5: BigNumber[];
-        6: number;
-        7: boolean;
+        3: BigNumber;
+        4: BigNumber[];
+        5: number;
+        6: boolean;
       };
     }>;
 
@@ -232,7 +229,6 @@ export class DealRoom extends Contract {
 
   makeDeal(
     _id: BigNumberish,
-    _arbitrator: string,
     _erc20: string,
     _erc721: string,
     _price: BigNumberish,
@@ -275,7 +271,6 @@ export class DealRoom extends Contract {
     overrides?: CallOverrides
   ): Promise<{
     id: BigNumber;
-    arbitrator: string;
     erc20: string;
     erc721: string;
     price: BigNumber;
@@ -285,11 +280,10 @@ export class DealRoom extends Contract {
     0: BigNumber;
     1: string;
     2: string;
-    3: string;
-    4: BigNumber;
-    5: BigNumber[];
-    6: number;
-    7: boolean;
+    3: BigNumber;
+    4: BigNumber[];
+    5: number;
+    6: boolean;
   }>;
 
   getDealStatus(id: BigNumberish, overrides?: CallOverrides): Promise<number>;
@@ -303,7 +297,6 @@ export class DealRoom extends Contract {
 
     makeDeal(
       _id: BigNumberish,
-      _arbitrator: string,
       _erc20: string,
       _erc721: string,
       _price: BigNumberish,
@@ -343,7 +336,6 @@ export class DealRoom extends Contract {
       overrides?: CallOverrides
     ): Promise<{
       id: BigNumber;
-      arbitrator: string;
       erc20: string;
       erc721: string;
       price: BigNumber;
@@ -353,11 +345,10 @@ export class DealRoom extends Contract {
       0: BigNumber;
       1: string;
       2: string;
-      3: string;
-      4: BigNumber;
-      5: BigNumber[];
-      6: number;
-      7: boolean;
+      3: BigNumber;
+      4: BigNumber[];
+      5: number;
+      6: boolean;
     }>;
 
     getDealStatus(id: BigNumberish, overrides?: CallOverrides): Promise<number>;
@@ -374,7 +365,6 @@ export class DealRoom extends Contract {
 
     makeDeal(
       _id: BigNumberish,
-      _arbitrator: string,
       _erc20: string,
       _erc721: string,
       _price: BigNumberish,
@@ -426,7 +416,6 @@ export class DealRoom extends Contract {
 
     makeDeal(
       _id: BigNumberish,
-      _arbitrator: string,
       _erc20: string,
       _erc721: string,
       _price: BigNumberish,
