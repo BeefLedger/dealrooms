@@ -1,3 +1,5 @@
+import { DeployedEnvironment, deployDealRoomDeployer, deployErc20, deployErc721 } from "../../deploy/deploy";
+
 const Names = {
     ALL: "all",
     ERC20: "erc20",
@@ -5,6 +7,14 @@ const Names = {
     DEALROOM: "dr",
     DEALROOM_DEPLOYER: "drd",
 }
+
+type Args = {
+    name: string;
+    verbose?: boolean;
+    erc20Owner?: string;
+    erc721Owner?: string;
+};
+
 
 exports.command = 'deploy'
 exports.aliases = ['dep']
@@ -43,6 +53,19 @@ exports.builder = (yargs) => {
 
 }
 
-exports.handler = function(argv) {
+exports.handler = async function(argv) {
     console.log(JSON.stringify(argv, undefined, 4))
+
+    const args: Args = argv as Args;
+    args.name = args.name.toLowerCase()
+    const all: boolean = args.name === Names.ALL
+    if (args.name === Names.DEALROOM_DEPLOYER || all) {
+        console.log(Names.DEALROOM_DEPLOYER, (await deployDealRoomDeployer()).address)
+    }
+    if (args.name === Names.ERC20 || all) {
+        console.log(Names.ERC20, (await deployErc20(args.erc20Owner)).address)
+    }
+    if (args.name === Names.ERC721 || all) {
+        console.log(Names.ERC721, (await deployErc721(args.erc721Owner)).address)
+    }
 }

@@ -3,6 +3,6 @@
 
 require('yargs')
     .demandCommand()
-    .command(require('./commands/contractDeploy'))
+    .command(require('./commands/cmdContractDeploy'))
     .help()
     .argv
