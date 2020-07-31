@@ -5,6 +5,8 @@
     "resolveJsonModule": true,
     "types": ["jest", "node"],
     "typeRoots": ["./src/types", "./node_modules/@types"],
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
   
     /* Basic Options */
     // "incremental": true,                   /* Enable incremental compilation */

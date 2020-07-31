@@ -23,16 +23,13 @@
     "typescript": "^3.9.7"
   },
   "scripts": {
-    "test": "jest",
-    "contracts:type": "yarn typechain --target ./node_modules/@typechain/ethers-v5 --outDir ./src/types './src/abi/*.json'",
-    "contracts:clear": "rm -rf ./abis && rm -rf ./types",
+    "test": "jest --detectOpenHandles --forceExit --runInBand",
+    "contracts:type": "yarn typechain --target ./node_modules/@typechain/ethers-v5 --outDir ./src/types './src/abi/**/*.json'",
+    "contracts:clear": "rm -rf ./src/abis && rm -rf ./src/types",
     "contracts:build": "yarn contracts:clear && yarn contracts:compile && yarn contracts:type",
     "contracts:compile": "yarn truffle compile",
     "src:build": "rm -rf ./dist && tsc",
-    "build": "yarn contracts:build && yarn src:build",
-    "test:contracts": "jest --detectOpenHandles --forceExit --runInBand --testPathPattern=./test",
-    "cli:contract": "ts-node ./cli/contract.ts",
-    "cli": "yarn cli:contract deploy all"
+    "build": "yarn contracts:build && yarn src:build"
   },
   "author": "Barry Earsman",
   "license": "ISC"

@@ -1,13 +1,11 @@
 import { deployAll, DeployedEnvironment } from "../deploy/deploy";
 import { getProvider } from "../services/chain/providerFactory";
 
-import { DealRoom } from "../types/DealRoom";
-
 import { bnEquals, bnToNumber } from "../util/bigNumbers";
 import { MultiSigWallet } from "../types/MultiSigWallet";
 import { DealRoomController, DealRoomCreateParams, Deal } from "../services/dealService";
 import { getSigner } from "../services/chain/signerFactory";
-import { BigNumber } from "ethers";
+import { BigNumber, Contract } from "ethers";
 
 
 type Actor = {
@@ -112,7 +110,7 @@ async function getAccounts() {
 }
 
 let dealRoomController: DealRoomController
-let dealRoomContract: DealRoom
+let dealRoomContract: Contract
 
 describe("Reset", () => {
     beforeAll(async () =>{
@@ -161,7 +159,7 @@ describe("Reset", () => {
     describe("Fetching Deal Rooms", () => {
         it("Fetches a room", async () => {
             dealRoomContract = await dealRoomController.getDealRoomContract()
-            expect(dealRoomContract instanceof DealRoom).toBeTruthy()
+            expect(dealRoomContract instanceof Contract).toBeTruthy()
         });   
     })
 

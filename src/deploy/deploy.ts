@@ -45,7 +45,7 @@ export async function deployErc721(owner?: string): Promise<Erc721Detailed>  {
 }
 
 export async function deployMultisig(owners: string[], approvalsRequired: number): Promise<MultiSigWallet>  {
-    const contract = await deployContract<MultiSigWallet>(await getSigner(), artifactMultisig, approvalsRequired)
+    const contract = await deployContract<MultiSigWallet>(await getSigner(), artifactMultisig, owners, approvalsRequired)
 
     return contract
 }

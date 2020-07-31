@@ -4,7 +4,8 @@ pragma experimental ABIEncoderV2;
 import "./ERC721/IERC721Full.sol";
 import "./ERC20/IERC20.sol";
 
-
+/// @title DealRoom -- allows atomic swap for ERC20/ERC721
+/// @author Barry Earsman
 contract DealRoom {
     address owner;
     IERC721Full public erc721;
@@ -33,7 +34,6 @@ contract DealRoom {
         Settled
     }
 
-    //constructor (IERC20 _erc20, IERC721Full _erc721, address _buyer, address _seller) public {
     constructor (address _buyer, address _seller) public {
         buyer = _buyer;
         seller = _seller;
