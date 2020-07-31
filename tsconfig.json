@@ -3,8 +3,8 @@
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
 
     "resolveJsonModule": true,
-    "types": ["reflect-metadata", "jest", "node"],
-    "typeRoots": ["./types", "./node_modules/@types"],
+    "types": ["jest", "node"],
+    "typeRoots": ["./src/types", "./node_modules/@types"],
   
     /* Basic Options */
     // "incremental": true,                   /* Enable incremental compilation */

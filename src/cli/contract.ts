@@ -1,5 +1,5 @@
 import * as yargs from "yargs";
-import { deployErc20, deployErc721, deployDealRoomDeployer, DeployedEnvironment } from "../../deploy/deploy";
+import { deployErc20, deployErc721, deployDealRoomDeployer, DeployedEnvironment } from "../deploy/deploy";
 
 type Args = {
     name: string;
