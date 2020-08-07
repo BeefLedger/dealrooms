@@ -192,29 +192,24 @@ describe("Reset", () => {
         });*/
         it("Deposit tokens", async () => {
 
-            // Get connection to ERC20 for the Buyer's signer
+            // Get connection to DealRoom for the Buyer's signer
             dealRoomController = new DealRoomController(await dealRoomController.getAddress(), await getSigner(Deals.GREEN_1.room.buyer.address))
 
             // Buyer transfers tokens to the Deal Room contract
-            await dealRoomController.depositDealTokens(Deals.GREEN_1.id, Deals.GREEN_1.price)
+            await dealRoomController.depositDealTokens(greenDeal.id, greenDeal.price)
 
             // Now there are no missing tokens
             const missingTokens = await dealRoomController.getDealMissingTokens(Deals.GREEN_1.id)
             expect(bnEquals(missingTokens, 0)).toBeTruthy()
         });
-        /*it("Deposit assets", async () => {
-            if (!de.erc721) {
-                fail("Not all contracts deployed")
-            }
-            // Get connection to ERC721 for the Seller's signer
-            let sellerErc721: Erc721Detailed = await getErc721Contract(de.erc721?.address, Deals.GREEN_1.room.seller.address)
-            
+        it("Deposit assets", async () => {
+            // Get connection to DealRoom for the Seller's signer
+            dealRoomController = new DealRoomController(await dealRoomController.getAddress(), await getSigner(Deals.GREEN_1.room.seller.address))
+
             //Seller transfers their tokens to the Deal Room contract
-            dealRoomContract = await dealRoomController.getDealRoomContract()
-            for (let asset of Deals.GREEN_1.assets) {
-                await sellerErc721.transferFrom(Deals.GREEN_1.room.seller.address, dealRoomContract.address, asset)
-            }
-            const missingAssets = (await dealRoomController.getDealMissingAssets(Deals.GREEN_1.id))
+            await dealRoomController.depositDealAssets(greenDeal.id, greenDeal.assetItems)
+
+            const missingAssets = (await dealRoomController.getDealMissingAssets(greenDeal.id))
             expect(bnEquals(missingAssets, 0)).toBeTruthy()
         });
         it("Deal room should have all tokens and assets", async () => {
@@ -228,8 +223,17 @@ describe("Reset", () => {
             expect(bnEquals(assetBalance, Deals.GREEN_1.assets.length)).toBeTruthy()
         });
         it("Settle deal", async() => {
-            expect(1).toEqual(1)
-        });*/
+            // expect(1).toEqual(1)
+            // Seller signs multisig
+            dealRoomController = new DealRoomController(await dealRoomController.getAddress(), await getSigner(Deals.GREEN_1.room.seller.address))
+            dealRoomController.approveDeal(greenDeal.id)
+            
+            // Buyer signs multisig
+            dealRoomController = new DealRoomController(await dealRoomController.getAddress(), await getSigner(Deals.GREEN_1.room.buyer.address))
+            dealRoomController.approveDeal(greenDeal.id)
+            
+            // Call settle()
+        });
         /*
         it("Claim tokens", async() => {
             if (!de.erc20 || !de.erc721) {
