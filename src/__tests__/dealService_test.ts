@@ -1,6 +1,8 @@
 import { deployAll, DeployedEnvironment } from "../deploy/deploy";
 import { getProvider } from "../services/chain/providerFactory";
 
+// import { DealRoom } from "../types/DealRoom";
+
 import { bnEquals, bnToNumber } from "../util/bigNumbers";
 import { MultiSigWallet } from "../types/MultiSigWallet";
 import { DealRoomController, DealRoomCreateParams, Deal } from "../services/dealService";
@@ -112,6 +114,8 @@ async function getAccounts() {
 let dealRoomController: DealRoomController
 let dealRoomContract: Contract
 
+jest.setTimeout(60000)
+
 describe("Reset", () => {
     beforeAll(async () =>{
         const provider = getProvider();
@@ -180,28 +184,25 @@ describe("Reset", () => {
             const fetchedDeal: Deal = await dealRoomController.getDeal(greenDeal.id)
             expect(fetchedDeal).toEqual(greenDeal)
         });
- /*       it("Check GREEN deal status", async () => {
+        /*it("Check GREEN deal status", async () => {
             const missingAssets = await dealRoomController.getDealMissingAssets(Deals.GREEN_1.id)
             const missingTokens = await dealRoomController.getDealMissingTokens(Deals.GREEN_1.id)
             expect(bnEquals(missingAssets, Deals.GREEN_1.assets.length)).toBeTruthy()
             expect(bnEquals(missingTokens, Deals.GREEN_1.price)).toBeTruthy()
-        });
+        });*/
         it("Deposit tokens", async () => {
-            if (!de.erc20) {
-                fail("Not all contracts deployed")
-            }
+
             // Get connection to ERC20 for the Buyer's signer
-            let buyerErc20: Erc20Detailed = await getErc20Contract(de.erc20?.address, Deals.GREEN_1.room.buyer.address)
+            dealRoomController = new DealRoomController(await dealRoomController.getAddress(), await getSigner(Deals.GREEN_1.room.buyer.address))
 
             // Buyer transfers tokens to the Deal Room contract
-            dealRoomContract = await dealRoomController.getDealRoomContract()
-            await buyerErc20.transfer(dealRoomContract.address, Deals.GREEN_1.price)
+            await dealRoomController.depositDealTokens(Deals.GREEN_1.id, Deals.GREEN_1.price)
 
             // Now there are no missing tokens
             const missingTokens = await dealRoomController.getDealMissingTokens(Deals.GREEN_1.id)
             expect(bnEquals(missingTokens, 0)).toBeTruthy()
         });
-        it("Deposit assets", async () => {
+        /*it("Deposit assets", async () => {
             if (!de.erc721) {
                 fail("Not all contracts deployed")
             }
