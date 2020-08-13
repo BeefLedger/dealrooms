@@ -25,7 +25,7 @@
     "typescript": "^3.9.7"
   },
   "scripts": {
-    "test": "tsc && jest --detectOpenHandles --forceExit --runInBand",
+    "test": "jest --detectOpenHandles --forceExit --runInBand",
     "contracts:type": "yarn typechain --target ./node_modules/@typechain/ethers-v5 --outDir ./src/types './src/abi/**/*.json'",
     "contracts:clear": "rm -rf ./src/abis && rm -rf ./src/types",
     "contracts:build": "yarn contracts:clear && yarn contracts:compile && yarn contracts:type",

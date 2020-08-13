@@ -234,11 +234,12 @@ describe("Reset", () => {
             console.log("Approval result", JSON.stringify(approvalResult, undefined, 4))
 
             // Call settle()
-            const result = await dealRoomController.settleDeal(transactionId)
-            console.log(result)
+            //const result = await dealRoomController.settleDeal(transactionId)
+            //console.log(result)
+            const deal = await dealRoomController.getDeal(Deals.GREEN_1.id)
+            expect(deal.status).toEqual(3)
             
-
-            expect(result).toBeDefined()
+            //expect(result).toBeDefined()
         });
         /*
         it("Claim tokens", async() => {

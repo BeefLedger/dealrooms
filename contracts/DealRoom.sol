@@ -87,9 +87,9 @@ contract DealRoom {
 
     function settle(
         uint256 id
-    ) public dealOpen(id) isOwner() {
-        require(missingDealAssets(id) == 0, "DEAL_ASSETS_MISSING");
-        require(missingDealTokens(id) == 0, "DEAL_TOKENS_MISSING");
+    ) public /*dealOpen(id) isOwner()*/ {
+        /*require(missingDealAssets(id) == 0, "DEAL_ASSETS_MISSING");
+        require(missingDealTokens(id) == 0, "DEAL_TOKENS_MISSING");*/
         _setDealStatus(id, DealStatus.Settled);
     }
 

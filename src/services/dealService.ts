@@ -1,10 +1,12 @@
 import * as deployer from "../deploy/deploy";
 import { MultiSigWallet } from "../types/MultiSigWallet";
-import { Signer, BigNumberish, BigNumber, ContractTransaction, ContractReceipt, Event } from "ethers";
+import { Signer, BigNumberish, BigNumber, ContractTransaction, ContractReceipt, Event, ethers } from "ethers";
 import * as prefabContracts from "./chain/prefabContractFactory";
 import { Erc20Detailed } from "../types/Erc20Detailed";
 import { DealRoom } from "../types/DealRoom";
 import { Erc721Detailed } from "../types/Erc721Detailed";
+import * as DealRoomArtifact from "../abi/DealRoom.json"
+import { DealRoomDeployerFactory } from "../types";
 
 export type Deal = {
     id: BigNumber
@@ -130,12 +132,13 @@ export class DealRoomController {
         //this._multiSig?.confirmTransaction()
         const deal: Deal = await this.getDeal(id)
 
-        const dealRoomContract = await this.getDealRoomContract()
-        const multisigContract = await this._getMultisigContract()
+        const dealRoomContract: DealRoom = await this.getDealRoomContract()
+        const multisigContract: MultiSigWallet = await this._getMultisigContract()
         const owners = await multisigContract.getOwners()
         console.log("owners", JSON.stringify(owners, undefined, 4))
 
         //Make the transaction  
+        //const encodedData = new ethers.utils.Interface(DealRoomArtifact.abi).encodeFunctionData("settle", [deal.id])
         const encodedData = dealRoomContract.interface.encodeFunctionData("settle", [deal.id])
         const transaction = await multisigContract.submitTransaction(dealRoomContract.address, 0, encodedData)
         const receipt = await transaction.wait() 
@@ -157,6 +160,7 @@ export class DealRoomController {
             throw `No submission events`         
         }
         catch (e) {
+            console.error(JSON.stringify(e, undefined, 4))
             throw `Error getting new transaction ID: ${e}`
         }
         
@@ -171,6 +175,7 @@ export class DealRoomController {
     }
 
     public async settleDeal(transactionId: BigNumberish): Promise<Event> {
+        
         const multisigContract = await this._getMultisigContract()
         const transaction = await multisigContract.executeTransaction(transactionId)
         const receipt = await transaction.wait() 
@@ -179,15 +184,16 @@ export class DealRoomController {
             const successEvents = receipt.events.filter(evt=>evt.event === 'Execution')
 
             if (failureEvents && failureEvents.length > 0) {
-                console.log(`Deal settlement failed:\n${JSON.stringify(failureEvents[0], undefined, 4)}`)
-                throw `Deal settlement failed`
+                console.error(`Deal settlement failed:\n${JSON.stringify(failureEvents[0], undefined, 4)}`)
+                throw `Deal settlement failed: Failure event detected`
             }
             if (successEvents && successEvents.length > 0) {
+                console.error(`Deal settlement succeeded:\n${JSON.stringify(successEvents[0], undefined, 4)}`)
                 return successEvents[0]
             }
             
         }
-        throw `Deal settlement failed`
+        throw `Deal settlement failed: No success events detected`
     }
 
     /*
