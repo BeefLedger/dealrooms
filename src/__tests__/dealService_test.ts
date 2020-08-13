@@ -1,10 +1,9 @@
 import { deployAll, DeployedEnvironment } from "../deploy/deploy";
 import { getProvider } from "../services/chain/providerFactory";
 
-// import { DealRoom } from "../types/DealRoom";
-
 import { bnEquals, bnToNumber } from "../util/bigNumbers";
 import { MultiSigWallet } from "../types/MultiSigWallet";
+import { DealRoom } from "../types/DealRoom";
 import { DealRoomController, DealRoomCreateParams, Deal } from "../services/dealService";
 import { getSigner } from "../services/chain/signerFactory";
 import { BigNumber, Contract } from "ethers";
@@ -112,7 +111,7 @@ async function getAccounts() {
 }
 
 let dealRoomController: DealRoomController
-let dealRoomContract: Contract
+let dealRoomContract: DealRoom
 
 jest.setTimeout(60000)
 
@@ -173,6 +172,7 @@ describe("Reset", () => {
             if (!de.erc20 || !de.erc721) {
                 fail("Not all contracts deployed")
             }
+            
             greenDeal = await dealRoomController.makeDeal({
                 id: BigNumber.from(Deals.GREEN_1.id),
                 erc20: de.erc20.address,
@@ -184,12 +184,12 @@ describe("Reset", () => {
             const fetchedDeal: Deal = await dealRoomController.getDeal(greenDeal.id)
             expect(fetchedDeal).toEqual(greenDeal)
         });
-        /*it("Check GREEN deal status", async () => {
+        it("Check GREEN deal status", async () => {
             const missingAssets = await dealRoomController.getDealMissingAssets(Deals.GREEN_1.id)
             const missingTokens = await dealRoomController.getDealMissingTokens(Deals.GREEN_1.id)
             expect(bnEquals(missingAssets, Deals.GREEN_1.assets.length)).toBeTruthy()
             expect(bnEquals(missingTokens, Deals.GREEN_1.price)).toBeTruthy()
-        });*/
+        });
         it("Deposit tokens", async () => {
 
             // Get connection to DealRoom for the Buyer's signer
@@ -226,19 +226,26 @@ describe("Reset", () => {
             // expect(1).toEqual(1)
             // Seller signs multisig
             dealRoomController = new DealRoomController(await dealRoomController.getAddress(), await getSigner(Deals.GREEN_1.room.seller.address))
-            dealRoomController.approveDeal(greenDeal.id)
+            const transactionId = await dealRoomController.proposeSettleDeal(greenDeal.id)
             
             // Buyer signs multisig
             dealRoomController = new DealRoomController(await dealRoomController.getAddress(), await getSigner(Deals.GREEN_1.room.buyer.address))
-            dealRoomController.approveDeal(greenDeal.id)
-            
+            const approvalResult = await dealRoomController.approveSettlementProposal(transactionId)
+            console.log("Approval result", JSON.stringify(approvalResult, undefined, 4))
+
             // Call settle()
+            const result = await dealRoomController.settleDeal(transactionId)
+            console.log(result)
+            
+
+            expect(result).toBeDefined()
         });
         /*
         it("Claim tokens", async() => {
             if (!de.erc20 || !de.erc721) {
                 fail("Not all contracts deployed")
             }
+            dealRoomController.
 
             // Get connection to ERC20 and DealRoom for the Seller's signer
             let sellerErc20: Erc20Detailed = await getErc20Contract(de.erc20.address, Deals.GREEN_1.room.seller.address)

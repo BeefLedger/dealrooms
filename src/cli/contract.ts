@@ -1,5 +1,5 @@
 import * as yargs from "yargs";
-import { deployErc20, deployErc721, deployDealRoomDeployer, DeployedEnvironment } from "../deploy/deploy";
+import { deployErc20, deployErc721, DeployedEnvironment } from "../deploy/deploy";
 
 type Args = {
     name: string;
@@ -57,9 +57,7 @@ async function main() {
             const args: Args = yargs.argv as Args;
             const all: boolean = args.name === Names.ALL;
             const result: DeployedEnvironment = {};
-            if (args.name === Names.DEALROOM_DEPLOYER || all) {
-                result.dealRoomDeployer = await deployDealRoomDeployer();
-            }
+
             if (args.name === Names.ERC20 || all) {
                 result.erc20 = await deployErc20(args.erc20Owner);
             }

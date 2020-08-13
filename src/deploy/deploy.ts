@@ -20,18 +20,13 @@ export type DeployedEnvironment = {
     erc721?: Erc721Detailed
 }
 
-export async function deployDealRoomDeployer(): Promise<DealRoomDeployer>  {
-    const contract = await deployContract<DealRoomDeployer>(await getSigner(), artifactDealRoomDeployer)
-    return contract
-}
-
 export async function deployErc20(owner?: string): Promise<Erc20Detailed>  {
     const contract = await deployContract<Erc20Detailed>(await getSigner(), artifactErc20, "BEEF Token", "BEEF", 1 )
     if (owner) {
         await contract.transferOwnership(owner)
         await contract.addMinter(owner);  
     }
-
+    console.log(`Deployed Erc20 contract to ${contract.address}`)
     return contract
 }
 
@@ -40,26 +35,27 @@ export async function deployErc721(owner?: string): Promise<Erc721Detailed>  {
     if (owner) {
         await contract.transferOwnership(owner)
         await contract.addMinter(owner);
-    }   
+    }
+    console.log(`Deployed Erc721 contract to ${contract.address}`)  
     return contract
 }
 
 export async function deployMultisig(owners: string[], approvalsRequired: number): Promise<MultiSigWallet>  {
     const contract = await deployContract<MultiSigWallet>(await getSigner(), artifactMultisig, owners, approvalsRequired)
-
+    console.log(`Deployed Multisig contract to ${contract.address}`)
     return contract
 }
 
 export async function deployDealRoom(buyer: string, seller: string, owner: string): Promise<DealRoom>  {
     const contract = await deployContract<DealRoom>(await getSigner(), artifactDealRoom, buyer, seller)
     await contract.changeOwner(owner);
+    console.log(`Deployed DealRoom contract to ${contract.address}`)
     
     return contract
 }
 
 export async function deployAll(): Promise<DeployedEnvironment> {
     const result: DeployedEnvironment = {
-        dealRoomDeployer: await deployDealRoomDeployer(),
         erc20: await deployErc20("0x658040983DD50DD44826FC7e414626Bb8b8180A9"),
         erc721: await deployErc721()
     }

@@ -1,4 +1,4 @@
-const config = {
+/*const config = {
     chain: {
         provider: {
             url: "https://a0udtzh6o3-a0yfgkb8xn-rpc.us0-aws.kaleido.io",
@@ -10,4 +10,4 @@ const config = {
     },
 };
 
-export default config;
+export default config;*/

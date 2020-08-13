@@ -1,4 +1,4 @@
-import { DeployedEnvironment, deployDealRoomDeployer, deployErc20, deployErc721 } from "../../deploy/deploy";
+import { deployErc20, deployErc721 } from "../../deploy/deploy";
 
 const Names = {
     ALL: "all",
@@ -60,9 +60,7 @@ exports.handler = async function(argv) {
     const args: Args = argv as Args;
     args.name = args.name.toLowerCase()
     const all: boolean = args.name === Names.ALL
-    if (args.name === Names.DEALROOM_DEPLOYER || all) {
-        console.log(Names.DEALROOM_DEPLOYER, (await deployDealRoomDeployer()).address)
-    }
+
     if (args.name === Names.ERC20 || all) {
         console.log(Names.ERC20, (await deployErc20(args.erc20Owner)).address)
     }

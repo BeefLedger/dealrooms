@@ -7,14 +7,16 @@
     "test": "test"
   },
   "dependencies": {
-    "ethers": "^5.0.7",
+    "@typechain/ethers-v4": "^1.0.1",
+    "ethers": "5",
+    "ganache-cli": "^6.10.1",
     "global": "^4.4.0",
     "truffle": "^5.1.35",
     "web3": "^1.2.11",
     "yargs": "^15.4.1"
   },
   "devDependencies": {
-    "@typechain/ethers-v5": "latest",
+    "@typechain/ethers-v5": "^1.0.0",
     "@types/jest": "^26.0.7",
     "@types/yargs": "^15.0.5",
     "jest": "^26.1.0",
@@ -29,7 +31,8 @@
     "contracts:build": "yarn contracts:clear && yarn contracts:compile && yarn contracts:type",
     "contracts:compile": "yarn truffle compile",
     "src:build": "rm -rf ./dist && tsc",
-    "build": "yarn contracts:build && yarn src:build"
+    "build": "yarn contracts:build && yarn src:build",
+    "remix": "remixd -s ./contracts --remix-ide https://remix.ethereum.org"
   },
   "author": "Barry Earsman",
   "license": "ISC"
