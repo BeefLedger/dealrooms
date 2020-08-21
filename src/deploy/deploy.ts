@@ -20,7 +20,7 @@ export type DeployedEnvironment = {
     erc721?: Erc721Detailed
 }
 
-export async function deployErc20(owner?: string): Promise<Erc20Detailed>  {
+export async function deployErc20(owner: string): Promise<Erc20Detailed>  {
     const contract = await deployContract<Erc20Detailed>(await getSigner(), artifactErc20, "BEEF Token", "BEEF", 1 )
     if (owner) {
         await contract.transferOwnership(owner)
@@ -30,7 +30,7 @@ export async function deployErc20(owner?: string): Promise<Erc20Detailed>  {
     return contract
 }
 
-export async function deployErc721(owner?: string): Promise<Erc721Detailed>  {
+export async function deployErc721(owner: string): Promise<Erc721Detailed>  {
     const contract = await deployContract<Erc721Detailed>(await getSigner(), artifactErc721, "Cattle", "CAT" )
     if (owner) {
         await contract.transferOwnership(owner)
@@ -57,7 +57,7 @@ export async function deployDealRoom(buyer: string, seller: string, owner: strin
 export async function deployAll(): Promise<DeployedEnvironment> {
     const result: DeployedEnvironment = {
         erc20: await deployErc20("0x658040983DD50DD44826FC7e414626Bb8b8180A9"),
-        erc721: await deployErc721()
+        erc721: await deployErc721("0x658040983DD50DD44826FC7e414626Bb8b8180A9")
     }
     return result
 }

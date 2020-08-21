@@ -11,8 +11,8 @@ const Names = {
 type Args = {
     name: string;
     verbose?: boolean;
-    erc20Owner?: string;
-    erc721Owner?: string;
+    erc20Owner: string;
+    erc721Owner: string;
     drdOwner?: string;
 };
 

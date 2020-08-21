@@ -17,6 +17,8 @@ contract DealRoom {
     address buyer;
     address seller;
 
+    event Debug(bytes32 message, uint num);
+
     struct Deal {
         uint256 id;
         IERC20 erc20;
@@ -77,6 +79,21 @@ contract DealRoom {
         return (deal.assetItems.length - assetDeposits);
     }
 
+    function _missingDealAssets(
+        uint256 id
+    ) public view dealOpen(id) returns (uint256) {
+        //Check that all the assets have been deposited, and return the quantity missing
+        uint256 assetDeposits = 0;
+        Deal memory deal = getDeal(id);
+
+        for (uint i = 0; i < deal.assetItems.length; i ++) {
+            if (deal.erc721.ownerOf(deal.assetItems[i]) == address(this)) {
+                assetDeposits ++;
+            }
+        }
+        return (deal.assetItems.length - assetDeposits);
+    }
+
     function missingDealTokens(
         uint256 id
     ) public view dealOpen(id) returns (uint256) {
@@ -87,9 +104,15 @@ contract DealRoom {
 
     function settle(
         uint256 id
-    ) public /*dealOpen(id) isOwner()*/ {
-        /*require(missingDealAssets(id) == 0, "DEAL_ASSETS_MISSING");
-        require(missingDealTokens(id) == 0, "DEAL_TOKENS_MISSING");*/
+    ) public dealOpen(id) /*isOwner() */{
+        //Deal deal = getDeal(id)
+        //emit Debug("Deal ID", deal.id);
+        //emit Debug("Deal ID", deal.id);
+
+        uint missing = _missingDealAssets(id);
+        //require(missingDealAssets(id) == 0, "DEAL_ASSETS_MISSING");
+        require(missingDealTokens(id) == 0, "DEAL_TOKENS_MISSING");
+        //emit Debug("Missing deal assets", missing);
         _setDealStatus(id, DealStatus.Settled);
     }
 

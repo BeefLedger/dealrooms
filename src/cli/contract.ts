@@ -4,8 +4,8 @@ import { deployErc20, deployErc721, DeployedEnvironment } from "../deploy/deploy
 type Args = {
     name: string;
     verbose?: boolean;
-    erc20Owner?: string;
-    erc721Owner?: string;
+    erc20Owner: string;
+    erc721Owner: string;
 };
 
 const Names = {

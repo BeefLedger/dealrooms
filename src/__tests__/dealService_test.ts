@@ -7,6 +7,7 @@ import { DealRoom } from "../types/DealRoom";
 import { DealRoomController, DealRoomCreateParams, Deal } from "../services/dealService";
 import { getSigner } from "../services/chain/signerFactory";
 import { BigNumber, Contract } from "ethers";
+import { Erc20Detailed } from "../types/Erc20Detailed";
 
 
 type Actor = {
@@ -97,7 +98,6 @@ const Deals: { [name: string]: SimpleDeal} = {
         assets: DealRooms.RED.seller.assets,
     },
 }
-let greenDeal: Deal;
 
 let accounts;
 //let dealRoom: DealRoom;
@@ -173,7 +173,7 @@ describe("Reset", () => {
                 fail("Not all contracts deployed")
             }
             
-            greenDeal = await dealRoomController.makeDeal({
+            const greenDeal = await dealRoomController.makeDeal({
                 id: BigNumber.from(Deals.GREEN_1.id),
                 erc20: de.erc20.address,
                 erc721: de.erc721.address,
@@ -196,7 +196,7 @@ describe("Reset", () => {
             dealRoomController = new DealRoomController(await dealRoomController.getAddress(), await getSigner(Deals.GREEN_1.room.buyer.address))
 
             // Buyer transfers tokens to the Deal Room contract
-            await dealRoomController.depositDealTokens(greenDeal.id, greenDeal.price)
+            await dealRoomController.depositDealTokens(Deals.GREEN_1.id, Deals.GREEN_1.price)
 
             // Now there are no missing tokens
             const missingTokens = await dealRoomController.getDealMissingTokens(Deals.GREEN_1.id)
@@ -207,9 +207,9 @@ describe("Reset", () => {
             dealRoomController = new DealRoomController(await dealRoomController.getAddress(), await getSigner(Deals.GREEN_1.room.seller.address))
 
             //Seller transfers their tokens to the Deal Room contract
-            await dealRoomController.depositDealAssets(greenDeal.id, greenDeal.assetItems)
+            await dealRoomController.depositDealAssets(Deals.GREEN_1.id, Deals.GREEN_1.assets)
 
-            const missingAssets = (await dealRoomController.getDealMissingAssets(greenDeal.id))
+            const missingAssets = (await dealRoomController.getDealMissingAssets(Deals.GREEN_1.id))
             expect(bnEquals(missingAssets, 0)).toBeTruthy()
         });
         it("Deal room should have all tokens and assets", async () => {
@@ -221,38 +221,39 @@ describe("Reset", () => {
             let assetBalance = await de.erc721.balanceOf(dealRoomContract.address)
             expect(bnEquals(tokenBalance, Deals.GREEN_1.price)).toBeTruthy()
             expect(bnEquals(assetBalance, Deals.GREEN_1.assets.length)).toBeTruthy()
-        });
+        })
+        it("Deal is ready", async() => {
+            const deal = await dealRoomController.getDeal(Deals.GREEN_1.id)
+            console.log(JSON.stringify(deal, undefined, 4))
+            const missingAssets = (await dealRoomController.getDealMissingAssets(Deals.GREEN_1.id))
+            expect(bnEquals(missingAssets, 0)).toBeTruthy()
+            const missingTokens = await dealRoomController.getDealMissingTokens(Deals.GREEN_1.id)
+            expect(bnEquals(missingTokens, 0)).toBeTruthy()
+        })
         it("Settle deal", async() => {
-            // expect(1).toEqual(1)
             // Seller signs multisig
             dealRoomController = new DealRoomController(await dealRoomController.getAddress(), await getSigner(Deals.GREEN_1.room.seller.address))
-            const transactionId = await dealRoomController.proposeSettleDeal(greenDeal.id)
+            const transactionId = await dealRoomController.proposeSettleDeal(Deals.GREEN_1.id)
             
             // Buyer signs multisig
             dealRoomController = new DealRoomController(await dealRoomController.getAddress(), await getSigner(Deals.GREEN_1.room.buyer.address))
             const approvalResult = await dealRoomController.approveSettlementProposal(transactionId)
             console.log("Approval result", JSON.stringify(approvalResult, undefined, 4))
 
-            // Call settle()
-            //const result = await dealRoomController.settleDeal(transactionId)
-            //console.log(result)
             const deal = await dealRoomController.getDeal(Deals.GREEN_1.id)
             expect(deal.status).toEqual(3)
             
             //expect(result).toBeDefined()
         });
-        /*
+        
         it("Claim tokens", async() => {
-            if (!de.erc20 || !de.erc721) {
+            if (!de.erc20) {
                 fail("Not all contracts deployed")
             }
-            dealRoomController.
+            dealRoomController = new DealRoomController(await dealRoomController.getAddress(), await getSigner(Deals.GREEN_1.room.seller.address))
 
-            // Get connection to ERC20 and DealRoom for the Seller's signer
-            let sellerErc20: Erc20Detailed = await getErc20Contract(de.erc20.address, Deals.GREEN_1.room.seller.address)
-
-            let oldBalance = await sellerErc20.balanceOf(Deals.GREEN_1.room.seller.address);
-            await sellerDealRoom.withdrawDealTokens(Deals.GREEN_1.id)
+            let oldBalance = await de.erc20.balanceOf(Deals.GREEN_1.room.seller.address)
+            await dealRoomController.withdrawDealTokens(Deals.GREEN_1.id)
             let newBalance = await de.erc20.balanceOf(Deals.GREEN_1.room.seller.address);
             expect(bnEquals(newBalance, bnToNumber(oldBalance) + Deals.GREEN_1.price)).toBeTruthy();
 
@@ -261,13 +262,13 @@ describe("Reset", () => {
             if (!de.erc721) {
                 fail("Not all contracts deployed")
             }
-            // Get connection to ERC721 and DealRoom for the Buyer's signer
-            let buyerErc721: Erc721Detailed = await getErc721Contract(de.erc721?.address, Deals.GREEN_1.room.buyer.address)
-            let buyerDealRoom: DealRoom = await getDealRoomContract(dealRoom?.address, Deals.GREEN_1.room.buyer.address)
-            let oldBalance = await buyerErc721.balanceOf(Deals.GREEN_1.room.buyer.address);
-            await buyerDealRoom.withdrawDealAssets(Deals.GREEN_1.id, Deals.GREEN_1.assets.length);     
-            let newBalance = await buyerErc721.balanceOf(Deals.GREEN_1.room.buyer.address);
+
+            dealRoomController = new DealRoomController(await dealRoomController.getAddress(), await getSigner(Deals.GREEN_1.room.buyer.address))
+
+            let oldBalance = await de.erc721.balanceOf(Deals.GREEN_1.room.buyer.address);
+            await dealRoomController.withdrawDealAssets(Deals.GREEN_1.id);     
+            let newBalance = await de.erc721.balanceOf(Deals.GREEN_1.room.buyer.address);
             expect(bnEquals(newBalance, bnToNumber(oldBalance) + Deals.GREEN_1.assets.length)).toBeTruthy();
-        });*/
+        });
     });
 });

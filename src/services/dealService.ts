@@ -1,6 +1,6 @@
 import * as deployer from "../deploy/deploy";
 import { MultiSigWallet } from "../types/MultiSigWallet";
-import { Signer, BigNumberish, BigNumber, ContractTransaction, ContractReceipt, Event, ethers } from "ethers";
+import { Signer, BigNumberish, BigNumber, ContractTransaction, ContractReceipt, Event, ethers, Overrides } from "ethers";
 import * as prefabContracts from "./chain/prefabContractFactory";
 import { Erc20Detailed } from "../types/Erc20Detailed";
 import { DealRoom } from "../types/DealRoom";
@@ -60,6 +60,16 @@ export class DealRoomController {
             receipts.push(await (await assetContract.transferFrom(await this._signer.getAddress(), roomContract.address, item)).wait())
         }
         return receipts  
+    }
+
+    public async getMyTokenBalance(id: BigNumberish): Promise<BigNumberish> {
+        const tokenContract = await this._getDealTokenContract(id)
+        return tokenContract.balanceOf(await this._signer.getAddress())
+    }
+
+    public async getMyAssetBalance(id: BigNumberish): Promise<BigNumberish> {
+        const assetContract = await this._getDealAssetContract(id)
+        return assetContract.balanceOf(await this._signer.getAddress())
     }
 
     public async getDealRoomContract(): Promise<DealRoom> {
@@ -169,12 +179,34 @@ export class DealRoomController {
     public async approveSettlementProposal(transactionId: BigNumberish): Promise<ContractReceipt> {
         const multisigContract = await this._getMultisigContract()
 
-        const transaction = await multisigContract.confirmTransaction(transactionId)
+        const transaction = await multisigContract.confirmTransaction(transactionId, {gasLimit: 999999})
         const receipt = await transaction.wait() 
         return receipt
     }
 
-    public async settleDeal(transactionId: BigNumberish): Promise<Event> {
+    public async manualSettleDeal(dealId: BigNumberish): Promise<ContractReceipt> {
+        const contract = await this._getDealRoomContract()
+        const transaction = await contract.settle(dealId)
+        const receipt = await transaction.wait() 
+        return receipt
+    }
+
+    public async withdrawDealTokens(dealId: BigNumberish): Promise<ContractReceipt> {
+        const contract = await this._getDealRoomContract()
+        const transaction = await contract.withdrawDealTokens(dealId)
+        const receipt = await transaction.wait() 
+        return receipt      
+    }
+
+    public async withdrawDealAssets(dealId: BigNumberish): Promise<ContractReceipt> {
+        const contract = await this._getDealRoomContract()
+        const deal = await this.getDeal(dealId)
+        const transaction = await contract.withdrawDealAssets(dealId, deal.assetItems.length)
+        const receipt = await transaction.wait() 
+        return receipt      
+    }
+
+    /*public async settleDeal(transactionId: BigNumberish): Promise<Event> {
         
         const multisigContract = await this._getMultisigContract()
         const transaction = await multisigContract.executeTransaction(transactionId)
@@ -195,7 +227,7 @@ export class DealRoomController {
         }
         throw `Deal settlement failed: No success events detected`
     }
-
+*/
     /*
     public async settleDeal(id: BigNumberish): Promise<ContractReceipt> {
 
