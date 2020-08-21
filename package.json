@@ -2,17 +2,18 @@
   "name": "investor-engine",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.ts",
   "directories": {
     "test": "test"
   },
   "dependencies": {
     "@typechain/ethers-v4": "^1.0.1",
     "ethers": "5",
-    "ganache-cli": "^6.10.1",
     "global": "^4.4.0",
     "truffle": "^5.1.35",
+    "ts-loader": "^8.0.2",
     "web3": "^1.2.11",
+    "webpack": "^4.44.1",
     "yargs": "^15.4.1"
   },
   "devDependencies": {
@@ -22,7 +23,8 @@
     "jest": "^26.1.0",
     "ts-jest": "^26.1.4",
     "typechain": "^2.0.0",
-    "typescript": "^3.9.7"
+    "typescript": "^3.9.7",
+    "webpack-cli": "^3.3.12"
   },
   "scripts": {
     "test": "jest --detectOpenHandles --forceExit --runInBand",

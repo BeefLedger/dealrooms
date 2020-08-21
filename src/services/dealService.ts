@@ -5,8 +5,7 @@ import * as prefabContracts from "./chain/prefabContractFactory";
 import { Erc20Detailed } from "../types/Erc20Detailed";
 import { DealRoom } from "../types/DealRoom";
 import { Erc721Detailed } from "../types/Erc721Detailed";
-import * as DealRoomArtifact from "../abi/DealRoom.json"
-import { DealRoomDeployerFactory } from "../types";
+
 
 export type Deal = {
     id: BigNumber
