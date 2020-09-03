@@ -1,5 +1,5 @@
 {
-  "name": "investor-engine",
+  "name": "dealroom",
   "version": "1.0.0",
   "description": "",
   "main": "src/index.ts",
@@ -24,7 +24,7 @@
     "ts-jest": "^26.1.4",
     "typechain": "^2.0.0",
     "typescript": "^3.9.7",
-    "webpack-cli": "^3.3.12"
+    "webpack-cli": "3.3.12"
   },
   "scripts": {
     "test": "jest --detectOpenHandles --forceExit --runInBand",
@@ -32,9 +32,10 @@
     "contracts:clear": "rm -rf ./src/abis && rm -rf ./src/types",
     "contracts:build": "yarn contracts:clear && yarn contracts:compile && yarn contracts:type",
     "contracts:compile": "yarn truffle compile",
-    "src:build": "rm -rf ./dist && tsc",
+    "src:build": "rm -rf ./dist && tsc && webpack --mode=development",
     "build": "yarn contracts:build && yarn src:build",
-    "remix": "remixd -s ./contracts --remix-ide https://remix.ethereum.org"
+    "remix": "remixd -s ./contracts --remix-ide https://remix.ethereum.org",
+    "testrpc": "ganache-cli -m abuse forget cool step task knife bargain vacant lemon manual various pride"
   },
   "author": "Barry Earsman",
   "license": "ISC"

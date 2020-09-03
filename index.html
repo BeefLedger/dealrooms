@@ -6,8 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" type="text/css" href="styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/magic-sdk/dist/magic.js" type="text/javascript"></script>
-    <script src="https://cdn.ethers.io/scripts/ethers-v4.min.js" type="text/javascript"></script>
-    <script src="https://cdn.tutorialjinni.com/bignumber.js/9.0.0/bignumber.min.js" type="text/javascript"></script>
+    
+    <script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js" type="text/javascript"></script>
+    <!--script src="https://cdn.ethers.io/scripts/ethers-v4.min.js" type="text/javascript"></script-->
+    <!--script src="https://cdn.tutorialjinni.com/bignumber.js/9.0.0/bignumber.min.js" type="text/javascript"></script-->
     <script src="./dist/bundle.js" type="text/javascript"></script>
     <script type="text/javascript">
         //<![CDATA[
@@ -19,7 +21,6 @@
             }
         });
         const provider = new ethers.providers.Web3Provider(magic.rpcProvider);
-
 
         /*  Smart contract values */
         const contractABI =
@@ -43,6 +44,7 @@
             let userHtml = "";
             let txnHtml = "";
             let signHtml = "";
+            var dealRoomController;
             const target = document.querySelector("#app");
             if (isLoggedIn) {
                 /* Get user metadata including email */
@@ -51,7 +53,7 @@
                 const network = await provider.getNetwork();
                 const userAddress = await signer.getAddress();
 
-                let dealRoomController;
+                
 
                 const userBalance = ethers.utils.formatEther(
                     await provider.getBalance(userAddress)
@@ -81,9 +83,8 @@
                             Make a new deal room for you, a seller, and an arbitrator
                         <\/div>
  
-                            <input type="text" id="sellerAddress" class="full-width" required="required" placeholder="Seller address" value="0x4667D332c39c115C4E4e1d50aaB5E6D09A5134a4" />
-                            <button id="btn-deploy" onclick="handleMakeDealRoom()">Make<\/button>
-
+                        <input type="text" id="sellerAddress" class="full-width" required="required" placeholder="Seller address" value="0x4667D332c39c115C4E4e1d50aaB5E6D09A5134a4" />
+                        <button id="btn-deploy" onclick="handleMakeDealRoom()">Make<\/button>
                     <\/div>
 
                     <div class="container">
@@ -92,31 +93,11 @@
                             Make a deal in your deal room
                         <\/div>
 
-                        <input type="text" id="erc20" class="full-width" required="required" placeholder="Address of ERC-20 contract" value="0xEE61514438C7DAada622c34b7f6858d700872a86" />
-                        <input type="text" id="erc721" class="full-width" required="required" placeholder="Address of ERC-721 contract" value="0x62A6188f8b0427D4edc56b3C94C97aF6e1e4d23c" />
+                        <input type="text" id="erc20" class="full-width" required="required" placeholder="Address of ERC-20 contract" value="0xCDf0C6cf21EF3cB70176a35cf0a84acF7588d264" />
+                        <input type="text" id="erc721" class="full-width" required="required" placeholder="Address of ERC-721 contract" value="0x53A7b7aa1a1dD7A6031D4Fa5bE6764d6Bb368609" />
                         <input type="text" id="price" class="full-width" required="required" placeholder="Price" value="100" />
                         <input type="text" id="items" class="full-width" required="required" placeholder="Items" value="111,222,333,444" />
                         <button id="btn-deploy" onclick="handleMakeDeal()">Make<\/button>
-
-                    <\/div>
-                `;
-                txnHtml = `
-                    <div class="container">
-                        <h1>Send Transaction<\/h1>
-                        <form onsubmit="handleSendTxn(event)">
-                        <input type="text" name="destination" class="full-width" required="required" placeholder="Destination address" />
-                        <input type="text" name="amount" class="full-width" required="required" placeholder="Amount in ETH" />
-                        <button id="btn-send-txn" type="submit">Send Transaction<\/button>
-                        <\/form>
-                    <\/div>
-                `;
-                signHtml = `
-                    <div class="container">
-                        <h1>Sign Message<\/h1>
-                        <form onsubmit="handleSignMsg(event)">
-                        <input type="text" name="message" class="full-width" placeholder="Message" />
-                        <button id="btn-sign-msg" type="submit">Sign Message<\/button>
-                        <\/form>
                     <\/div>
                 `;
 
@@ -140,20 +121,24 @@
             //evt.preventDefault();
             const sellerAddress = document.getElementById("sellerAddress").value;
             const signer = provider.getSigner();
-            dealRoomController = new DealService.DealService.DealRoomController({
-                buyer: signer.address,
+            const params = {
+                buyer: await signer.getAddress(),
                 seller: sellerAddress,
                 arbitrator: "0x59a665f2b8118Eb17E0b2E588088e0d2C83eE7c3", //Cassandra
-            }, signer);
+            }
+            //console.log(JSON.stringify(params, undefined, 4))
+            dealRoomController = new DealService.DealService.DealRoomController(params, signer);
+            dealRoomContract = await dealRoomController.getDealRoomContract()
+            console.log(`Deal Room contract: ${dealRoomContract.address}`)
         }
 
         const handleMakeDeal = async () => {
-            const erc20 =document.getElementById("erc20").value;
+            const erc20 = document.getElementById("erc20").value;
             const erc721 = document.getElementById("erc721").value;
-            const price = BigNumber(document.getElementById("price").value);
-            const assetItems = (document.getElementById("items").value).split(",").map(n=>BigNumber(n));
+            const price = ethers.BigNumber.from(document.getElementById("price").value);
+            const assetItems = (document.getElementById("items").value).split(",").map(n=>ethers.BigNumber.from(n));
             const deal = {
-                id: 1000,
+                id: ethers.BigNumber.from(1000),
                 erc20,
                 erc721,
                 price,

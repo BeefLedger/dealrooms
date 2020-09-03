@@ -64,7 +64,7 @@ async function main() {
             if (args.name === Names.ERC721 || all) {
                 result.erc721 = await deployErc721(args.erc721Owner);
             }
-            console.log(JSON.stringify(result, undefined, 4));
+            //console.log(JSON.stringify(result, undefined, 4));
         }
     ).help().argv
 

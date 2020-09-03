@@ -1,0 +1,42 @@
+{
+  "name": "my-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "cd ./services && jest --detectOpenHandles --forceExit --runInBand",
+    "contracts:type": "yarn typechain --target ./node_modules/@typechain/ethers-v5 --outDir ./ethereum/types './ethereum/abi/**/*.json'",
+    "contracts:clear": "rm -rf ./ethereum/abis && rm -rf ./ethereum/types",
+    "contracts:build": "yarn contracts:clear && yarn contracts:compile && yarn contracts:type",
+    "contracts:compile": "cd ethereum && truffle compile",
+    "remix": "remixd -s ./contracts --remix-ide https://remix.ethereum.org",
+    "testrpc": "ganache-cli -m abuse forget cool step task knife bargain vacant lemon manual various pride",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "ethers": "5",
+    "truffle": "^5.1.35",
+    "webpack": "^4.44.1",
+    "yargs": "^15.4.1",
+    "date-fns": "^2.11.1",
+    "gray-matter": "^4.0.2",
+    "next": "9.3.5",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "remark": "^12.0.0",
+    "remark-html": "^11.0.1",
+    "swr": "^0.3.2"
+  },
+  "devDependencies": {
+    "jest": "^26.1.0",
+    "ts-jest": "^26.1.4",
+    "typechain": "^2.0.0",
+    "@types/react": "^16.9.49",
+    "@typechain/ethers-v5": "^1.0.0",
+    "@types/jest": "^26.0.7"
+  }
+}
