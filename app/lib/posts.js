@@ -15,7 +15,7 @@ export function getSortedPostsData() {
     const fileContents = fs.readFileSync(fullPath, 'utf8')
 
     // Combine the data with the id
-    return JSON.parse(fileContents)
+    return {...JSON.parse(fileContents), id: fileName.split(".")[0]}
   })
   // Sort posts by date
   return allPostsData.sort((a, b) => {

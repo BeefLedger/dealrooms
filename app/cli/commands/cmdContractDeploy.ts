@@ -1,4 +1,4 @@
-import { deployErc20, deployErc721 } from "../../deploy/deploy";
+import { deployErc20, deployErc721 } from "../../ethereum/deploy/deploy";
 
 const Names = {
     ALL: "all",
