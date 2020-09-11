@@ -1,16 +1,16 @@
 import Head from 'next/head'
 import Layout from '../components/layout'
-import NewDealForm from "../components/newDealForm"
+import NewRoomForm from '../components/newRoomForm'
 
 export default function NewDeal() {
     return (
         <Layout home>
             <Head>
-                <title>Create New Deal</title>
+                <title>Create New Deal Room</title>
             </Head>
 
-            <h1>New Deal</h1>
-            <NewDealForm></NewDealForm>
+            <h1>New Room</h1>
+            <NewRoomForm></NewRoomForm>
             
         </Layout>
     )

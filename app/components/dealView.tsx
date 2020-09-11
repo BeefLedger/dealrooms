@@ -1,10 +1,13 @@
 
 import { useState, useEffect } from 'react'
 
-import { DealRoomController, Deal, loadDealRoomController } from '../services/dealService'
+import { DealRoomController, Deal } from '../services/dealService'
+import { DealRoom } from '../ethereum/types/DealRoom'
+import { getItem } from '../services/storage'
+import { getSigner } from '../services/chain/signerFactory'
+import { getMagicProvider } from '../services/userService'
 
 export default function DealView(props) {
-    console.log("*** Initial props:", JSON.stringify(props))
 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
@@ -27,7 +30,8 @@ export default function DealView(props) {
             return
         }
         let dealRoomController: DealRoomController
-        dealRoomController = loadDealRoomController()
+        const provider = getMagicProvider()
+        dealRoomController = new DealRoomController(getItem("dealRoomAddress"), provider.getSigner() )
         const _deal = await dealRoomController.getDeal(dealId)
         console.log(JSON.stringify(_deal, undefined, 4))
         setDeal(_deal) 
@@ -53,7 +57,6 @@ export default function DealView(props) {
                 <p>{deal?.erc721}</p>
 
                 <h2>Assets to be sold</h2>
- 
                 <ul>
                     {deal.assetItems.map(item=>{return <li key={Number(item)}>{item}</li>})}
                 </ul>
@@ -63,8 +66,6 @@ export default function DealView(props) {
                 <h3>Missing assets: {missingAssets}</h3>
                 <h3>Missing tokens: {missingTokens}</h3>
 
-
-   
             </>
         )
     } else {

@@ -1,15 +1,17 @@
+import { BigNumber, BigNumberish } from "ethers/utils";
+import { Signer, ethers } from "ethers";
+import { ContractReceipt } from "ethers/contract";
+
 import { MultiSigWallet } from "../ethereum/types/MultiSigWallet";
-import { Signer, utils, ContractTransaction, Event, ethers } from "ethers";
 import { Erc20Detailed } from "../ethereum/types/Erc20Detailed";
 import { DealRoom } from "../ethereum/types/DealRoom";
 import { Erc721Detailed } from "../ethereum/types/Erc721Detailed";
-import { BigNumber, BigNumberish } from "ethers/utils";
-import { ContractReceipt } from "ethers/contract";
+
 import * as DealRoomCompiled from "../ethereum/abi/DealRoom.json"
 import * as Deployer from "../ethereum/deploy/deploy";
 import { getErc20Contract, getErc721Contract, getMultisigContract, getDealRoomContract } from "./chain/prefabContractFactory";
 import { getMagicProvider } from "./userService";
-
+import * as DataStorage from "./storage";
 
 export type Deal = {
     id?: BigNumberish
@@ -168,7 +170,7 @@ export class DealRoomController {
         const dealRoomContract: DealRoom = await this.getDealRoomContract()
         const multisigContract: MultiSigWallet = await this._getMultisigContract()
         const owners = await multisigContract.getOwners()
-        console.log("owners", JSON.stringify(owners, undefined, 4))
+        //console.log("owners", JSON.stringify(owners, undefined, 4))
 
         //Make the transaction  
         const encodedData = new ethers.utils.Interface(DealRoomCompiled.abi).functions.settle.encode([deal.id])
@@ -337,12 +339,4 @@ export class DealRoomController {
         } 
         return this._multiSig
     }
-}
-
-export function loadDealRoomController() {
-    //Get dealRoom contract address
-    const provider = getMagicProvider();
-    const address = localStorage.getItem("dealRoomAddress")
-    const dealRoomController = new DealRoomController(address, provider.getSigner())
-    return dealRoomController
 }
