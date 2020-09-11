@@ -86,13 +86,13 @@ type SimpleDeal = {
 
 const Deals: { [name: string]: SimpleDeal} = {
     GREEN_1: {
-        id: 888888,       
+        id: 0,       
         room: DealRooms.GREEN,
         price: 7,
         assets: DealRooms.GREEN.seller.assets,
     },
     RED_1: {
-        id: 444444,
+        id: 1,
         room: DealRooms.RED,
         price: 10,
         assets: DealRooms.RED.seller.assets,
@@ -127,7 +127,7 @@ describe("Reset", () => {
         if (!de.erc20 || !de.erc721) {
             fail("Not all contracts deployed")
         }
-        console.log(`Environment: ${JSON.stringify(de, undefined, 4)}`)
+       // console.log(`Environment: ${JSON.stringify(de, undefined, 4)}`)
 
         for (let actorId in Actors) {
             let actor = Actors[actorId]
@@ -175,7 +175,7 @@ describe("Reset", () => {
             }
             
             const greenDeal = await dealRoomController.makeDeal({
-                id: bigNumberify(Deals.GREEN_1.id),
+                //id: bigNumberify(Deals.GREEN_1.id),
                 erc20: de.erc20.address,
                 erc721: de.erc721.address,
                 price: bigNumberify(Deals.GREEN_1.price),
@@ -225,7 +225,7 @@ describe("Reset", () => {
         })
         it("Deal is ready", async() => {
             const deal = await dealRoomController.getDeal(Deals.GREEN_1.id)
-            console.log(JSON.stringify(deal, undefined, 4))
+            // console.log(JSON.stringify(deal, undefined, 4))
             const missingAssets = (await dealRoomController.getDealMissingAssets(Deals.GREEN_1.id))
             expect(bnEquals(missingAssets, 0)).toBeTruthy()
             const missingTokens = await dealRoomController.getDealMissingTokens(Deals.GREEN_1.id)
@@ -239,7 +239,7 @@ describe("Reset", () => {
             // Buyer signs multisig
             dealRoomController = new DealRoomController(await dealRoomController.getAddress(), await getSigner(Deals.GREEN_1.room.buyer.address))
             const approvalResult = await dealRoomController.approveSettlementProposal(transactionId)
-            console.log("Approval result", JSON.stringify(approvalResult, undefined, 4))
+            //console.log("Approval result", JSON.stringify(approvalResult, undefined, 4))
 
             const deal = await dealRoomController.getDeal(Deals.GREEN_1.id)
             expect(deal.status).toEqual(3)

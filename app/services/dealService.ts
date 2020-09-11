@@ -12,12 +12,12 @@ import { getMagicProvider } from "./userService";
 
 
 export type Deal = {
-    id?: BigNumber
+    id?: BigNumberish
     erc20?: string
     erc721?: string
     price?: BigNumber
-    assetItems?: BigNumber[]
-    multisigTransactionId?: BigNumber
+    assetItems?: BigNumberish[]
+    multisigTransactionId?: BigNumberish
     status?: number
 }
 
@@ -102,13 +102,15 @@ export class DealRoomController {
     }
 
     public async makeDeal(deal: Deal): Promise<Deal> {
+        debugger
+        const nextDealId = await this.getDealCount()
         const contract = await this._getDealRoomContract()
-        const tx = await contract.makeDeal(deal.id, deal.erc20, deal.erc721, deal.price, deal.assetItems)
+        const tx = await contract.makeDeal(deal.erc20, deal.erc721, deal.price, deal.assetItems)
         const receipt = await tx.wait()
-        console.log(`makeDeal result`, JSON.stringify(receipt, undefined, 4))
+        //console.log(`makeDeal result`, JSON.stringify(receipt, undefined, 4))
         const multisig = await this._getMultisigContract()
-
-        return this.getDeal(deal.id)
+        
+        return this.getDeal(nextDealId)
     }
 
     public async getDeal(id: BigNumberish): Promise<Deal> {
@@ -116,11 +118,11 @@ export class DealRoomController {
             const contract = await this._getDealRoomContract()
             const response = await contract.getDeal(id)
             return {
-                id: response.id,
+                id: response.id.toNumber(),
                 erc20: response.erc20,
                 erc721: response.erc721,
                 price: response.price,
-                assetItems: response.assetItems,
+                assetItems: response.assetItems.map(item=>item.toNumber()),
                 status: response.status,
             } as Deal
         }
@@ -128,17 +130,35 @@ export class DealRoomController {
             console.error(e)
             throw Error(`getDeal(): ${e}`)
         }
-
     }
 
-    public async getDealMissingAssets(id: BigNumberish): Promise<BigNumberish> {
+    public async getDealCount(): Promise<number> {
         const contract = await this._getDealRoomContract()
-        return contract.missingDealAssets(id);
+        return (await contract.getDealCount()).toNumber()
     }
 
-    public async getDealMissingTokens(id: BigNumberish): Promise<BigNumberish> {
+    public async getDeals(): Promise<Deal[]> {
+        try {
+            const contract = await this._getDealRoomContract()
+            const dealCount = await this.getDealCount()
+            const result: Deal[] = []
+            for (let i = 0; i < dealCount ; i ++) {
+                result.push(await this.getDeal(i))
+            }
+            return result
+        }
+        catch (e) {
+            throw Error(`getDeals(): ${e}`)
+        }
+    }
+    public async getDealMissingAssets(id: BigNumberish): Promise<number> {
         const contract = await this._getDealRoomContract()
-        return contract.missingDealTokens(id);
+        return (await contract.missingDealAssets(id)).toNumber()
+    }
+
+    public async getDealMissingTokens(id: BigNumberish): Promise<number> {
+        const contract = await this._getDealRoomContract()
+        return (await contract.missingDealTokens(id)).toNumber()
     }
 
     public async proposeSettleDeal(id: BigNumberish): Promise<BigNumberish> {
@@ -267,6 +287,7 @@ export class DealRoomController {
 
     }
 
+    // TODO: Cache the contract
     private async _getDealRoomContract(): Promise<DealRoom> {
         try {
             console.log("_getDealRoomContract()")

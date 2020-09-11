@@ -43,19 +43,17 @@ export default function NewDealForm() {
             const contract = await controller.getDealRoomContract()
             DataStorage.setItem("dealRoomAddress", contract.address)
             console.log(`Contract ${contract.address}`)
-            const assetItems = assets.value.split("\n")
+            const assetItems = assets.split("\n")
             
             const deal: Deal = {
-                id: bigNumberify(randomInt(1000)),
+                //id: bigNumberify(randomInt(1000)),
                 erc20,
                 erc721,
                 price,
                 assetItems
             }
             const updatedDeal = await controller.makeDeal(deal)
-            console.log(JSON.stringify(updatedDeal, undefined, 4))
-            
-
+            console.log(JSON.stringify(updatedDeal, undefined, 4))  
         }
         catch (err) {
             setLoading(false)
@@ -71,8 +69,8 @@ export default function NewDealForm() {
                 <li>Arb 0xB051764B2da6Aa16b9Bc439BcAd1c309Ad7a32CA</li>
                 <li>Buyer 0xc4e0daB85A5e7Cffec5025cb206E16278Ec20040</li>
                 <li>Seller 0xd5AE65265C8F8E09C48da86DE16287F5d90c75e5</li>
-                <li>ERC-20 0x0C3cC7b64D2513e7D85EbA96B2ad28196B29d078</li>
-                <li>ERC-721 0xa768D41A0b7821bbe0311bb700f401EDb9b8F390</li>               
+                <li>ERC-20 0x55A002AA3a6eC7ecC9dEc14e9D66dc8DA350817e</li>
+                <li>ERC-721 0x6b74B686Af6fDFD65e3AE0135042b4698ABB6CE7</li>           
             </ul>
 
             <Form.Label>Arbitrator</Form.Label>

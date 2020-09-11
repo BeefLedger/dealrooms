@@ -11,8 +11,8 @@ contract DealRoom {
     IERC721Full public erc721;
     IERC20 public erc20;
     uint256 public dealCount;
-    mapping(uint256 => Deal) private deals;
-    uint256[] private dealIds;
+    Deal[] public deals;
+    //mapping(uint256 => Deal) private deals;
     bool private settled;
     address public buyer;
     address public seller;
@@ -44,23 +44,23 @@ contract DealRoom {
     }
 
     function makeDeal(
-        uint256 _id,
         IERC20 _erc20,
         IERC721Full _erc721,
         uint256 _price,
         uint256[] memory _assetItems
-    ) public dealExists(_id, false) {
+    ) public  {
 
-        deals[_id] = Deal({
-            id: _id,
+        deals.push(Deal({
+            id: dealCount,
             erc721: _erc721,
             erc20: _erc20,
             price: _price,
             assetItems: _assetItems,
             status: DealStatus.Open,
             valid: true
-        });
-        dealIds.push(_id);
+        }));
+        dealCount ++;
+        // dealIds.push(_id);
     }
 
     function missingDealAssets(
@@ -158,6 +158,10 @@ contract DealRoom {
         uint256 id
     ) public view returns (Deal memory) {
         return deals[id];
+    }
+
+    function getDealCount() public view returns (uint256) {
+        return dealCount;
     }
 
     function getDealStatus(

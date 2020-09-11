@@ -10,8 +10,7 @@ const Post = () => {
 
             <section>
                 <h1>Deal {router.query.id}</h1>
-                <DealView dealId={router.query.id}>
-                </DealView>
+                <DealView dealId={router.query.id}></DealView>
             </section>
         </Layout>
 
