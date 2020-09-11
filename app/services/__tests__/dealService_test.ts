@@ -6,7 +6,8 @@ import { MultiSigWallet } from "../../ethereum/types/MultiSigWallet"
 import { DealRoom } from "../../ethereum/types/DealRoom"
 import { DealRoomController, DealRoomCreateParams, Deal } from "../dealService"
 import { getSigner } from "../chain/signerFactory"
-import { BigNumber, Contract } from "ethers"
+import { Contract } from "ethers"
+import { BigNumber, bigNumberify } from "ethers/utils"
 // import { Erc20Detailed } from "../../ethereum/types/Erc20Detailed"
 
 type Actor = {
@@ -120,12 +121,13 @@ describe("Reset", () => {
         accounts = await provider.listAccounts()
 
         //Deploy all contracts as ADMIN and store references in `de` - DeployedEnvironment
-        de = await deployAll()
+        de = await deployAll(provider.getSigner())
         expect(de.erc20).toBeDefined()
         expect(de.erc721).toBeDefined()
         if (!de.erc20 || !de.erc721) {
             fail("Not all contracts deployed")
         }
+        console.log(`Environment: ${JSON.stringify(de, undefined, 4)}`)
 
         for (let actorId in Actors) {
             let actor = Actors[actorId]
@@ -173,11 +175,11 @@ describe("Reset", () => {
             }
             
             const greenDeal = await dealRoomController.makeDeal({
-                id: BigNumber.from(Deals.GREEN_1.id),
+                id: bigNumberify(Deals.GREEN_1.id),
                 erc20: de.erc20.address,
                 erc721: de.erc721.address,
-                price: BigNumber.from(Deals.GREEN_1.price),
-                assetItems: Deals.GREEN_1.assets.map(item=>BigNumber.from(item)),
+                price: bigNumberify(Deals.GREEN_1.price),
+                assetItems: Deals.GREEN_1.assets.map(item=>bigNumberify(item)),
             } as Deal)
 
             const fetchedDeal: Deal = await dealRoomController.getDeal(greenDeal.id)

@@ -18,27 +18,27 @@ function Authenticate() {
  
     const handleSubmit = async (event) => {
         try {
-            event.preventDefault();
-            setLoading(true);
+            event.preventDefault()
+            setLoading(true)
 
             if (!email) {
-                setLoading(false);
-                setError('Missing email');
+                setLoading(false)
+                setError('Missing email')
                 return;
             }
 
-            await loginUser(email);
-            setLoading(false);
+            await loginUser(email)
+            setLoading(false)
             //history.replace('/dashboard');
         }
         catch (err) {
-            setError(`Error logging in: ${err}`);
-            console.error(err);
+            setError(`Error logging in: ${err}`)
+            console.error(err)
         }
     };
 
     const handleChange = (event) => {
-        setEmail(event.target.value);
+        setEmail(event.target.value)
     };
     return (
         <div>

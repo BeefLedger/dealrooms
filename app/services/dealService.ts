@@ -1,19 +1,23 @@
-import * as deployer from "../ethereum/deploy/deploy";
 import { MultiSigWallet } from "../ethereum/types/MultiSigWallet";
-import { Signer, BigNumberish, BigNumber, ContractTransaction, ContractReceipt, Event, ethers, Overrides } from "ethers";
-import * as prefabContracts from "./chain/prefabContractFactory";
+import { Signer, utils, ContractTransaction, Event, ethers } from "ethers";
 import { Erc20Detailed } from "../ethereum/types/Erc20Detailed";
 import { DealRoom } from "../ethereum/types/DealRoom";
 import { Erc721Detailed } from "../ethereum/types/Erc721Detailed";
+import { BigNumber, BigNumberish } from "ethers/utils";
+import { ContractReceipt } from "ethers/contract";
+import * as DealRoomCompiled from "../ethereum/abi/DealRoom.json"
+import * as Deployer from "../ethereum/deploy/deploy";
+import { getErc20Contract, getErc721Contract, getMultisigContract, getDealRoomContract } from "./chain/prefabContractFactory";
+import { getMagicProvider } from "./userService";
 
 
 export type Deal = {
-    id: BigNumber
-    erc20: string
-    erc721: string
-    price: BigNumber
-    assetItems: BigNumber[]
-    multisigTransactionId: BigNumber
+    id?: BigNumber
+    erc20?: string
+    erc721?: string
+    price?: BigNumber
+    assetItems?: BigNumber[]
+    multisigTransactionId?: BigNumber
     status?: number
 }
 
@@ -77,12 +81,12 @@ export class DealRoomController {
 
     public async getBuyer(): Promise<string> {
         const contract: DealRoom = await this._getDealRoomContract()
-        return contract.buyer
+        return await contract.getBuyer()
     }
 
     public async getSeller(): Promise<string> {
         const contract: DealRoom = await this._getDealRoomContract()
-        return contract.seller
+        return await contract.getSeller()
     }
 
     public async getAddress(): Promise<string> {
@@ -147,8 +151,9 @@ export class DealRoomController {
         console.log("owners", JSON.stringify(owners, undefined, 4))
 
         //Make the transaction  
-        //const encodedData = new ethers.utils.Interface(DealRoomArtifact.abi).encodeFunctionData("settle", [deal.id])
-        const encodedData = dealRoomContract.interface.encodeFunctionData("settle", [deal.id])
+        const encodedData = new ethers.utils.Interface(DealRoomCompiled.abi).functions.settle.encode([deal.id])
+
+        //const encodedData = dealRoomContract.interface.encodeFunctionData("settle", [deal.id])
         const transaction = await multisigContract.submitTransaction(dealRoomContract.address, 0, encodedData)
         const receipt = await transaction.wait() 
         
@@ -159,7 +164,7 @@ export class DealRoomController {
                 if (submissionEvents) { 
                     if (submissionEvents.length > 0) {
                         if (submissionEvents.length === 1) {
-                            const transactionId: BigNumberish = submissionEvents[0]?.args?.transactionId
+                            const transactionId: BigNumberish = (submissionEvents[0]?.args as any).transactionId
                             return transactionId
                         }
                         throw `More than one submission event`
@@ -237,7 +242,7 @@ export class DealRoomController {
     private async _deployMultiSig(params: DealRoomCreateParams): Promise<MultiSigWallet> {
         console.log("_deployMultiSig()")
         try {
-            this._multiSig = await deployer.deployMultisig([params.buyer, params.seller, params.arbitrator], 2)
+            this._multiSig = await Deployer.deployMultisig([params.buyer, params.seller, params.arbitrator], 2, this._signer)
 
             return this._multiSig  
         } catch (e) {
@@ -252,7 +257,7 @@ export class DealRoomController {
                 //Create multisig first
                 this._multiSig = await this._deployMultiSig(params)
             }
-            let contract = await deployer.deployDealRoom(params.buyer, params.seller, this._multiSig.address)
+            let contract = await Deployer.deployDealRoom(params.buyer, params.seller, this._multiSig.address, this._signer)
             this._dealRoomAddress = contract.address
             return contract.address
         }
@@ -279,7 +284,7 @@ export class DealRoomController {
             }
             //Connect to the contract with my signer
             console.log(`prefabContracts.getDealRoomContract(${this._dealRoomAddress}`)//, ${this._signer})`)
-            const contract = await prefabContracts.getDealRoomContract(this._dealRoomAddress, this._signer)
+            const contract = await getDealRoomContract(this._dealRoomAddress, this._signer)
             return contract
         }
         catch (e) {
@@ -291,13 +296,13 @@ export class DealRoomController {
     private async _getDealTokenContract(id: BigNumberish): Promise<Erc20Detailed> {
         console.log("_getDealTokenContract()")
         const deal = await this.getDeal(id)
-        return prefabContracts.getErc20Contract(deal.erc20, this._signer)
+        return getErc20Contract(deal.erc20, this._signer)
     }
 
     private async _getDealAssetContract(id: BigNumberish): Promise<Erc721Detailed> {
         console.log("_getDealAssetContract()")
         const deal = await this.getDeal(id)
-        return prefabContracts.getErc721Contract(deal.erc721, this._signer)
+        return getErc721Contract(deal.erc721, this._signer)
     }
 
     private async _getMultisigContract(): Promise<MultiSigWallet> {
@@ -306,9 +311,17 @@ export class DealRoomController {
             // The owner of the DealRoom contract is the multisig contract
             const drContract = await this._getDealRoomContract()
             const msAddress = await drContract.getOwner();
-            this._multiSig = await prefabContracts.getMultisigContract(msAddress, this._signer)
+            this._multiSig = await getMultisigContract(msAddress, this._signer)
 
         } 
         return this._multiSig
     }
+}
+
+export function loadDealRoomController() {
+    //Get dealRoom contract address
+    const provider = getMagicProvider();
+    const address = localStorage.getItem("dealRoomAddress")
+    const dealRoomController = new DealRoomController(address, provider.getSigner())
+    return dealRoomController
 }

@@ -14,8 +14,8 @@ contract DealRoom {
     mapping(uint256 => Deal) private deals;
     uint256[] private dealIds;
     bool private settled;
-    address buyer;
-    address seller;
+    address public buyer;
+    address public seller;
 
     event Debug(bytes32 message, uint num);
 
@@ -79,21 +79,6 @@ contract DealRoom {
         return (deal.assetItems.length - assetDeposits);
     }
 
-    /*function _missingDealAssets(
-        uint256 id
-    ) public view dealOpen(id) returns (uint256) {
-        //Check that all the assets have been deposited, and return the quantity missing
-        uint256 assetDeposits = 0;
-        Deal memory deal = getDeal(id);
-
-        for (uint i = 0; i < deal.assetItems.length; i ++) {
-            if (deal.erc721.ownerOf(deal.assetItems[i]) == address(this)) {
-                assetDeposits ++;
-            }
-        }
-        return (deal.assetItems.length - assetDeposits);
-    }*/
-
     function missingDealTokens(
         uint256 id
     ) public view dealOpen(id) returns (uint256) {
@@ -155,6 +140,14 @@ contract DealRoom {
 
     function getOwner() public view returns (address) {
         return owner;
+    }
+
+    function getBuyer() public view returns (address) {
+        return buyer;
+    }
+
+    function getSeller() public view returns (address) {
+        return seller;
     }
 
     function changeOwner(address newOwner) public isOwner() {
