@@ -13,7 +13,7 @@
     "contracts:build": "yarn contracts:clear && yarn contracts:compile && yarn contracts:type",
     "contracts:compile": "cd ethereum && truffle compile",
     "remix": "remixd -s ./contracts --remix-ide https://remix.ethereum.org",
-    "testrpc": "ganache-cli -m abuse forget cool step task knife bargain vacant lemon manual various pride",
+    "testrpc": "ganache-cli --db ./ethereum/db  -m abuse forget cool step task knife bargain vacant lemon manual various pride",
     "dev": "next dev",
     "build": "yarn contracts:build && next build",
     "start": "next start"

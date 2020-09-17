@@ -29,11 +29,10 @@ export default function DealView() {
     return (
 
         <ul>
-            <li>OK</li>
             {deals.map(
                 (item) => {
                     //return <li key={item.id}>{item.id}</li>
-                    return <li key={item.id}><Link href="/deal/[id]" as={`/deal/${item.id}`}><a>{item.id}</a></Link></li>
+                return <li key={item.id}><Link href="/deal/[id]" as={`/deal/${item.id}`}><a>Deal ID: {item.id} Price: B{item.price.toNumber()}</a></Link></li>
                 }
             )}
         </ul>

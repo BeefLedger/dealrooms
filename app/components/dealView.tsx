@@ -5,7 +5,9 @@ import { DealRoomController, Deal } from '../services/dealService'
 import { DealRoom } from '../ethereum/types/DealRoom'
 import { getItem } from '../services/storage'
 import { getSigner } from '../services/chain/signerFactory'
-import { getMagicProvider } from '../services/userService'
+import { getMagicProvider, getUser } from '../services/userService'
+import { Button } from 'react-bootstrap'
+import { MagicUserMetadata } from 'magic-sdk'
 
 export default function DealView(props) {
 
@@ -15,35 +17,60 @@ export default function DealView(props) {
     let deal: Deal
     let setDeal: Function
     [deal, setDeal] = useState(null)
+    const [user, setUser] = useState<MagicUserMetadata>(null)
     const [buyer, setBuyer] = useState("")
     const [seller, setSeller] = useState("")
     const [dealId, setDealId] = useState(props.dealId)
     const [missingAssets, setMissingAssets] = useState(-1)
     const [missingTokens, setMissingTokens] = useState(-1)
+    const [dealRoomController, setDealRoomController] = useState<DealRoomController>(null)
     useEffect(() => {
-        load(dealId)
+        setup(dealId)
     }, [props.dealId]);
 
-    async function load(dealId: number) {
-        console.log(`*** load(${dealId})`)
+    async function setup(dealId: number) {
         if (!dealId) {
             return
         }
-        let dealRoomController: DealRoomController
+        //let dealRoomController: DealRoomController
         const provider = getMagicProvider()
-        dealRoomController = new DealRoomController(getItem("dealRoomAddress"), provider.getSigner() )
-        const _deal = await dealRoomController.getDeal(dealId)
-        console.log(JSON.stringify(_deal, undefined, 4))
-        setDeal(_deal) 
-        setBuyer(await dealRoomController.getBuyer())
-        setSeller(await dealRoomController.getSeller())
-        setMissingAssets(await dealRoomController.getDealMissingAssets(_deal.id))
-        setMissingTokens(await dealRoomController.getDealMissingTokens(_deal.id))
+        await setUser(await getUser())
+        const _dealRoomController = new DealRoomController(getItem("dealRoomAddress"), provider.getSigner())
+        setDealRoomController(_dealRoomController)
+
+        const _deal = await _dealRoomController.getDeal(dealId)
+        await setDeal(_deal)
+
+        setBuyer(await _dealRoomController.getBuyer())
+        setSeller(await _dealRoomController.getSeller())
+        setMissingAssets(await _dealRoomController.getDealMissingAssets(_deal.id))
+        setMissingTokens(await _dealRoomController.getDealMissingTokens(_deal.id))  
+    }
+
+
+
+    async function handleDepositTokens() {
+        if (!dealRoomController) {
+            return
+        }
+        await dealRoomController.depositDealTokens(deal.id, deal.price)
+        setMissingTokens(await dealRoomController.getDealMissingTokens(deal.id))  
+    }
+
+    async function handleDepositAssets() {
+        if (!dealRoomController) {
+            return
+        }
+        await dealRoomController.depositDealAssets(deal.id, deal.assetItems)
+        setMissingAssets(await dealRoomController.getDealMissingAssets(deal.id))
     }
 
     if (deal !== null) {
         return (
             <>
+                <h2>User</h2>
+                <b>{user.publicAddress}</b>
+
                 <h2>Buyer (ERC-20 spender)</h2>
                 <p>{buyer}</p>
 
@@ -64,7 +91,20 @@ export default function DealView(props) {
                 <h2>Price in tokens</h2>
                 <p>{deal.price.toNumber()}</p>
                 <h3>Missing assets: {missingAssets}</h3>
+                <Button
+                    onClick={handleDepositAssets}
+                    variant="primary"
+                >
+                    {loading ? 'Sending...' : 'Deposit assets'}
+                </Button>
+                
                 <h3>Missing tokens: {missingTokens}</h3>
+                <Button
+                    onClick={handleDepositTokens}
+                    variant="primary"
+                >
+                    {loading ? 'Sending...' : 'Deposit tokens'}
+                </Button>
 
             </>
         )

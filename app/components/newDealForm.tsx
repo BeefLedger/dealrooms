@@ -1,9 +1,10 @@
 import { Form, InputGroup, Button } from 'react-bootstrap'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { getUser, getMagicProvider } from '../services/userService'
 import { DealRoomController, Deal } from '../services/dealService'
 import * as DataStorage from '../services/storage'
+import { demoEnvironment } from 'ethereum/demo/setup'
 
 export default function NewDealForm() {
 
@@ -13,10 +14,24 @@ export default function NewDealForm() {
     const [erc721, setErc721] = useState(null)
     const [price, setPrice] = useState(null)
     const [assets, setAssets] = useState(null)
+    const [buyer, setBuyer] = useState("")
+    const [seller, setSeller] = useState("")
 
-    
+    useEffect(() => {
+        load()
+    }, []);
 
     //const history = useHistory();
+
+
+    async function load() {
+
+        let dealRoomController: DealRoomController
+        const provider = getMagicProvider()
+        dealRoomController = new DealRoomController(DataStorage.getItem("dealRoomAddress"), provider.getSigner() )
+        setBuyer(await dealRoomController.getBuyer())
+        setSeller(await dealRoomController.getSeller())
+    }
 
     async function handleSubmit (e)  {
         try {
@@ -52,19 +67,18 @@ export default function NewDealForm() {
     return (
         <>
             <ul>
-                <li>ERC-20 0x55A002AA3a6eC7ecC9dEc14e9D66dc8DA350817e</li>
-                <li>ERC-721 0x6b74B686Af6fDFD65e3AE0135042b4698ABB6CE7</li>           
+                <li>ERC-20 0x396aB64941cF73B935f700bB9A95976eb4A3a7E3</li>
+                <li>ERC-721 0x3Ed0312886c4ecd43d06601BbD41ED9cf3C2Df8e</li>           
             </ul>
 
             <h3>Arbitrator</h3>
-            <p>TODO</p>
-
+            <p>TODO: Load from multisig</p>
 
             <h3>Buyer (ERC-20 spender)</h3>
-            <p>TODO</p>
+            <p>{buyer}</p>
 
             <h3>Seller (ERC-721 provider)</h3>
-            <p>TODO</p>
+            <p>{seller}</p>
 
             <Form.Label>Token contract (ERC-20)</Form.Label>
             <InputGroup className="mb-2">

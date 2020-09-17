@@ -91,6 +91,11 @@ export class DealRoomController {
         return await contract.getSeller()
     }
 
+    public async getArbitrator(): Promise<string> {
+        const contract: DealRoom = await this._getDealRoomContract()
+        return await contract.getArbitrator()
+    }
+
     public async getAddress(): Promise<string> {
         //If already cached, return it
         if (this._dealRoomAddress) {

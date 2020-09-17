@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { getUser, getMagicProvider } from '../services/userService'
 import { DealRoomController } from '../services/dealService'
 import * as DataStorage from '../services/storage'
+import { demoEnvironment } from 'ethereum/demo/setup'
 
 export default function NewRoomForm() {
 
