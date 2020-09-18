@@ -12,7 +12,6 @@ import { DealRoomDeployer } from "../types/DealRoomDeployer"
 import { MultiSigWallet } from "../types/MultiSigWallet"
 import { DealRoom } from "../types/DealRoom"
 import { Signer } from "ethers"
-import { setupDemo } from "ethereum/demo/setup"
 
 export type DeployedEnvironment = {
     dealRoomDeployer?: DealRoomDeployer

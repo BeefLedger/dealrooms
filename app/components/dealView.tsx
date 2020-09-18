@@ -2,14 +2,16 @@
 import { useState, useEffect } from 'react'
 
 import { DealRoomController, Deal } from '../services/dealService'
-import { DealRoom } from '../ethereum/types/DealRoom'
-import { getItem } from '../services/storage'
-import { getSigner } from '../services/chain/signerFactory'
 import { getMagicProvider, getUser } from '../services/userService'
 import { Button } from 'react-bootstrap'
 import { MagicUserMetadata } from 'magic-sdk'
 
-export default function DealView(props) {
+export type DealViewProps = { 
+    roomId: string;
+    dealId: number;
+}
+
+export default function DealView(props: DealViewProps) {
 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
@@ -20,25 +22,28 @@ export default function DealView(props) {
     const [user, setUser] = useState<MagicUserMetadata>(null)
     const [buyer, setBuyer] = useState("")
     const [seller, setSeller] = useState("")
+    const [roomId, setRoomId] = useState(props.roomId)
     const [dealId, setDealId] = useState(props.dealId)
     const [missingAssets, setMissingAssets] = useState(-1)
     const [missingTokens, setMissingTokens] = useState(-1)
     const [dealRoomController, setDealRoomController] = useState<DealRoomController>(null)
     useEffect(() => {
-        setup(dealId)
-    }, [props.dealId]);
+        setup()
+    }, [props.dealId, props.roomId]);
 
-    async function setup(dealId: number) {
-        if (!dealId) {
+    async function setup() {
+        if (!props.dealId || !props.roomId) {
             return
         }
+        setRoomId(props.roomId)
+        setDealId(props.dealId)
         //let dealRoomController: DealRoomController
         const provider = getMagicProvider()
         await setUser(await getUser())
-        const _dealRoomController = new DealRoomController(getItem("dealRoomAddress"), provider.getSigner())
+        const _dealRoomController = new DealRoomController(props.roomId, provider.getSigner())
         setDealRoomController(_dealRoomController)
 
-        const _deal = await _dealRoomController.getDeal(dealId)
+        const _deal = await _dealRoomController.getDeal(props.dealId)
         await setDeal(_deal)
 
         setBuyer(await _dealRoomController.getBuyer())
@@ -46,8 +51,6 @@ export default function DealView(props) {
         setMissingAssets(await _dealRoomController.getDealMissingAssets(_deal.id))
         setMissingTokens(await _dealRoomController.getDealMissingTokens(_deal.id))  
     }
-
-
 
     async function handleDepositTokens() {
         if (!dealRoomController) {

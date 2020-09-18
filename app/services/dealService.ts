@@ -10,8 +10,6 @@ import { Erc721Detailed } from "../ethereum/types/Erc721Detailed";
 import * as DealRoomCompiled from "../ethereum/abi/DealRoom.json"
 import * as Deployer from "../ethereum/deploy/deploy";
 import { getErc20Contract, getErc721Contract, getMultisigContract, getDealRoomContract } from "./chain/prefabContractFactory";
-import { getMagicProvider } from "./userService";
-import * as DataStorage from "./storage";
 
 export type Deal = {
     id?: BigNumberish
@@ -34,7 +32,7 @@ export class DealRoomController {
     private _createParams?: DealRoomCreateParams
     private _multiSig?: MultiSigWallet
     constructor(dealRoomParams: String | DealRoomCreateParams, signer: Signer) {
-        console.log("constructor()")
+        console.log(`dealRoomParams ${dealRoomParams}`)
         this._signer = signer
 
         if (typeof(dealRoomParams) === "string") {

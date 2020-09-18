@@ -1,13 +1,17 @@
 import { Form, InputGroup, Button } from 'react-bootstrap'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
 
 import { getUser, getMagicProvider } from '../services/userService'
 import { DealRoomController, Deal } from '../services/dealService'
 import * as DataStorage from '../services/storage'
-import { demoEnvironment } from 'ethereum/demo/setup'
 
-export default function NewDealForm() {
+export type NewDealProps = {
+    roomId: string;
+}
 
+const NewDealForm = (props: NewDealProps) => {
+    const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
     const [erc20, setErc20] = useState(null)
@@ -16,25 +20,33 @@ export default function NewDealForm() {
     const [assets, setAssets] = useState(null)
     const [buyer, setBuyer] = useState("")
     const [seller, setSeller] = useState("")
-
+    const [roomId, setRoomId] = useState(props.roomId)
+    
     useEffect(() => {
         load()
-    }, []);
+    }, [props.roomId]);
 
     //const history = useHistory();
 
 
     async function load() {
 
+        console.log('newDealForm: load()')
+        if (!props.roomId) {
+            return
+        }
+        console.log('newDealForm: loading')
+
         let dealRoomController: DealRoomController
         const provider = getMagicProvider()
-        dealRoomController = new DealRoomController(DataStorage.getItem("dealRoomAddress"), provider.getSigner() )
+        dealRoomController = new DealRoomController(props.roomId, provider.getSigner() )
         setBuyer(await dealRoomController.getBuyer())
         setSeller(await dealRoomController.getSeller())
     }
 
     async function handleSubmit (e)  {
         try {
+            
             e.preventDefault()
             setLoading(true)
             const user = await getUser()
@@ -42,8 +54,8 @@ export default function NewDealForm() {
                 throw Error('Not signed in')
             }
             const provider = getMagicProvider()
-            const dealRoom = DataStorage.getItem('dealRoomAddress')
-            const controller = new DealRoomController(dealRoom, provider.getSigner())
+
+            const controller = new DealRoomController(props.roomId, provider.getSigner())
 
             const assetItems = assets.split("\n")
             
@@ -55,6 +67,7 @@ export default function NewDealForm() {
             }
             const updatedDeal = await controller.makeDeal(deal)
             console.log(JSON.stringify(updatedDeal, undefined, 4))  
+            router.push("/room/[room_id]/[deal_id]", `/room/${roomId}/${updatedDeal.id}`)
         }
         catch (err) {
             setLoading(false)
@@ -66,11 +79,6 @@ export default function NewDealForm() {
 
     return (
         <>
-            <ul>
-                <li>ERC-20 0x396aB64941cF73B935f700bB9A95976eb4A3a7E3</li>
-                <li>ERC-721 0x3Ed0312886c4ecd43d06601BbD41ED9cf3C2Df8e</li>           
-            </ul>
-
             <h3>Arbitrator</h3>
             <p>TODO: Load from multisig</p>
 
@@ -110,3 +118,4 @@ export default function NewDealForm() {
         </>
     )
 }
+export default NewDealForm

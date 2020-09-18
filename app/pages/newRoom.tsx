@@ -9,7 +9,7 @@ export default function NewDeal() {
                 <title>Create New Deal Room</title>
             </Head>
 
-            <h1>New Room</h1>
+            <h3>New Room</h3>
             <NewRoomForm></NewRoomForm>
             
         </Layout>

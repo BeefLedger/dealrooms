@@ -30,10 +30,10 @@ export default function Layout({
 
 			</Head>
 			<Container>
-				<Row>
+				<Row className="header">
 					<Col>
 						<header>
-							<h1>{siteTitle}</h1>
+							<h5>{siteTitle}</h5>
 						</header>
 					</Col>
 				</Row>

@@ -25,3 +25,10 @@ img {
   max-width: 100%;
   display: block;
 }
+
+.header {
+  background-color: grey;
+  margin: 1em;
+  padding-top: 0.5em;
+  color: white;
+}
