@@ -3,8 +3,9 @@ import { useState, useEffect } from 'react'
 
 import { DealRoomController, Deal } from '../services/dealService'
 import { getMagicProvider, getUser } from '../services/userService'
-import { Button } from 'react-bootstrap'
+import { Button, Table } from 'react-bootstrap'
 import { MagicUserMetadata } from 'magic-sdk'
+import DataCard from './dataCard'
 
 export type DealViewProps = { 
     roomId: string;
@@ -71,29 +72,94 @@ export default function DealView(props: DealViewProps) {
     if (deal !== null) {
         return (
             <>
-                <h2>User</h2>
-                <b>{user.publicAddress}</b>
+                <Table bordered size="sm">
+                    <tbody>
+                        <tr>
+                            <th>Token Contract (ERC-20)</th>
+                            <td>{deal?.erc20}</td>
+                        </tr>
+                        <tr>
+                            <th>Asset Contract (ERC-721)</th>
+                            <td>{deal?.erc721}</td>
+                        </tr>
+                    </tbody>
+                </Table>
 
-                <h2>Buyer (ERC-20 spender)</h2>
-                <p>{buyer}</p>
+                <Table bordered size="sm">
+                    <tbody>
+                        <tr>
+                            <th>Buyer</th>
+                            <td>{buyer}</td>
+                        </tr>
+                        <tr>
+                            <th>Seller</th>
+                            <td>{seller}</td>
+                        </tr>    
+                    </tbody>
+                    
+                </Table>
 
-                <h2>Seller (ERC-721 provider)</h2>
-                <p>{seller}</p>
+                <h4>Tokens</h4>
+                <Table bordered size="sm">
+                    <tbody>
+                        <tr>
+                            <th>Price in tokens</th>
+                            <td>{deal.price.toNumber()}</td>
+                        </tr>
+                        <tr>
+                            <th>Tokens deposited</th>
+                            <td>{deal.price.toNumber()-missingAssets}</td>
+                        </tr>
+                        <tr>
+                            <th>Tokens pending</th>
+                            <td className="important">{missingAssets}</td>
+                        </tr>
+                    </tbody>
+                    
+                </Table>
 
-                <h2>Token Contract (ERC-20)</h2>
-                <p>{deal?.erc20}</p>
+                <h4>Assets</h4>
+                <Table bordered size="sm">
+                    <tbody>
+                        <tr>
+                            <th>Assets for sale</th>
+                            <td>{deal.assetItems.length}</td>
+                        </tr>
+                        <tr>
+                            <th>Assets deposited</th>
+                            <td>{deal.assetItems.length-missingAssets}</td>
+                        </tr>
+                        <tr>
+                            <th>Assets pending</th>
+                            <td className="important">{missingAssets}</td>
+                        </tr>
+                    </tbody>
 
-                <h2>Asset Contract (ERC-20)</h2>
-                <p>{deal?.erc721}</p>
+                </Table>
 
-                <h2>Assets to be sold</h2>
-                <ul>
-                    {deal.assetItems.map(item=>{return <li key={Number(item)}>{item}</li>})}
-                </ul>
+                <Table bordered size="sm">
+                    <thead>
+                        <tr>
+                            <th>Asset</th>
+                            <th>Description</th>
+                            <th>Deposited</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {deal.assetItems.map(
+                            item=>{
+                                return (
+                                    <tr>
+                                        <td key={Number(item)}>{item}</td>
+                                        <td>Information</td>
+                                        <td>...</td>
+                                    </tr>
+                                )
+                            }
+                        )}
+                    </tbody>
+                </Table>
 
-                <h2>Price in tokens</h2>
-                <p>{deal.price.toNumber()}</p>
-                <h3>Missing assets: {missingAssets}</h3>
                 <Button
                     onClick={handleDepositAssets}
                     variant="primary"
@@ -101,7 +167,6 @@ export default function DealView(props: DealViewProps) {
                     {loading ? 'Sending...' : 'Deposit assets'}
                 </Button>
                 
-                <h3>Missing tokens: {missingTokens}</h3>
                 <Button
                     onClick={handleDepositTokens}
                     variant="primary"

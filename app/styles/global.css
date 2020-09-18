@@ -29,6 +29,9 @@ img {
 .header {
   background-color: grey;
   margin: 1em;
-  padding-top: 0.5em;
   color: white;
+}
+
+td.important {
+  color: red;
 }

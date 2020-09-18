@@ -1,7 +1,11 @@
 import { useRouter } from 'next/router'
-import Layout from '../../../../components/layout'
 import DealView from '../../../../components/dealView'
 import { useEffect, useState } from 'react'
+import {
+	Container,
+	Row,
+	Col
+} from 'react-bootstrap'
 
 const Post = () => {
     const router = useRouter()
@@ -21,13 +25,18 @@ const Post = () => {
     }
 
     return (
-        <Layout home>
-            <section>
-                <h3>Room {roomId}</h3>
-                <h5>Deal {dealId}</h5>
-                <DealView roomId={roomId} dealId={dealId}></DealView>
-            </section>
-        </Layout>
+        <Container>
+            <Row className="header">
+                <Col>
+                    <header>Deal {dealId}</header>
+                </Col>
+            </Row>
+            <Row>
+                <Col>
+                    <DealView roomId={roomId} dealId={dealId}></DealView>
+                </Col>
+            </Row>
+        </Container>
     )
 }
 
