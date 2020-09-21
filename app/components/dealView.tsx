@@ -6,11 +6,15 @@ import { getMagicProvider, getUser } from '../services/userService'
 import { Button, Table } from 'react-bootstrap'
 import { MagicUserMetadata } from 'magic-sdk'
 import DataCard from './dataCard'
+import { BigNumber, BigNumberish } from 'ethers/utils'
+import { ethers } from 'ethers'
 
 export type DealViewProps = { 
     roomId: string;
     dealId: number;
 }
+
+const DealStatus = ["", "Open", "Cancelled", "Settled"];
 
 export default function DealView(props: DealViewProps) {
 
@@ -27,8 +31,11 @@ export default function DealView(props: DealViewProps) {
     const [iAmBuyer, setIAmBuyer] = useState(false)
     const [roomId, setRoomId] = useState(props.roomId)
     const [dealId, setDealId] = useState(props.dealId)
+    const [dealStatus, setDealStatus] = useState("")
     const [missingAssets, setMissingAssets] = useState(-1)
     const [missingTokens, setMissingTokens] = useState(-1)
+    const [myTokenBalance, setMyTokenBalance] = useState<BigNumberish>(0)
+    const [myAssetBalance, setMyAssetBalance] = useState<BigNumberish>(0)
     const [dealRoomController, setDealRoomController] = useState<DealRoomController>(null)
     useEffect(() => {
         setup()
@@ -45,7 +52,10 @@ export default function DealView(props: DealViewProps) {
         const _deal = await _dealRoomController.getDeal(props.dealId)
         const _buyer = await _dealRoomController.getBuyer()
         const _seller = await _dealRoomController.getSeller()
+        const _myTokenBalance = await _dealRoomController.getMyTokenBalance(_deal.id)
+        const _myAssetBalance = await _dealRoomController.getMyAssetBalance(_deal.id)
 
+        setDealStatus(DealStatus[_deal?.status ?? 0])
         setRoomId(props.roomId)
         setDealId(props.dealId)
         setDealRoomController(_dealRoomController)
@@ -54,7 +64,10 @@ export default function DealView(props: DealViewProps) {
         setBuyer(_buyer)
         setSeller(_seller)
         setIAmSeller(_user.publicAddress === _seller)
-        setIAmBuyer(_user.publicAddress === _buyer)  
+        setIAmBuyer(_user.publicAddress === _buyer) 
+        setMyTokenBalance((new BigNumber(_myTokenBalance)).toNumber())
+        setMyAssetBalance((new BigNumber(_myAssetBalance)).toNumber())
+        setMissingTokens(await _dealRoomController.getDealMissingTokens(_deal.id))  
         setMissingAssets(await _dealRoomController.getDealMissingAssets(_deal.id))
         setMissingTokens(await _dealRoomController.getDealMissingTokens(_deal.id))  
         console.log(`publicAddress: ${_user.publicAddress} seller: ${_seller}`)
@@ -73,6 +86,22 @@ export default function DealView(props: DealViewProps) {
             return
         }
         await dealRoomController.depositDealAssets(deal.id, deal.assetItems)
+        setMissingAssets(await dealRoomController.getDealMissingAssets(deal.id))
+    }
+
+    async function handleWithdrawTokens() {
+        if (!dealRoomController) {
+            return
+        }
+        await dealRoomController.withdrawDealTokens(deal.id)
+        setMissingTokens(await dealRoomController.getDealMissingTokens(deal.id))  
+    }
+
+    async function handleWithdrawAssets() {
+        if (!dealRoomController) {
+            return
+        }
+        await dealRoomController.withdrawDealAssets(deal.id)
         setMissingAssets(await dealRoomController.getDealMissingAssets(deal.id))
     }
 
@@ -125,6 +154,7 @@ export default function DealView(props: DealViewProps) {
     if (deal !== null) {
         return (
             <>
+                <h3>Status: {dealStatus}</h3>
                 <Table bordered size="sm">
                     <tbody>
                         <tr>
@@ -156,6 +186,10 @@ export default function DealView(props: DealViewProps) {
                 <Table bordered size="sm">
                     <tbody>
                         <tr>
+                            <th>Your balance</th>
+                            <td>{myTokenBalance}</td>
+                        </tr>
+                        <tr>
                             <th>Price in tokens</th>
                             <td>{deal.price.toNumber()}</td>
                         </tr>
@@ -174,6 +208,10 @@ export default function DealView(props: DealViewProps) {
                 <h4>Assets</h4>
                 <Table bordered size="sm">
                     <tbody>
+                    <tr>
+                        <th>Your balance</th>
+                            <td>{myAssetBalance}</td>
+                        </tr>
                         <tr>
                             <th>Assets for sale</th>
                             <td>{deal.assetItems.length}</td>

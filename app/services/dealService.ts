@@ -102,7 +102,6 @@ export class DealRoomController {
     }
 
     public async makeDeal(deal: Deal): Promise<Deal> {
-        debugger
         const nextDealId = await this.getDealCount()
         const contract = await this._getDealRoomContract()
         const tx = await contract.makeDeal(deal.erc20, deal.erc721, deal.price, deal.assetItems)
@@ -203,10 +202,7 @@ export class DealRoomController {
         }
         finally {
             console.log("proposeSettleDeal() complete")
-        }
- 
-        
-        
+        }      
     }
 
     public async approveSettlementProposal(transactionId: BigNumberish): Promise<ContractReceipt> {

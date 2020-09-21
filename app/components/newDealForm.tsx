@@ -67,7 +67,7 @@ const NewDealForm = (props: NewDealProps) => {
             }
             const updatedDeal = await controller.makeDeal(deal)
             console.log(JSON.stringify(updatedDeal, undefined, 4))  
-            router.push("/room/[room_id]/[deal_id]", `/room/${roomId}/${updatedDeal.id}`)
+            router.push("/room/[room_id]/[deal_id]", `/room/${props.roomId}/${updatedDeal.id}`)
         }
         catch (err) {
             setLoading(false)

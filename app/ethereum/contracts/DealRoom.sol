@@ -65,11 +65,13 @@ contract DealRoom {
 
     function missingDealAssets(
         uint256 id
-    ) public view dealOpen(id) returns (uint256) {
-        //Check that all the assets have been deposited, and return the quantity missing
-        uint256 assetDeposits = 0;
+    ) public view dealExists(id, true) returns (uint256) {
+        //Check that all the assets have been deposited, and return the quantity missing    
         Deal memory deal = getDeal(id);
-
+        if (deal.status == DealStatus.Settled) {
+            return 0;
+        }
+        uint256 assetDeposits = 0;
         for (uint i = 0; i < deal.assetItems.length; i ++) {
             // Check that I (the dealroom contract) own this asset
             if (deal.erc721.ownerOf(deal.assetItems[i]) == address(this)) {
@@ -81,10 +83,17 @@ contract DealRoom {
 
     function missingDealTokens(
         uint256 id
-    ) public view dealOpen(id) returns (uint256) {
+    ) public view dealExists(id, true) returns (uint256) {
         //Check that all the tokens have been deposited, and return the amount missing
         Deal memory deal = getDeal(id);
-        return deal.price - deal.erc20.balanceOf(address(this));
+        if (deal.status == DealStatus.Settled) {
+            return 0;
+        }
+        uint256 balance = deal.erc20.balanceOf(address(this));
+        if (balance >= deal.price) {
+            return 0;
+        }
+        return deal.price - balance;
     }
 
     function settle(
