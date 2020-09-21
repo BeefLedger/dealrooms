@@ -89,11 +89,6 @@ export class DealRoomController {
         return await contract.getSeller()
     }
 
-    public async getArbitrator(): Promise<string> {
-        const contract: DealRoom = await this._getDealRoomContract()
-        return await contract.getArbitrator()
-    }
-
     public async getAddress(): Promise<string> {
         //If already cached, return it
         if (this._dealRoomAddress) {
@@ -168,40 +163,49 @@ export class DealRoomController {
 
     public async proposeSettleDeal(id: BigNumberish): Promise<BigNumberish> {
         //this._multiSig?.confirmTransaction()
+        console.log("proposeSettleDeal()")
+        try {
         const deal: Deal = await this.getDeal(id)
 
-        const dealRoomContract: DealRoom = await this.getDealRoomContract()
-        const multisigContract: MultiSigWallet = await this._getMultisigContract()
-        const owners = await multisigContract.getOwners()
-        //console.log("owners", JSON.stringify(owners, undefined, 4))
+            const dealRoomContract: DealRoom = await this.getDealRoomContract()
+            const multisigContract: MultiSigWallet = await this._getMultisigContract()
+            const owners = await multisigContract.getOwners()
+            //console.log("owners", JSON.stringify(owners, undefined, 4))
 
-        //Make the transaction  
-        const encodedData = new ethers.utils.Interface(DealRoomCompiled.abi).functions.settle.encode([deal.id])
+            //Make the transaction  
+            const encodedData = new ethers.utils.Interface(DealRoomCompiled.abi).functions.settle.encode([deal.id])
 
-        //const encodedData = dealRoomContract.interface.encodeFunctionData("settle", [deal.id])
-        const transaction = await multisigContract.submitTransaction(dealRoomContract.address, 0, encodedData)
-        const receipt = await transaction.wait() 
-        
-        //Obtain the transaction ID created in the multisig
-        try {
-            if (receipt.events) {
-                const submissionEvents = receipt.events?.filter(evt => evt.event === 'Submission')
-                if (submissionEvents) { 
-                    if (submissionEvents.length > 0) {
-                        if (submissionEvents.length === 1) {
-                            const transactionId: BigNumberish = (submissionEvents[0]?.args as any).transactionId
-                            return transactionId
+            //const encodedData = dealRoomContract.interface.encodeFunctionData("settle", [deal.id])
+            const transaction = await multisigContract.submitTransaction(dealRoomContract.address, 0, encodedData)
+            const receipt = await transaction.wait() 
+            
+            //Obtain the transaction ID created in the multisig
+            try {
+                if (receipt.events) {
+                    const submissionEvents = receipt.events?.filter(evt => evt.event === 'Submission')
+                    if (submissionEvents) { 
+                        if (submissionEvents.length > 0) {
+                            if (submissionEvents.length === 1) {
+                                const transactionId: BigNumberish = (submissionEvents[0]?.args as any).transactionId
+                                return transactionId
+                            }
+                            throw `More than one submission event`
                         }
-                        throw `More than one submission event`
-                    }
-                } 
+
+                    } 
+                }
+                throw `No submission events`         
             }
-            throw `No submission events`         
+            catch (e) {
+                //console.error(JSON.stringify(e, undefined, 4))
+                throw `Error getting new transaction ID: ${e}`
+            }
         }
-        catch (e) {
-            //console.error(JSON.stringify(e, undefined, 4))
-            throw `Error getting new transaction ID: ${e}`
+        finally {
+            console.log("proposeSettleDeal() complete")
         }
+ 
+        
         
     }
 

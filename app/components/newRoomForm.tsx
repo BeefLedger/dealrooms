@@ -49,6 +49,11 @@ const accounts = [
         address: "0xEca31FcDb5377d9902B3274A0c48f0469375A013",
         name: "Ian Illingsworth"
     },
+    
+    {
+        address: "0x3c8f64283Da1846252b201bb4ab198cDFeFAAE3c",
+        name: "Big Bazza's Bargain Burgers"
+    },
     {
         address: "0xd5AE65265C8F8E09C48da86DE16287F5d90c75e5",
         name: "Earsman Farming Solutions"
@@ -92,8 +97,9 @@ export default function NewRoomForm() {
                 },
                 provider.getSigner()
             )
+            //TODO: Make an explicit deploy() method
             const contract = await controller.getDealRoomContract()
-            //console.log(`/room/${contract.address}`)
+
             router.push(`/room/[room_id]`, `/room/${contract.address}`)
 
             DataStorage.push("rooms", contract.address) //setItem("dealRoomAddress", contract.address)
@@ -108,7 +114,7 @@ export default function NewRoomForm() {
     };
 
     const selectOptions = accounts.map((item)=> {
-        return <option value={item.address}>{item.name}</option>
+        return <option value={item.address}>{item.name} {item.address===user?.publicAddress?"(You)":""}</option>
     })
 
     return (
@@ -116,12 +122,12 @@ export default function NewRoomForm() {
             <h3>Welcome, {user?.email || "stranger"}</h3>
             <h5>{user?.publicAddress || ""}</h5>
 
-            <Form.Label>Seller (You)</Form.Label>
+            <Form.Label>Seller</Form.Label>
             <InputGroup className="mb-2">
                 <InputGroup.Prepend>
                     <InputGroup.Text>0x</InputGroup.Text>
                 </InputGroup.Prepend>
-                <Form.Control as="select" value={user?.publicAddress} placeholder="Ethereum address" onChange={(e)=>setSeller(e.target.value)}>
+                <Form.Control as="select" placeholder="Ethereum address" onChange={(e)=>setSeller(e.target.value)}>
                     {selectOptions}
                 </Form.Control>
             </InputGroup>

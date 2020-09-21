@@ -23,6 +23,8 @@ export default function DealView(props: DealViewProps) {
     const [user, setUser] = useState<MagicUserMetadata>(null)
     const [buyer, setBuyer] = useState("")
     const [seller, setSeller] = useState("")
+    const [iAmSeller, setIAmSeller] = useState(false)
+    const [iAmBuyer, setIAmBuyer] = useState(false)
     const [roomId, setRoomId] = useState(props.roomId)
     const [dealId, setDealId] = useState(props.dealId)
     const [missingAssets, setMissingAssets] = useState(-1)
@@ -33,24 +35,29 @@ export default function DealView(props: DealViewProps) {
     }, [props.dealId, props.roomId]);
 
     async function setup() {
-        if (!props.dealId || !props.roomId) {
+        console.log(`setup(): ${props.dealId}, ${props.roomId}`)
+        if (props.dealId == undefined || !props.roomId) {
             return
         }
+        const provider = getMagicProvider()
+        const _user = await getUser()       
+        const _dealRoomController = new DealRoomController(props.roomId, provider.getSigner())       
+        const _deal = await _dealRoomController.getDeal(props.dealId)
+        const _buyer = await _dealRoomController.getBuyer()
+        const _seller = await _dealRoomController.getSeller()
+
         setRoomId(props.roomId)
         setDealId(props.dealId)
-        //let dealRoomController: DealRoomController
-        const provider = getMagicProvider()
-        await setUser(await getUser())
-        const _dealRoomController = new DealRoomController(props.roomId, provider.getSigner())
         setDealRoomController(_dealRoomController)
-
-        const _deal = await _dealRoomController.getDeal(props.dealId)
-        await setDeal(_deal)
-
-        setBuyer(await _dealRoomController.getBuyer())
-        setSeller(await _dealRoomController.getSeller())
+        setDeal(_deal)
+        setUser(_user)
+        setBuyer(_buyer)
+        setSeller(_seller)
+        setIAmSeller(_user.publicAddress === _seller)
+        setIAmBuyer(_user.publicAddress === _buyer)  
         setMissingAssets(await _dealRoomController.getDealMissingAssets(_deal.id))
         setMissingTokens(await _dealRoomController.getDealMissingTokens(_deal.id))  
+        console.log(`publicAddress: ${_user.publicAddress} seller: ${_seller}`)
     }
 
     async function handleDepositTokens() {
@@ -68,6 +75,52 @@ export default function DealView(props: DealViewProps) {
         await dealRoomController.depositDealAssets(deal.id, deal.assetItems)
         setMissingAssets(await dealRoomController.getDealMissingAssets(deal.id))
     }
+
+    async function handleProposeSettle() {
+        if (!dealRoomController) {
+            return
+        }
+        try {
+            setLoading(true)
+            await dealRoomController.proposeSettleDeal(deal.id)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    async function handleApproveSettle() {
+        if (!dealRoomController) {
+            return
+        }
+        try {
+            setLoading(true)
+            await dealRoomController.approveSettlementProposal(deal.id)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const requestSettleButton = iAmSeller?(
+        <Button
+            onClick={handleProposeSettle}
+            variant="primary"
+        >
+            {loading ? 'Sending...' : 'Propose Settlement'}
+        </Button>
+    ):(
+        <></>
+    )
+
+    const approveSettleButton = iAmBuyer?(
+        <Button
+            onClick={handleApproveSettle}
+            variant="primary"
+        >
+            {loading ? 'Sending...' : 'Approve Settlement'}
+        </Button>
+    ):(
+        <></>
+    )
 
     if (deal !== null) {
         return (
@@ -88,11 +141,11 @@ export default function DealView(props: DealViewProps) {
                 <Table bordered size="sm">
                     <tbody>
                         <tr>
-                            <th>Buyer</th>
+                            <th>Buyer {iAmBuyer?"(You)":""}</th>
                             <td>{buyer}</td>
                         </tr>
                         <tr>
-                            <th>Seller</th>
+                            <th>Seller {iAmSeller?"(You)":""}</th>
                             <td>{seller}</td>
                         </tr>    
                     </tbody>
@@ -108,11 +161,11 @@ export default function DealView(props: DealViewProps) {
                         </tr>
                         <tr>
                             <th>Tokens deposited</th>
-                            <td>{deal.price.toNumber()-missingAssets}</td>
+                            <td>{deal.price.toNumber()-missingTokens}</td>
                         </tr>
                         <tr>
                             <th>Tokens pending</th>
-                            <td className="important">{missingAssets}</td>
+                            <td className="important">{missingTokens}</td>
                         </tr>
                     </tbody>
                     
@@ -173,6 +226,23 @@ export default function DealView(props: DealViewProps) {
                 >
                     {loading ? 'Sending...' : 'Deposit tokens'}
                 </Button>
+
+                <Button
+                    onClick={handleWithdrawTokens}
+                    variant="primary"
+                >
+                    {loading ? 'Sending...' : 'Withdraw tokens'}
+                </Button>
+
+                <Button
+                    onClick={handleWithdrawAssets}
+                    variant="primary"
+                >
+                    {loading ? 'Sending...' : 'Withdraw assets'}
+                </Button>
+
+                {requestSettleButton}
+                {approveSettleButton}
 
             </>
         )

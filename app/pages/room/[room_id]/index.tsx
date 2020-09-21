@@ -12,7 +12,6 @@ const RoomPage = () => {
 
     const [buyer, setBuyer] = useState("")
     const [seller, setSeller] = useState("")
-    const [arb, setArb] = useState("")
     const [roomId, setRoomId] = useState("")
 
     useEffect(() => {
@@ -28,8 +27,6 @@ const RoomPage = () => {
             setBuyer(await _dealRoomController.getBuyer())
             setSeller(await _dealRoomController.getSeller())
         }
-
-        //setArb(await _dealRoomController.getArbitrator())
     }
 
     if (roomId) {
