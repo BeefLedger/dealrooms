@@ -1,8 +1,10 @@
 
 import * as artifactDealRoom from "../abi/DealRoom.json"
+import * as artifactDealRoomDeployer from "../abi/DealRoomDeployer.json"
 import * as artifactErc20 from "../abi/ERC20Detailed.json"
 import * as artifactErc721 from "../abi/ERC721Detailed.json"
 import * as artifactMultisig from "../abi/MultiSigWallet.json"
+
 import { getSigner } from "../../services/chain/signerFactory"
 
 import { deployContract } from "../../services/chain/contractFactory"
@@ -11,7 +13,9 @@ import { Erc721Detailed } from "../types/Erc721Detailed"
 import { DealRoomDeployer } from "../types/DealRoomDeployer"
 import { MultiSigWallet } from "../types/MultiSigWallet"
 import { DealRoom } from "../types/DealRoom"
+
 import { Signer } from "ethers"
+import { getDealRoomDeployerContract } from "services/chain/prefabContractFactory"
 
 export type DeployedEnvironment = {
     dealRoomDeployer?: DealRoomDeployer
@@ -51,19 +55,36 @@ export async function deployMultisig(owners: string[], approvalsRequired: number
 
 }
 
-export async function deployDealRoom(buyer: string, seller: string, owner: string, signer: Signer): Promise<DealRoom>  {
+export async function deployDealRoomDeployer(owner: string, signer: Signer): Promise<DealRoomDeployer>  {
 
-    const contract = await deployContract<DealRoom>(signer, artifactDealRoom, buyer, seller)
+    const contract = await deployContract<DealRoomDeployer>(signer, artifactDealRoomDeployer)
     await contract.changeOwner(owner);
-    console.log(`Deployed DealRoom contract to ${contract.address}`)
+    console.log(`Deployed DealRoomDeployer contract to ${contract.address}`)
     
     return contract
+}
+
+export type DeployDealRoomParams = {
+    id: number,
+    buyer: string,
+    seller: string,
+    arbitrator: string,
+    sensorApprover: string,
+    docApprover: string,
+}
+
+export async function deployDealRoom(dealRoomDeployerAddress: string, params: DeployDealRoomParams, owner: string, signer: Signer): Promise<string>  {
+    const dealRoomDeployerContract = await getDealRoomDeployerContract(dealRoomDeployerAddress, signer)
+    await dealRoomDeployerContract.functions.makeRoom(params)
+    const dealRoomDetails = await dealRoomDeployerContract.functions.getRoom(params.id)
+    return dealRoomDetails.id
 }
 
 export async function deployAll(signer: Signer): Promise<DeployedEnvironment> {
     const result: DeployedEnvironment = {
         erc20: await deployErc20("0x658040983DD50DD44826FC7e414626Bb8b8180A9", signer),
-        erc721: await deployErc721("0x658040983DD50DD44826FC7e414626Bb8b8180A9", signer)
+        erc721: await deployErc721("0x658040983DD50DD44826FC7e414626Bb8b8180A9", signer),
+        dealRoomDeployer: await deployDealRoomDeployer("0x658040983DD50DD44826FC7e414626Bb8b8180A9", signer),
     }
     return result
 }
