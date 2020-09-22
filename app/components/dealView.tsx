@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react'
 
-import { DealRoomController, Deal } from '../services/dealService'
+import { DealRoomController, Deal, AssetStatus } from '../services/dealService'
 import { getMagicProvider, getUser } from '../services/userService'
 import { Button, Table } from 'react-bootstrap'
 import { MagicUserMetadata } from 'magic-sdk'
@@ -32,6 +32,7 @@ export default function DealView(props: DealViewProps) {
     const [roomId, setRoomId] = useState(props.roomId)
     const [dealId, setDealId] = useState(props.dealId)
     const [dealStatus, setDealStatus] = useState("")
+    const [assetStatus, setAssetStatus] = useState<AssetStatus[]>([])
     const [missingAssets, setMissingAssets] = useState(-1)
     const [missingTokens, setMissingTokens] = useState(-1)
     const [myTokenBalance, setMyTokenBalance] = useState<BigNumberish>(0)
@@ -46,6 +47,7 @@ export default function DealView(props: DealViewProps) {
         if (props.dealId == undefined || !props.roomId) {
             return
         }
+        //Get data
         const provider = getMagicProvider()
         const _user = await getUser()       
         const _dealRoomController = new DealRoomController(props.roomId, provider.getSigner())       
@@ -54,11 +56,15 @@ export default function DealView(props: DealViewProps) {
         const _seller = await _dealRoomController.getSeller()
         const _myTokenBalance = await _dealRoomController.getMyTokenBalance(_deal.id)
         const _myAssetBalance = await _dealRoomController.getMyAssetBalance(_deal.id)
+        const _assetStatus = await _dealRoomController.getDealAssetStatus(_deal.id)
 
+        //Set state
+        //Note: the state change is asynchronous
         setDealStatus(DealStatus[_deal?.status ?? 0])
         setRoomId(props.roomId)
         setDealId(props.dealId)
         setDealRoomController(_dealRoomController)
+
         setDeal(_deal)
         setUser(_user)
         setBuyer(_buyer)
@@ -69,8 +75,7 @@ export default function DealView(props: DealViewProps) {
         setMyAssetBalance((new BigNumber(_myAssetBalance)).toNumber())
         setMissingTokens(await _dealRoomController.getDealMissingTokens(_deal.id))  
         setMissingAssets(await _dealRoomController.getDealMissingAssets(_deal.id))
-        setMissingTokens(await _dealRoomController.getDealMissingTokens(_deal.id))  
-        console.log(`publicAddress: ${_user.publicAddress} seller: ${_seller}`)
+        setAssetStatus(_assetStatus)
     }
 
     async function handleDepositTokens() {
@@ -87,6 +92,7 @@ export default function DealView(props: DealViewProps) {
         }
         await dealRoomController.depositDealAssets(deal.id, deal.assetItems)
         setMissingAssets(await dealRoomController.getDealMissingAssets(deal.id))
+        setAssetStatus(await dealRoomController.getDealAssetStatus(dealId))
     }
 
     async function handleWithdrawTokens() {
@@ -199,7 +205,7 @@ export default function DealView(props: DealViewProps) {
                         </tr>
                         <tr>
                             <th>Tokens pending</th>
-                            <td className="important">{missingTokens}</td>
+                            <td className={missingTokens?"important":"safe"}>{missingTokens}</td>
                         </tr>
                     </tbody>
                     
@@ -222,7 +228,7 @@ export default function DealView(props: DealViewProps) {
                         </tr>
                         <tr>
                             <th>Assets pending</th>
-                            <td className="important">{missingAssets}</td>
+                            <td className={missingAssets?"important":"safe"}>{missingAssets}</td>
                         </tr>
                     </tbody>
 
@@ -232,18 +238,19 @@ export default function DealView(props: DealViewProps) {
                     <thead>
                         <tr>
                             <th>Asset</th>
-                            <th>Description</th>
+                            <th>Owner</th>
                             <th>Deposited</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {deal.assetItems.map(
+                        {assetStatus?.map(
                             item=>{
+                                const deposited = item.owner === props.roomId
                                 return (
                                     <tr>
-                                        <td key={Number(item)}>{item}</td>
-                                        <td>Information</td>
-                                        <td>...</td>
+                                        <td key={Number(item.assetId)}>{Number(item.assetId)}</td>
+                                        <td className={deposited?"safe": "normal"}>{item.owner} </td>
+                                        <td>{deposited?"Yes":"No"}</td>
                                     </tr>
                                 )
                             }

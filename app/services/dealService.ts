@@ -26,6 +26,12 @@ export type DealRoomCreateParams = {
     seller: string,
     arbitrator: string,
 }
+
+export type AssetStatus = {
+    assetId: BigNumber,
+    owner: string
+}
+
 export class DealRoomController {
     private _signer: Signer
     private _dealRoomAddress?: string
@@ -73,6 +79,11 @@ export class DealRoomController {
     public async getMyAssetBalance(id: BigNumberish): Promise<BigNumberish> {
         const assetContract = await this._getDealAssetContract(id)
         return assetContract.balanceOf(await this._signer.getAddress())
+    }
+
+    public async getAssetOwner(dealId: BigNumberish, assetId: BigNumberish): Promise<string> {
+        const assetContract = await this._getDealAssetContract(dealId)
+        return assetContract.ownerOf(assetId)
     }
 
     public async getDealRoomContract(): Promise<DealRoom> {
@@ -153,6 +164,26 @@ export class DealRoomController {
     public async getDealMissingAssets(id: BigNumberish): Promise<number> {
         const contract = await this._getDealRoomContract()
         return (await contract.missingDealAssets(id)).toNumber()
+    }
+
+    public async getDealAssetStatus(dealId: BigNumberish): Promise<AssetStatus[]> {
+        const deal = await this.getDeal(dealId)
+        
+        const results: AssetStatus[] = []
+        debugger
+        for (const assetId of deal.assetItems) {
+            try {
+                const owner = await this.getAssetOwner(dealId, assetId)
+                results.push({
+                    assetId: new BigNumber(assetId),
+                    owner
+                })
+            } catch (e) {
+                console.warn(`Error getting asset status for ${assetId}: ${e}`)
+            }
+
+        }
+        return results
     }
 
     public async getDealMissingTokens(id: BigNumberish): Promise<number> {

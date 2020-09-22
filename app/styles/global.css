@@ -35,3 +35,7 @@ img {
 td.important {
   color: red;
 }
+
+td.safe {
+  color: green;
+}
