@@ -7,6 +7,7 @@ import * as DataStorage from '../services/storage'
 // import { demoEnvironment } from 'ethereum/demo/setup'
 import { useRouter } from 'next/router'
 import { MagicUserMetadata } from 'magic-sdk'
+import { randomInt } from 'lib/random'
 
 const accounts = [
     {
@@ -65,11 +66,13 @@ export default function NewRoomForm() {
 
     const router = useRouter()
     const [loading, setLoading] = useState(false)
-    const [error, setError] = useState(null)
-    const [buyer, setBuyer] = useState(null)
-    const [seller, setSeller] = useState(null)
+    const [error, setError] = useState("")
+    const [buyer, setBuyer] = useState("")
+    const [seller, setSeller] = useState("")
     const [user, setUser] = useState<MagicUserMetadata>(null)
-    const [arbitrator, setArbitrator] = useState(null)
+    const [arbitrator, setArbitrator] = useState("")
+    const [docApprover, setDocApprover] = useState("")
+    const [sensorApprover, setSensorApprover] = useState("")
     const [roomId, setRoomId] = useState("")
 
     useEffect(() => {
@@ -91,9 +94,12 @@ export default function NewRoomForm() {
             const provider = getMagicProvider()
             const controller = new DealRoomController(
                 {
+                    id: randomInt(9999999),
                     buyer,
                     seller,
-                    arbitrator
+                    arbitrator,
+                    docApprover,
+                    sensorApprover,
                 },
                 provider.getSigner()
             )
@@ -152,24 +158,24 @@ export default function NewRoomForm() {
                 </Form.Control>
             </InputGroup>
 
-            <Form.Label>Document Approver</Form.Label>
+            <Form.Label>Document Approver (TODO: Add addresses)</Form.Label>
             <InputGroup className="mb-2">
                 <InputGroup.Prepend>
                     <InputGroup.Text>0x</InputGroup.Text>
                 </InputGroup.Prepend>
-                <Form.Control as="select" placeholder="Ethereum address">
+                <Form.Control as="select" placeholder="Ethereum address" onChange={(e)=>setDocApprover(e.target.value)}>
                     <option key={0} value={0}>None</option>
                     <option key={1} value={1}>Approval Committee A</option>
                     <option key={2} value={2}>Approval Committee B</option>                
                 </Form.Control>
             </InputGroup>
 
-            <Form.Label>Sensor Service</Form.Label>
+            <Form.Label>Sensor Service (TODO: Add addresses)</Form.Label>
             <InputGroup className="mb-2">
                 <InputGroup.Prepend>
                     <InputGroup.Text>0x</InputGroup.Text>
                 </InputGroup.Prepend>
-                <Form.Control as="select" placeholder="Ethereum address">
+                <Form.Control as="select" placeholder="Ethereum address" onChange={(e)=>setSensorApprover(e.target.value)}>
                     <option key={0} value={0}>None</option>
                     <option key={1} value={1}>LiveX Sensortone 2000</option> 
                     <option key={2} value={2}>HeatFeed 2.6</option>
