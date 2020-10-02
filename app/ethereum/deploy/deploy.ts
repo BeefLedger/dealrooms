@@ -16,6 +16,7 @@ import { DealRoom } from "../types/DealRoom"
 
 import { Signer } from "ethers"
 import { getDealRoomHubContract } from "services/chain/prefabContractFactory"
+import { DealRoomDetails } from "services/dealRoomController"
 
 export type DeployedEnvironment = {
     DealRoomHub?: DealRoomHub
@@ -63,33 +64,25 @@ export async function deployDealRoomHub(owner: string, signer: Signer): Promise<
     return contract
 }
 
-export type DeployDealRoomParams = {
-    id: number,
-    buyer: string,
-    seller: string,
-    arbitrator: string,
-    sensorApprover: string,
-    docApprover: string,
+export type DealRoomCreateParams = {
+    dealRoomHubAddress: string
+    buyer: string
+    seller: string
+    arbitrator: string
+    docApprover: string
+    sensorApprover: string
 }
 
-export type DealRoomDetails = {
-    room: string;
-    buyer: string;
-    seller: string;
-    arbitrator: string;
-    sensorApprover: string;
-    docApprover: string;
-    mainMultiSig: string;
-    agentsMultiSig: string;   
-}
 
-export async function deployDealRoom(DealRoomHubAddress: string, params: DeployDealRoomParams, owner: string, signer: Signer): Promise<DealRoomDetails>  {
+export async function deployDealRoom(params: DealRoomCreateParams, owner: string, signer: Signer): Promise<DealRoomDetails>  {
     console.log(1)
-    const DealRoomHubContract = await getDealRoomHubContract(DealRoomHubAddress, signer)
+    const DealRoomHubContract = await getDealRoomHubContract(params.dealRoomHubAddress, signer)
     console.log(2, JSON.stringify(params, undefined, 4))
-    await DealRoomHubContract.functions.makeRoom(params)
-    console.log(3)
-    const dealRoomDetails = await DealRoomHubContract.functions.getRoom(params.id)
+    const tx = await DealRoomHubContract.functions.makeRoom(params)
+    const receipt = await tx.wait()
+    console.log(JSON.stringify(receipt, undefined, 4))
+    // TODO: Find out where the contract address is stashed
+    const dealRoomDetails = await DealRoomHubContract.functions.getRoom("dummy")
     console.log(4)
     return dealRoomDetails;
 }

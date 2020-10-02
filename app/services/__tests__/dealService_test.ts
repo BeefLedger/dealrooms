@@ -1,10 +1,12 @@
-import { deployAll, DeployedEnvironment } from "../../ethereum/deploy/deploy"
+export const hello = "hello"
+
+/*import { deployAll, DeployedEnvironment } from "../../ethereum/deploy/deploy"
 import { getProvider } from "../chain/providerFactory"
 
 import { bnEquals, bnToNumber } from "../../lib/bigNumbers"
 import { MultiSigWallet } from "../../ethereum/types/MultiSigWallet"
 import { DealRoom } from "../../ethereum/types/DealRoom"
-import { DealRoomController, DealRoomCreateParams, Deal } from "../dealService"
+import { DealRoomController, DealRoomCreateParams, Deal } from "../dealRoomController"
 import { getSigner } from "../chain/signerFactory"
 import { Contract } from "ethers"
 import { BigNumber, bigNumberify } from "ethers/utils"
@@ -273,3 +275,4 @@ describe("Reset", () => {
         })
     })
 })
+*/

@@ -9,17 +9,8 @@ import { Erc721Detailed } from "../ethereum/types/Erc721Detailed";
 
 import * as DealRoomCompiled from "../ethereum/abi/DealRoom.json"
 import * as Deployer from "../ethereum/deploy/deploy";
-import { getErc20Contract, getErc721Contract, getDealRoomContract, getMultisigContract, getDealRoomHubContract } from "./chain/prefabContractFactory";
+import * as ContractFactory from "./chain/prefabContractFactory";
 import { DealRoomHub } from "ethereum/types/DealRoomHub";
-
-export type DealRoomCreateParams = {
-    dealRoomHubAddress: string
-    buyer: string
-    seller: string
-    arbitrator: string
-    docApprover: string
-    sensorApprover: string
-}
 
 export type DealRoomDetails = {
     addr: string
@@ -51,24 +42,25 @@ export class DealRoomController {
     private _signer: Signer
     private _dealRoomAddress?: string
     private _dealRoomHubAddress?: string
-    private _createParams?: DealRoomCreateParams
+    private _createParams?: Deployer.DealRoomCreateParams
     private _mainMultiSig?: MultiSigWallet
     private _agentsMultiSig?: MultiSigWallet
 
-    public dealRoomHub?: DealRoomHub
+    public dealRoomContract?: DealRoom
+    public dealRoomHubContract?: DealRoomHub
     public details?: DealRoomDetails
 
-    constructor(dealRoomParams: String | DealRoomCreateParams, signer: Signer) {
+    constructor(dealRoomParams: String | Deployer.DealRoomCreateParams, signer: Signer) {
         console.log(`dealRoomParams ${dealRoomParams}`)
         this._signer = signer
 
         if (typeof(dealRoomParams) === "string") {
-            // Fetch Multisig and/or DealRoom contracts on demand
+            // On init(), fetch all details from dealroom contact
             this._dealRoomAddress = dealRoomParams as string;
 
         } else {
-            // Deploy Multisig and DealRoom contracts on demand
-            this._createParams = dealRoomParams as DealRoomCreateParams
+            // On init(), deploy everything, then fetch details
+            this._createParams = dealRoomParams as Deployer.DealRoomCreateParams
         }
     }
 
@@ -78,17 +70,19 @@ export class DealRoomController {
         // If instantiating with just a dealroom address,
         if (this._dealRoomAddress) {
             // Get deal room hub address
-            this._dealRoomHubAddress = (await this.getDealRoomContract()).creator;
+            this.dealRoomContract = await this.getDealRoomContract()
+            this._dealRoomHubAddress = this.dealRoomContract.creatorx;
         } 
         // If creating a new deal room,
         else if (this._createParams) {
             // Deploy one
             this._dealRoomHubAddress = this._createParams.dealRoomHubAddress;
-            await this._deployDealRoom(this._createParams)
+            this._dealRoomAddress = await this._deployDealRoom(this._createParams)
+            this.dealRoomContract = await this.getDealRoomContract()
         }
         // Ask the deal room hub for all the details
-        this.dealRoomHub = await this._getDealRoomHubContract();
-        this.details = await this.dealRoomHub.getRoom(this._dealRoomAddress)
+        this.dealRoomHubContract = await this._getDealRoomHubContract();
+        this.details = await this.dealRoomHubContract.getRoom(this._dealRoomAddress)
     }
 
     public async depositDealTokens(id: BigNumberish, amount: BigNumberish): Promise<ContractReceipt> {
@@ -230,7 +224,7 @@ export class DealRoomController {
     }
 
     // Send a proposal transaction to the agents multisig to send an approval transaction to the main multisig
-    public async agentProposeSettleDeal(dealId: BigNumberish, transactionId: BigNumberish): Promise<void> {
+    public async agentProposeSettleDeal(dealId: BigNumberish, transactionId: BigNumberish): Promise<BigNumberish> {
         console.log("proposeSettleDeal()")
         const agentsMultisigContract: MultiSigWallet = await this._getAgentsMultisigContract()
         const mainMultisigContract: MultiSigWallet = await this._getMainMultisigContract()
@@ -427,10 +421,10 @@ export class DealRoomController {
     */
     //--- Private methods ------------------------------------- //
 
-    private async _deployDealRoom(params: DealRoomCreateParams): Promise<string> {
+    private async _deployDealRoom(params: Deployer.DealRoomCreateParams): Promise<string> {
         try {
-            const dr = await Deployer.deployDealRoom(this.DealRoomHub, params, await this._signer.getAddress(), this._signer )
-            return this._dealRoomAddress = dr.room;
+            const dr = await Deployer.deployDealRoom(params, await this._signer.getAddress(), this._signer )
+            return dr.addr;
         }
         catch (e) {
             throw Error(`_deployDealRoom: ${e}`)
@@ -447,24 +441,23 @@ export class DealRoomController {
             }
             //Connect to the contract with my signer
             console.log(`prefabContracts.getDealRoomContract(${this._dealRoomAddress}`)//, ${this._signer})`)
-            const contract = await getDealRoomContract(this._dealRoomAddress, this._signer)
+            const contract = await ContractFactory.getDealRoomContract(this._dealRoomAddress, this._signer)
             return contract
         }
         catch (e) {
             throw Error(`Failed to get DealRoom contract: ${e}`)
         }
-
     }
 
     private async _getDealRoomHubContract(): Promise<DealRoomHub> {
         try {
-            console.log("_getDe_getDealRoomHubContractlRoomContract()")
+            console.log("_getDealRoomHubContractlRoomContract()")
             //If the contract hasn't been instantiated yet,
-            if (this._DealRoomHubAddress == undefined) {
+            if (this._dealRoomHubAddress == undefined) {
                 throw Error("Deal room hub not yet created")
             }
             //Connect to the contract with my signer
-            const contract = await getDealRoomHubContract(this._DealRoomHubAddress, this._signer)
+            const contract = await ContractFactory.getDealRoomHubContract(this._dealRoomHubAddress, this._signer)
             return contract
         }
         catch (e) {
@@ -473,18 +466,16 @@ export class DealRoomController {
 
     }
 
-
-
     private async _getDealTokenContract(id: BigNumberish): Promise<Erc20Detailed> {
         console.log("_getDealTokenContract()")
         const deal = await this.getDeal(id)
-        return getErc20Contract(deal.erc20, this._signer)
+        return ContractFactory.getErc20Contract(deal.erc20, this._signer)
     }
 
     private async _getDealAssetContract(id: BigNumberish): Promise<Erc721Detailed> {
         console.log("_getDealAssetContract()")
         const deal = await this.getDeal(id)
-        return getErc721Contract(deal.erc721, this._signer)
+        return ContractFactory.getErc721Contract(deal.erc721, this._signer)
     }
 
     private async _getMainMultisigContract(): Promise<MultiSigWallet> {
@@ -493,7 +484,7 @@ export class DealRoomController {
             if (!this.details) {
                 throw new Error("Room not loaded")
             }
-            this._mainMultiSig = await getMultisigContract(this.details.mainMultiSig, this._signer)
+            this._mainMultiSig = await ContractFactory.getMultisigContract(this.details.mainMultiSig, this._signer)
         } 
         return this._mainMultiSig
     }
@@ -504,7 +495,7 @@ export class DealRoomController {
             if (!this.details) {
                 throw new Error("Room not loaded")
             }
-            this._mainMultiSig = await getMultisigContract(this.details.agentsMultiSig, this._signer)
+            this._mainMultiSig = await ContractFactory.getMultisigContract(this.details.agentsMultiSig, this._signer)
         } 
         return this._mainMultiSig
     }

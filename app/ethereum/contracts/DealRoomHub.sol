@@ -32,7 +32,7 @@ contract DealRoomHub {
         address docApprover;
     }
 
-    function makeRoom(MakeRoomParams memory params) public {
+    function makeRoom(MakeRoomParams memory params) public returns (address) {
         DealRoom room = new DealRoom(params.buyer, params.seller);
         require(params.buyer != address(0), "BUYER_MISSING");
         require(params.seller != address(0), "SELLER_MISSING");
@@ -73,6 +73,7 @@ contract DealRoomHub {
         roomDetailsByAddress[address(room)].mainMultiSig = address(mainMultiSig);
         roomDetailsByAddress[address(room)].agentsMultiSig = address(agentsMultiSig);
 
+        return address(room);
     }
 
     function getUserRooms(address _user) public view returns(address[] memory) {
