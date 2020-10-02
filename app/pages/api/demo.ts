@@ -6,7 +6,7 @@ export default async (req, res) => {
     const response = {
         "erc20": de.erc20.address,
         "erc721": de.erc721.address,
-        "dealRoomDeployer": de.dealRoomDeployer.address,
+        "DealRoomHub": de.DealRoomHub.address,
     }
     res.status(200).json(response)
 }

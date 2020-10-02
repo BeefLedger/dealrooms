@@ -7,7 +7,9 @@ import * as DataStorage from '../services/storage'
 // import { demoEnvironment } from 'ethereum/demo/setup'
 import { useRouter } from 'next/router'
 import { MagicUserMetadata } from 'magic-sdk'
-import { randomInt } from 'lib/random'
+import { DEALROOM_HUB } from 'lib/settings'
+
+
 
 const accounts = [
     {
@@ -99,7 +101,7 @@ export default function NewRoomForm() {
             const provider = getMagicProvider()
             const controller = new DealRoomController(
                 {
-                    id: randomInt(9999999),
+                    dealRoomHubAddress: DEALROOM_HUB,
                     buyer,
                     seller,
                     arbitrator,

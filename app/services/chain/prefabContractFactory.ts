@@ -1,10 +1,10 @@
 import * as Erc20DetailedCompiled  from "../../ethereum/abi/ERC20Detailed.json"
 import * as Erc721DetailedCompiled from "../../ethereum/abi/ERC721Detailed.json"
-import * as DealRoomDeployerCompiled from "../../ethereum/abi/DealRoomDeployer.json"
+import * as DealRoomHubCompiled from "../../ethereum/abi/DealRoomHub.json"
 import * as DealRoomCompiled from "../../ethereum/abi/DealRoom.json"
 import * as MultiSigWalletCompiled from "../../ethereum/abi/MultiSigWallet.json"
 
-import { DealRoomDeployer } from "ethereum/types/DealRoomDeployer"
+import { DealRoomHub } from "ethereum/types/DealRoomHub"
 import { DealRoom } from "../../ethereum/types/DealRoom"
 import { Erc20Detailed } from "../../ethereum/types/Erc20Detailed"
 import { Erc721Detailed } from "../../ethereum/types/Erc721Detailed"
@@ -14,9 +14,9 @@ import { getContract } from "./contractFactory"
 import { Signer } from "ethers"
 
 
-export async function getDealRoomDeployerContract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<DealRoomDeployer> {
+export async function getDealRoomHubContract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<DealRoomHub> {
     //console.log(` getContract(${address}, DealRoomCompiled.abi, ${JSON.stringify(signerIdxOrAddressOrSigner)})`)
-    return getContract<DealRoomDeployer>(address, DealRoomDeployerCompiled.abi, signerIdxOrAddressOrSigner) as Promise<DealRoomDeployer>
+    return getContract<DealRoomHub>(address, DealRoomHubCompiled.abi, signerIdxOrAddressOrSigner) as Promise<DealRoomHub>
 }
 
 export async function getDealRoomContract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<DealRoom> {

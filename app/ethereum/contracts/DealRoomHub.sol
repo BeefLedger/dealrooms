@@ -5,7 +5,7 @@ pragma solidity ^0.5.0;
 import "./DealRoom.sol";
 import "./multisig/MultiSigWallet.sol";
 
-contract DealRoomDeployer {
+contract DealRoomHub {
     address owner;
 
     struct DealRoomDetails {
