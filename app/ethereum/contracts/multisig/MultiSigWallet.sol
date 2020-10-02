@@ -102,7 +102,8 @@ contract MultiSigWallet {
     /// @param _required Number of required confirmations.
     constructor(address[] memory _owners, uint256 _required) public validRequirement(_owners.length, _required) {
         for (uint256 i = 0; i < _owners.length; i++) {
-            require(!isOwner[_owners[i]] && _owners[i] != address(0), "is already owner");
+            require(!isOwner[_owners[i]], "is already owner");
+            require(_owners[i] != address(0), "is null address");
             isOwner[_owners[i]] = true;
         }
         owners = _owners;
@@ -348,4 +349,25 @@ contract MultiSigWallet {
             txn.timestamp
         );
     }
+
+    /*function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
+        if (_i == 0) {
+            return "0";
+        }
+        uint j = _i;
+        uint len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint k = len - 1;
+        while (_i != 0) {
+            bstr[k--] = byte(uint8(48 + _i % 10));
+            _i /= 10;
+        }
+        return string(bstr);
+    }*/
+
+
 }

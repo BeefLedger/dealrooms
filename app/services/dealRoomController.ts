@@ -9,9 +9,33 @@ import { Erc721Detailed } from "../ethereum/types/Erc721Detailed";
 
 import * as DealRoomCompiled from "../ethereum/abi/DealRoom.json"
 import * as Deployer from "../ethereum/deploy/deploy";
-import { getErc20Contract, getErc721Contract, getDealRoomContract, getMultisigContract } from "./chain/prefabContractFactory";
+import { getErc20Contract, getErc721Contract, getDealRoomContract, getMultisigContract, getDealRoomDeployerContract } from "./chain/prefabContractFactory";
+import { DealRoomDeployer } from "ethereum/types/DealRoomDeployer";
 const DEALROOM_DEPLOYER = "0xd876147a5c33c71F1C4EAed0540059fEf888472E"
 
+
+
+export type DealRoomCreateParams = {
+    dealRoomDeployer: string
+    id: number
+    buyer: string
+    seller: string
+    arbitrator: string
+    docApprover: string
+    sensorApprover: string
+}
+
+export type DealRoomDetails = {
+    id: number
+    address: string
+    buyer: string
+    seller: string
+    arbitrator: string
+    docApprover: string
+    sensorApprover: string
+    mainMultiSig: string
+    agentMultiSig: string
+}
 
 export type Deal = {
     id?: BigNumberish
@@ -23,15 +47,6 @@ export type Deal = {
     status?: number
 }
 
-export type DealRoomCreateParams = {
-    id: number,
-    buyer: string,
-    seller: string,
-    arbitrator: string,
-    docApprover: string,
-    sensorApprover: string
-}
-
 export type AssetStatus = {
     assetId: BigNumber,
     owner: string
@@ -40,9 +55,14 @@ export type AssetStatus = {
 export class DealRoomController {
     private _signer: Signer
     private _dealRoomAddress?: string
+    private _dealRoomDeployerAddress?: string
     private _createParams?: DealRoomCreateParams
     private _mainMultiSig?: MultiSigWallet
     private _agentsMultiSig?: MultiSigWallet
+
+    public dealRoomDeployer?: DealRoomDeployer
+    public details?: DealRoomDetails
+
     constructor(dealRoomParams: String | DealRoomCreateParams, signer: Signer) {
         console.log(`dealRoomParams ${dealRoomParams}`)
         this._signer = signer
@@ -60,11 +80,20 @@ export class DealRoomController {
     //--- Public methods ------------------------------------- //
 
     public async init() {
+        // If instantiating with just a dealroom address,
         if (this._dealRoomAddress) {
-            return
-        } else if (this._createParams) {
-            await this._deployDealRoom(DEALROOM_DEPLOYER, this._createParams)
+            // Get deal room deployer address
+            this._dealRoomDeployerAddress = (await this.getDealRoomContract()).creator;
+        } 
+        // If creating a new deal room,
+        else if (this._createParams) {
+            // Deploy one
+            this._dealRoomDeployerAddress = this._createParams.dealRoomDeployer;
+            await this._deployDealRoom(this._createParams)
         }
+        // Ask the deal room deployer for all the details
+        this.dealRoomDeployer = await this._getDealRoomDeployerContract();
+        this.details = await this.dealRoomDeployer.getRoom(this._dealRoomAddress)
     }
 
     public async depositDealTokens(id: BigNumberish, amount: BigNumberish): Promise<ContractReceipt> {
@@ -207,27 +236,67 @@ export class DealRoomController {
 
     // Send a proposal transaction to the agents multisig to send an approval transaction to the main multisig
     public async agentProposeSettleDeal(dealId: BigNumberish, transactionId: BigNumberish): Promise<void> {
-        //const agentsMultisigContract: MultiSigWallet = await this._getAgentsMultisigContract()
-        //const mainMultisigContract: MultiSigWallet = await this._getMainMultisigContract()
-    }
-
-
-    public async proposeSettleDeal(id: BigNumberish): Promise<BigNumberish> {
-        //this._multiSig?.confirmTransaction()
         console.log("proposeSettleDeal()")
+        const agentsMultisigContract: MultiSigWallet = await this._getAgentsMultisigContract()
+        const mainMultisigContract: MultiSigWallet = await this._getMainMultisigContract()
+        
         try {
-            const deal: Deal = await this.getDeal(id)
+            const deal: Deal = await this.getDeal(dealId)
 
             const dealRoomContract: DealRoom = await this.getDealRoomContract()
-            const multisigContract: MultiSigWallet = await this._getMainMultisigContract()
-            const owners = await multisigContract.getOwners()
-            //console.log("owners", JSON.stringify(owners, undefined, 4))
+            const mainMultisigContract: MultiSigWallet = await this._getMainMultisigContract();
+            const owners = await mainMultisigContract.getOwners()
 
             //Make the transaction  
             const encodedData = new ethers.utils.Interface(DealRoomCompiled.abi).functions.settle.encode([deal.id])
 
             //const encodedData = dealRoomContract.interface.encodeFunctionData("settle", [deal.id])
-            const transaction = await multisigContract.submitTransaction(dealRoomContract.address, 0, encodedData)
+            const transaction = await mainMultisigContract.submitTransaction(dealRoomContract.address, 0, encodedData)
+            const receipt = await transaction.wait() 
+            
+            //Obtain the transaction ID created in the multisig
+            try {
+                if (receipt.events) {
+                    const submissionEvents = receipt.events?.filter(evt => evt.event === 'Submission')
+                    if (submissionEvents) { 
+                        if (submissionEvents.length > 0) {
+                            if (submissionEvents.length === 1) {
+                                const transactionId: BigNumberish = (submissionEvents[0]?.args as any).transactionId
+                                return transactionId
+                            }
+                            throw `More than one submission event`
+                        }
+
+                    } 
+                }
+                throw `No submission events`         
+            }
+            catch (e) {
+                //console.error(JSON.stringify(e, undefined, 4))
+                throw `Error getting new transaction ID: ${e}`
+            }
+        }
+        finally {
+            console.log("proposeSettleDeal() complete")
+        }
+    }
+
+
+    public async proposeSettleDeal(id: BigNumberish): Promise<BigNumberish> {
+
+        console.log("proposeSettleDeal()")
+        try {
+            const deal: Deal = await this.getDeal(id)
+
+            const dealRoomContract: DealRoom = await this.getDealRoomContract()
+            const mainMultisigContract: MultiSigWallet = await this._getMainMultisigContract();
+            const owners = await mainMultisigContract.getOwners()
+
+            //Make the transaction  
+            const encodedData = new ethers.utils.Interface(DealRoomCompiled.abi).functions.settle.encode([deal.id])
+
+            //const encodedData = dealRoomContract.interface.encodeFunctionData("settle", [deal.id])
+            const transaction = await mainMultisigContract.submitTransaction(dealRoomContract.address, 0, encodedData)
             const receipt = await transaction.wait() 
             
             //Obtain the transaction ID created in the multisig
@@ -363,21 +432,9 @@ export class DealRoomController {
     */
     //--- Private methods ------------------------------------- //
 
-    /*private async _deployMultiSig(params: DealRoomCreateParams): Promise<MultiSigWallet> {
-        console.log("_deployMultiSig()")
+    private async _deployDealRoom(params: DealRoomCreateParams): Promise<string> {
         try {
-            this._multiSig = await Deployer.deployMultisig([params.buyer, params.seller, params.arbitrator], 2, this._signer)
-
-            return this._multiSig  
-        } catch (e) {
-            throw Error(`_deployMultisig(): ${e}`)
-        }
-    }*/
-
-    private async _deployDealRoom(dealRoomDeployer: string, params: DealRoomCreateParams): Promise<string> {
-        try {
-            console.log(`_deployDealRoom(${dealRoomDeployer}`)
-            const dr = await Deployer.deployDealRoom(dealRoomDeployer, params, await this._signer.getAddress(), this._signer )
+            const dr = await Deployer.deployDealRoom(this.dealRoomDeployer, params, await this._signer.getAddress(), this._signer )
             return this._dealRoomAddress = dr.room;
         }
         catch (e) {
@@ -404,6 +461,25 @@ export class DealRoomController {
 
     }
 
+    private async _getDealRoomDeployerContract(): Promise<DealRoomDeployer> {
+        try {
+            console.log("_getDe_getDealRoomDeployerContractlRoomContract()")
+            //If the contract hasn't been instantiated yet,
+            if (this._dealRoomDeployerAddress == undefined) {
+                throw Error("Deal Room Deployer not yet created")
+            }
+            //Connect to the contract with my signer
+            const contract = await getDealRoomDeployerContract(this._dealRoomDeployerAddress, this._signer)
+            return contract
+        }
+        catch (e) {
+            throw Error(`Failed to get DealRoom contract: ${e}`)
+        }
+
+    }
+
+
+
     private async _getDealTokenContract(id: BigNumberish): Promise<Erc20Detailed> {
         console.log("_getDealTokenContract()")
         const deal = await this.getDeal(id)
@@ -419,9 +495,8 @@ export class DealRoomController {
     private async _getMainMultisigContract(): Promise<MultiSigWallet> {
         console.log("_getMainMultisigContract()")
         if (!this._mainMultiSig) {
-            // The owner of the DealRoom contract is the multisig contract
-            const drContract = await this._getDealRoomContract()
-            const msAddress = await drContract.getOwner();
+            const drd = await this.getDealRoomDeployer();
+            drd.getRoom(this.r)
             this._mainMultiSig = await getMultisigContract(msAddress, this._signer)
         } 
         return this._mainMultiSig

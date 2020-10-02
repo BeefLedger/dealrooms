@@ -7,7 +7,8 @@ import "./ERC20/IERC20.sol";
 /// @title DealRoom -- allows atomic swap for ERC20/ERC721
 /// @author Barry Earsman
 contract DealRoom {
-    address owner;
+    address public creator;
+    address public owner;
     IERC721Full public erc721;
     IERC20 public erc20;
     uint256 public dealCount;
@@ -41,6 +42,7 @@ contract DealRoom {
         seller = _seller;
         dealCount = 0;
         owner = msg.sender;
+        creator = msg.sender;
     }
 
     function makeDeal(
