@@ -83,7 +83,8 @@ export default function DealView(props: DealViewProps) {
             return
         }
         await dealRoomController.depositDealTokens(deal.id, deal.price)
-        setMissingTokens(await dealRoomController.getDealMissingTokens(deal.id))  
+        //setMissingTokens(await dealRoomController.getDealMissingTokens(deal.id)) 
+        await setup() 
     }
 
     async function handleDepositAssets() {
@@ -91,8 +92,9 @@ export default function DealView(props: DealViewProps) {
             return
         }
         await dealRoomController.depositDealAssets(deal.id, deal.assetItems)
-        setMissingAssets(await dealRoomController.getDealMissingAssets(deal.id))
-        setAssetStatus(await dealRoomController.getDealAssetStatus(dealId))
+        // setMissingAssets(await dealRoomController.getDealMissingAssets(deal.id))
+        // setAssetStatus(await dealRoomController.getDealAssetStatus(dealId))
+        await setup()
     }
 
     async function handleWithdrawTokens() {
@@ -100,7 +102,8 @@ export default function DealView(props: DealViewProps) {
             return
         }
         await dealRoomController.withdrawDealTokens(deal.id)
-        setMissingTokens(await dealRoomController.getDealMissingTokens(deal.id))  
+        // setMissingTokens(await dealRoomController.getDealMissingTokens(deal.id))  
+        await setup()
     }
 
     async function handleWithdrawAssets() {
@@ -108,7 +111,8 @@ export default function DealView(props: DealViewProps) {
             return
         }
         await dealRoomController.withdrawDealAssets(deal.id)
-        setMissingAssets(await dealRoomController.getDealMissingAssets(deal.id))
+        // setMissingAssets(await dealRoomController.getDealMissingAssets(deal.id))
+        await setup()
     }
 
     async function handleProposeSettle() {

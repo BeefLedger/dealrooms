@@ -79,9 +79,6 @@ const NewDealForm = (props: NewDealProps) => {
 
     return (
         <>
-            <h3>Arbitrator</h3>
-            <p>TODO: Load from multisig</p>
-
             <h3>Buyer (ERC-20 spender)</h3>
             <p>{buyer}</p>
 
