@@ -58,7 +58,6 @@ export async function deployMultisig(owners: string[], approvalsRequired: number
 export async function deployDealRoomDeployer(owner: string, signer: Signer): Promise<DealRoomDeployer>  {
 
     const contract = await deployContract<DealRoomDeployer>(signer, artifactDealRoomDeployer)
-    await contract.changeOwner(owner);
     console.log(`Deployed DealRoomDeployer contract to ${contract.address}`)
     
     return contract
@@ -73,11 +72,26 @@ export type DeployDealRoomParams = {
     docApprover: string,
 }
 
-export async function deployDealRoom(dealRoomDeployerAddress: string, params: DeployDealRoomParams, owner: string, signer: Signer): Promise<string>  {
+export type DealRoomDetails = {
+    room: string;
+    buyer: string;
+    seller: string;
+    arbitrator: string;
+    sensorApprover: string;
+    docApprover: string;
+    mainMultiSig: string;
+    agentsMultiSig: string;   
+}
+
+export async function deployDealRoom(dealRoomDeployerAddress: string, params: DeployDealRoomParams, owner: string, signer: Signer): Promise<DealRoomDetails>  {
+    console.log(1)
     const dealRoomDeployerContract = await getDealRoomDeployerContract(dealRoomDeployerAddress, signer)
+    console.log(2, JSON.stringify(params, undefined, 4))
     await dealRoomDeployerContract.functions.makeRoom(params)
+    console.log(3)
     const dealRoomDetails = await dealRoomDeployerContract.functions.getRoom(params.id)
-    return dealRoomDetails.id
+    console.log(4)
+    return dealRoomDetails;
 }
 
 export async function deployAll(signer: Signer): Promise<DeployedEnvironment> {

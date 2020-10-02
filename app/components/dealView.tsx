@@ -1,13 +1,11 @@
 
 import { useState, useEffect } from 'react'
 
-import { DealRoomController, Deal, AssetStatus } from '../services/dealService'
+import { DealRoomController, Deal, AssetStatus } from '../services/dealRoomController'
 import { getMagicProvider, getUser } from '../services/userService'
 import { Button, Table } from 'react-bootstrap'
 import { MagicUserMetadata } from 'magic-sdk'
-import DataCard from './dataCard'
 import { BigNumber, BigNumberish } from 'ethers/utils'
-import { ethers } from 'ethers'
 
 export type DealViewProps = { 
     roomId: string;

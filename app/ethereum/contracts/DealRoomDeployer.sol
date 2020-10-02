@@ -6,6 +6,7 @@ import "./DealRoom.sol";
 import "./multisig/MultiSigWallet.sol";
 
 contract DealRoomDeployer {
+    address owner;
 
     struct DealRoomDetails {
         address room;
@@ -34,17 +35,22 @@ contract DealRoomDeployer {
 
     function makeRoom(MakeRoomParams memory params) public roomExists(params.id, false) {
         DealRoom room = new DealRoom(params.buyer, params.seller);
-        
+        require(params.buyer != address(0), "BUYER_MISSING");
+        require(params.seller != address(0), "SELLER_MISSING");
+        require(params.arbitrator != address(0), "ARBITRATOR_MISSING");
+        require(params.sensorApprover != address(0), "SENSOR_APPROVER_MISSING");
+        require(params.docApprover != address(0), "DOC_APPROVER_MISSING");
         address[] memory agents = new address[](3);
         agents[0] = params.buyer;
         agents[1] = params.seller;
-        agents[2] = params.arbitrator;
+        agents[2] = params.arbitrator; 
         MultiSigWallet agentsMultiSig = new MultiSigWallet(agents, 2);
         
+        require(address(agentsMultiSig) != address(0), "AGENTS_MULTISIG_MISSING");
         address[] memory mainSignatories = new address[](3);
-        agents[0] = address(agentsMultiSig);
-        agents[1] = params.sensorApprover;
-        agents[2] = params.docApprover;    
+        mainSignatories[0] = params.sensorApprover;
+        mainSignatories[1] = params.docApprover; 
+        mainSignatories[2] = address(agentsMultiSig);  
         MultiSigWallet mainMultiSig = new MultiSigWallet(mainSignatories, 3);
         
         room.changeOwner(address(mainMultiSig));
@@ -88,6 +94,15 @@ contract DealRoomDeployer {
             //Room must not already exist
             require(roomDetails.room == address(0), "ROOM_EXISTS");
         }
+        _;
+    }
+
+    function changeOwner(address newOwner) public isOwner() {
+        owner = newOwner;
+    }
+
+    modifier isOwner() {
+        require(msg.sender == owner, "ONLY_OWNER");
         _;
     }
 }

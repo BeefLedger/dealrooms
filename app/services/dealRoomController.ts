@@ -9,7 +9,9 @@ import { Erc721Detailed } from "../ethereum/types/Erc721Detailed";
 
 import * as DealRoomCompiled from "../ethereum/abi/DealRoom.json"
 import * as Deployer from "../ethereum/deploy/deploy";
-import { getErc20Contract, getErc721Contract, getMultisigContract, getDealRoomContract } from "./chain/prefabContractFactory";
+import { getErc20Contract, getErc721Contract, getDealRoomContract, getMultisigContract } from "./chain/prefabContractFactory";
+const DEALROOM_DEPLOYER = "0xd876147a5c33c71F1C4EAed0540059fEf888472E"
+
 
 export type Deal = {
     id?: BigNumberish
@@ -56,6 +58,14 @@ export class DealRoomController {
     }
 
     //--- Public methods ------------------------------------- //
+
+    public async init() {
+        if (this._dealRoomAddress) {
+            return
+        } else if (this._createParams) {
+            await this._deployDealRoom(DEALROOM_DEPLOYER, this._createParams)
+        }
+    }
 
     public async depositDealTokens(id: BigNumberish, amount: BigNumberish): Promise<ContractReceipt> {
         console.log("depositDealTokens()")
@@ -366,14 +376,13 @@ export class DealRoomController {
 
     private async _deployDealRoom(dealRoomDeployer: string, params: DealRoomCreateParams): Promise<string> {
         try {
-            console.log("_deployDealRoom()")
-            this._dealRoomAddress = await Deployer.deployDealRoom(dealRoomDeployer, params, await this._signer.getAddress(), this._signer )
-            return this._dealRoomAddress
+            console.log(`_deployDealRoom(${dealRoomDeployer}`)
+            const dr = await Deployer.deployDealRoom(dealRoomDeployer, params, await this._signer.getAddress(), this._signer )
+            return this._dealRoomAddress = dr.room;
         }
         catch (e) {
             throw Error(`_deployDealRoom: ${e}`)
         }
-
     }
 
     // TODO: Cache the contract
@@ -382,15 +391,7 @@ export class DealRoomController {
             console.log("_getDealRoomContract()")
             //If the contract hasn't been instantiated yet,
             if (this._dealRoomAddress == undefined) {
-                console.log("_getDealRoomContract()", 1)
-                //If the contract needs to be created, create it
-                if (this._createParams !== undefined) {
-                    console.log("_getDealRoomContract()", 2)
-                    await this._deployDealRoom(this._createParams)
-                } else {
-                    throw Error("Cannot obtain DealRoom contract because there were no details provided")
-                }
-                console.log("_getDealRoomContract()", 3)
+                throw Error("Deal Room not yet created")
             }
             //Connect to the contract with my signer
             console.log(`prefabContracts.getDealRoomContract(${this._dealRoomAddress}`)//, ${this._signer})`)
@@ -418,17 +419,6 @@ export class DealRoomController {
     private async _getMainMultisigContract(): Promise<MultiSigWallet> {
         console.log("_getMainMultisigContract()")
         if (!this._mainMultiSig) {
-            // The owner of the DealRoom contract is the multisig contract
-            const drContract = await this._getDealRoomContract()
-            const msAddress = await drContract.getOwner();
-            this._mainMultiSig = await getMultisigContract(msAddress, this._signer)
-        } 
-        return this._mainMultiSig
-    }
-
-    private async _getAgentsMultisigContract(): Promise<MultiSigWallet> {
-        console.log("_getAgentsMultisigContract()")
-        if (!this._agentsMultiSig) {
             // The owner of the DealRoom contract is the multisig contract
             const drContract = await this._getDealRoomContract()
             const msAddress = await drContract.getOwner();

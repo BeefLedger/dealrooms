@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 
 import { getUser, getMagicProvider } from '../services/userService'
-import { DealRoomController, Deal } from '../services/dealService'
+import { DealRoomController, Deal } from '../services/dealRoomController'
 import * as DataStorage from '../services/storage'
 
 export type NewDealProps = {

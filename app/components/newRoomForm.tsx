@@ -2,7 +2,7 @@ import { Form, InputGroup, Button } from 'react-bootstrap'
 import { useEffect, useState } from 'react'
 
 import { getUser, getMagicProvider } from '../services/userService'
-import { DealRoomController } from '../services/dealService'
+import { DealRoomController } from '../services/dealRoomController'
 import * as DataStorage from '../services/storage'
 // import { demoEnvironment } from 'ethereum/demo/setup'
 import { useRouter } from 'next/router'
@@ -35,29 +35,34 @@ const accounts = [
         name: "Eric Ellison"
     },
     {
-        address: "0x205742d1d3C6249cb382bA2142eD197d436B326b",
-        name: "Frances Finch"
-    },
-    {
-        address: "0xAa4F52b0985f5Df9a2BF9Bcc3d33A72eeaf36b98",
-        name: "Grant Gallant"
-    },
-    {
-        address: "0x4A7D5F0463e1bCB535062AB8B76d0Ce7224A2841",
-        name: "Herman Hurst"
-    },
-    {
-        address: "0xEca31FcDb5377d9902B3274A0c48f0469375A013",
-        name: "Ian Illingsworth"
-    },
-    
-    {
         address: "0x3c8f64283Da1846252b201bb4ab198cDFeFAAE3c",
         name: "Big Bazza's Bargain Burgers"
     },
     {
         address: "0xd5AE65265C8F8E09C48da86DE16287F5d90c75e5",
         name: "Earsman Farming Solutions"
+    },
+]
+
+const sensors = [
+    {
+        address: "0x205742d1d3C6249cb382bA2142eD197d436B326b",
+        name: "LiveX Sensortone 2000"
+    },
+    {
+        address: "0xAa4F52b0985f5Df9a2BF9Bcc3d33A72eeaf36b98",
+        name: "HeatFeed 2.6"
+    },
+]
+
+const docApprovers = [
+    {
+        address: "0x4A7D5F0463e1bCB535062AB8B76d0Ce7224A2841",
+        name: "Approver 1"
+    },
+    {
+        address: "0xEca31FcDb5377d9902B3274A0c48f0469375A013",
+        name: "Approver 2"
     },
 ]
 
@@ -103,8 +108,8 @@ export default function NewRoomForm() {
                 },
                 provider.getSigner()
             )
-            //TODO: Make an explicit deploy() method
-            const contract = await controller.getDealRoomContract()
+            await controller.init();
+            const contract = await controller.getDealRoomContract();
 
             router.push(`/room/[room_id]`, `/room/${contract.address}`)
 
@@ -120,7 +125,15 @@ export default function NewRoomForm() {
     };
 
     const selectOptions = accounts.map((item)=> {
-        return <option value={item.address}>{item.name} {item.address===user?.publicAddress?"(You)":""}</option>
+        return <option key={item.address} value={item.address}>{item.name} {item.address===user?.publicAddress?"(You)":""}</option>
+    })
+
+    const sensorOptions = sensors.map((item)=> {
+        return <option key={item.address} value={item.address}>{item.name}</option>
+    })
+
+    const docApproverOptions = docApprovers.map((item)=> {
+        return <option key={item.address} value={item.address}>{item.name}</option>
     })
 
     return (
@@ -158,36 +171,31 @@ export default function NewRoomForm() {
                 </Form.Control>
             </InputGroup>
 
-            <Form.Label>Document Approver (TODO: Add addresses)</Form.Label>
+            <Form.Label>Document Approver</Form.Label>
             <InputGroup className="mb-2">
                 <InputGroup.Prepend>
                     <InputGroup.Text>0x</InputGroup.Text>
                 </InputGroup.Prepend>
                 <Form.Control as="select" placeholder="Ethereum address" onChange={(e)=>setDocApprover(e.target.value)}>
-                    <option key={0} value={0}>None</option>
-                    <option key={1} value={1}>Approval Committee A</option>
-                    <option key={2} value={2}>Approval Committee B</option>                
+                    {docApproverOptions}
                 </Form.Control>
             </InputGroup>
 
-            <Form.Label>Sensor Service (TODO: Add addresses)</Form.Label>
+            <Form.Label>Sensor Service</Form.Label>
             <InputGroup className="mb-2">
                 <InputGroup.Prepend>
                     <InputGroup.Text>0x</InputGroup.Text>
                 </InputGroup.Prepend>
                 <Form.Control as="select" placeholder="Ethereum address" onChange={(e)=>setSensorApprover(e.target.value)}>
-                    <option key={0} value={0}>None</option>
-                    <option key={1} value={1}>LiveX Sensortone 2000</option> 
-                    <option key={2} value={2}>HeatFeed 2.6</option>
-                    
+                    {sensorOptions}
                 </Form.Control>
             </InputGroup>
 
             <Button
-                    onClick={handleSubmit}
-                    variant="primary"
+                onClick={handleSubmit}
+                variant="primary"
             >
-                    {loading ? 'Saving...' : 'Save'}
+                {loading ? 'Saving...' : 'Save'}
             </Button>
         </>
     )

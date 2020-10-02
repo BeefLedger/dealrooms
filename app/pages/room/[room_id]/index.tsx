@@ -5,7 +5,7 @@ import { Button, Card } from 'react-bootstrap'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { getMagicProvider } from 'services/userService'
-import { DealRoomController } from 'services/dealService'
+import { DealRoomController } from 'services/dealRoomController'
 
 const RoomPage = () => {
     const router = useRouter()

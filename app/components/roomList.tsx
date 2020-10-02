@@ -2,8 +2,6 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-import { DealRoomController, Deal } from '../services/dealService'
-import { getMagicProvider } from '../services/userService'
 import * as Storage from '../services/storage'
 
 export type RoomListProps = {
