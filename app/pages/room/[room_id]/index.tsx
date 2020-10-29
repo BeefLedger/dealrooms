@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { getMagicProvider } from 'services/userService'
 import { DealRoomController } from 'services/dealRoomController'
+import { DEALROOM_HUB } from 'lib/settings'
 
 const RoomPage = () => {
     const router = useRouter()
@@ -23,7 +24,7 @@ const RoomPage = () => {
             console.log(router.query)
             setRoomId(router.query.room_id as string)
             const provider = getMagicProvider()
-            const _dealRoomController = new DealRoomController(router.query.room_id as string, provider.getSigner())
+            const _dealRoomController = new DealRoomController(DEALROOM_HUB, router.query.room_id as string, provider.getSigner())
             setBuyer(await _dealRoomController.getBuyer())
             setSeller(await _dealRoomController.getSeller())
         }

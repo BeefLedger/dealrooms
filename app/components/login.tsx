@@ -8,7 +8,7 @@ import {
     FormControl,
 } from 'react-bootstrap'
 
-import { getUser, loginUser } from '../services/userService'
+import { getUser, loginUser, logoutUser } from '../services/userService'
 
 function Authenticate() {
     const [email, setEmail] = useState('')
@@ -38,10 +38,24 @@ function Authenticate() {
             await loginUser(email)
             setUserDetails(await getUser())
             setLoading(false)
-            //history.replace('/dashboard');
         }
         catch (err) {
             setError(`Error logging in: ${err}`)
+            console.error(err)
+        }
+    };
+
+    const handleLogout = async (event) => {
+        try {
+            event.preventDefault()
+            setLoading(true)
+
+            await logoutUser()
+            setUserDetails(null)
+            setLoading(false)
+        }
+        catch (err) {
+            setError(`Error logging out: ${err}`)
             console.error(err)
         }
     };
@@ -55,7 +69,14 @@ function Authenticate() {
             <div>
                 <h3>Welcome, {userDetails.email}</h3>
                 <h5>{userDetails.publicAddress}</h5>
-
+                <Button
+                        type="submit"
+                        className="d-block w-100"
+                        variant="primary"
+                        onClick={handleLogout}
+                    >
+                        {loading ? 'Logging out...' : 'Log out'}
+                </Button>
             </div>
         )
     } else {

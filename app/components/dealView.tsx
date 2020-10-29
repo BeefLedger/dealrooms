@@ -6,6 +6,7 @@ import { getMagicProvider, getUser } from '../services/userService'
 import { Button, Table } from 'react-bootstrap'
 import { MagicUserMetadata } from 'magic-sdk'
 import { BigNumber, BigNumberish } from 'ethers/utils'
+import { DEALROOM_HUB } from 'lib/settings'
 
 export type DealViewProps = { 
     roomId: string;
@@ -36,6 +37,9 @@ export default function DealView(props: DealViewProps) {
     const [myTokenBalance, setMyTokenBalance] = useState<BigNumberish>(0)
     const [myAssetBalance, setMyAssetBalance] = useState<BigNumberish>(0)
     const [dealRoomController, setDealRoomController] = useState<DealRoomController>(null)
+    const [agentConfirmations, setAgentConfirmations] = useState(0)
+    const [dealConfirmations, setDealConfirmations] = useState(0)
+
     useEffect(() => {
         setup()
     }, [props.dealId, props.roomId]);
@@ -48,7 +52,8 @@ export default function DealView(props: DealViewProps) {
         //Get data
         const provider = getMagicProvider()
         const _user = await getUser()       
-        const _dealRoomController = new DealRoomController(props.roomId, provider.getSigner())       
+        const _dealRoomController = new DealRoomController(DEALROOM_HUB, props.roomId, provider.getSigner()) 
+        await _dealRoomController.init()      
         const _deal = await _dealRoomController.getDeal(props.dealId)
         const _buyer = await _dealRoomController.getBuyer()
         const _seller = await _dealRoomController.getSeller()
@@ -74,6 +79,8 @@ export default function DealView(props: DealViewProps) {
         setMissingTokens(await _dealRoomController.getDealMissingTokens(_deal.id))  
         setMissingAssets(await _dealRoomController.getDealMissingAssets(_deal.id))
         setAssetStatus(_assetStatus)
+        setAgentConfirmations((new BigNumber(_deal.agentConfirmations)).toNumber())
+        setDealConfirmations((new BigNumber(_deal.dealConfirmations)).toNumber())
     }
 
     async function handleDepositTokens() {
@@ -89,6 +96,7 @@ export default function DealView(props: DealViewProps) {
         if (!dealRoomController) {
             return
         }
+        debugger
         await dealRoomController.depositDealAssets(deal.id, deal.assetItems)
         // setMissingAssets(await dealRoomController.getDealMissingAssets(deal.id))
         // setAssetStatus(await dealRoomController.getDealAssetStatus(dealId))
@@ -105,6 +113,7 @@ export default function DealView(props: DealViewProps) {
     }
 
     async function handleWithdrawAssets() {
+        debugger
         if (!dealRoomController) {
             return
         }
@@ -113,50 +122,87 @@ export default function DealView(props: DealViewProps) {
         await setup()
     }
 
-    async function handleProposeSettle() {
+    async function handleProposeAgentsApprove() {
         if (!dealRoomController) {
             return
         }
         try {
             setLoading(true)
-            await dealRoomController.proposeSettleDeal(deal.id)
+            await dealRoomController.proposeAgentsSettleDeal(deal.id)
         } finally {
             setLoading(false)
         }
     }
 
-    async function handleApproveSettle() {
+    async function handleApproveAgentsApprove() {
         if (!dealRoomController) {
             return
         }
         try {
             setLoading(true)
-            await dealRoomController.approveSettlementProposal(deal.id)
+            await dealRoomController.approveAgentSettlementProposal(deal.id)
         } finally {
             setLoading(false)
         }
     }
 
-    const requestSettleButton = iAmSeller?(
+    async function handleProposeMainSettle() {
+        if (!dealRoomController) {
+            return
+        }
+        try {
+            setLoading(true)
+            await dealRoomController.proposeMainSettleDeal(deal.id)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    async function handleApproveMainSettle() {
+        if (!dealRoomController) {
+            return
+        }
+        try {
+            setLoading(true)
+            await dealRoomController.approveDealSettlementProposal(deal.id)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const requestAgentsApproveButton = 
         <Button
-            onClick={handleProposeSettle}
+            onClick={handleProposeAgentsApprove}
+            variant="primary"
+        >
+            {loading ? 'Sending...' : 'Propose Agents Sign'}
+        </Button>
+
+    const approveAgentsApproveButton = (
+        <Button
+            onClick={handleApproveAgentsApprove}
+            variant="primary"
+        >
+            {loading ? 'Sending...' : 'Approve Agents Sign'}
+        </Button>
+    )
+
+    const requestSettleMainButton = (
+        <Button
+            onClick={handleProposeMainSettle}
             variant="primary"
         >
             {loading ? 'Sending...' : 'Propose Settlement'}
         </Button>
-    ):(
-        <></>
     )
 
-    const approveSettleButton = iAmBuyer?(
+    const approveSettleMainButton = (
         <Button
-            onClick={handleApproveSettle}
+            onClick={handleApproveMainSettle}
             variant="primary"
         >
             {loading ? 'Sending...' : 'Approve Settlement'}
         </Button>
-    ):(
-        <></>
     )
 
     if (deal !== null) {
@@ -185,7 +231,15 @@ export default function DealView(props: DealViewProps) {
                         <tr>
                             <th>Seller {iAmSeller?"(You)":""}</th>
                             <td>{seller}</td>
-                        </tr>    
+                        </tr>  
+                        <tr>
+                            <th>Agent signatures</th>
+                            <td>{new BigNumber(deal.agentConfirmations).toNumber()}/3</td>
+                        </tr>  
+                        <tr>
+                            <th>Deal signatures</th>
+                            <td>{new BigNumber(deal.dealConfirmations).toNumber()}/3</td>
+                        </tr>
                     </tbody>
                     
                 </Table>
@@ -232,6 +286,7 @@ export default function DealView(props: DealViewProps) {
                             <th>Assets pending</th>
                             <td className={missingAssets?"important":"safe"}>{missingAssets}</td>
                         </tr>
+                        
                     </tbody>
 
                 </Table>
@@ -288,8 +343,12 @@ export default function DealView(props: DealViewProps) {
                     {loading ? 'Sending...' : 'Withdraw assets'}
                 </Button>
 
-                {requestSettleButton}
-                {approveSettleButton}
+                {requestSettleMainButton}
+                {approveSettleMainButton}
+
+                {requestAgentsApproveButton}
+                {approveAgentsApproveButton}
+                {}
 
             </>
         )

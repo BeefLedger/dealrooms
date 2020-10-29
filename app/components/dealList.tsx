@@ -4,6 +4,7 @@ import Link from 'next/link'
 
 import { DealRoomController, Deal } from '../services/dealRoomController'
 import { getMagicProvider } from '../services/userService'
+import { DEALROOM_HUB } from 'lib/settings'
 
 export type DealListProps = {
     roomId: string
@@ -26,8 +27,9 @@ export default function DealList(props: DealListProps) {
         }
         console.log("load(): DealList props:", JSON.stringify(props, undefined, 4))
         const provider = getMagicProvider()
-        console.log(`const dealRoomController = new DealRoomController(${roomId}, provider.getSigner())`)
-        const dealRoomController = new DealRoomController(roomId, provider.getSigner())
+        //console.log(`const dealRoomController = new DealRoomController(${roomId}, provider.getSigner())`)
+        const dealRoomController = new DealRoomController(DEALROOM_HUB, roomId, provider.getSigner())
+        await dealRoomController.init()
 
         const _deals: Deal[] = await dealRoomController.getDeals()
         console.log("Loaded deal room", JSON.stringify(_deals, undefined, 4))

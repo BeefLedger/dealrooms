@@ -29,6 +29,7 @@ contract MultiSigWallet {
     mapping (uint256 => mapping (address => bool)) public confirmations;
     mapping (address => bool) public isOwner;
     address[] public owners;
+    uint256[] public transactionIds;
     uint256 public required;
     uint256 public transactionCount;
 
@@ -163,12 +164,12 @@ contract MultiSigWallet {
     }
 
     /// @dev Allows an owner to submit and confirm a transaction.
+    /// @param transactionId Transaction ID to use.
     /// @param destination Transaction target address.
     /// @param value Transaction ether value.
     /// @param data Transaction data payload.
-    /// @return Returns transaction ID.
-    function submitTransaction(address destination, uint256 value, bytes memory data) public returns (uint256 transactionId) {
-        transactionId = addTransaction(destination, value, data);
+    function submitTransaction(uint256 transactionId, address destination, uint256 value, bytes memory data) public {
+        addTransaction(transactionId, destination, value, data);
         confirmTransaction(transactionId);
     }
 
@@ -253,13 +254,12 @@ contract MultiSigWallet {
      * Internal functions
      */
     /// @dev Adds a new transaction to the transaction mapping, if transaction does not exist yet.
+    /// @param transactionId Transaction identifier to use for the new transaction.
     /// @param destination Transaction target address.
     /// @param value Transaction ether value.
     /// @param data Transaction data payload.
-    /// @return Returns transaction ID.
-    function addTransaction(address destination, uint256 value, bytes memory data) internal
-        notNull(destination) returns (uint256 transactionId) {
-        transactionId = transactionCount;
+    function addTransaction(uint256 transactionId, address destination, uint256 value, bytes memory data) internal
+        notNull(destination) {
         transactions[transactionId] = Transaction({
             destination: destination,
             value: value,
@@ -267,6 +267,7 @@ contract MultiSigWallet {
             executed: false,
             timestamp: now
         });
+        transactionIds.push(transactionId);
         transactionCount += 1;
         emit Submission(transactionId);
     }
@@ -349,25 +350,4 @@ contract MultiSigWallet {
             txn.timestamp
         );
     }
-
-    /*function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
-        if (_i == 0) {
-            return "0";
-        }
-        uint j = _i;
-        uint len;
-        while (j != 0) {
-            len++;
-            j /= 10;
-        }
-        bytes memory bstr = new bytes(len);
-        uint k = len - 1;
-        while (_i != 0) {
-            bstr[k--] = byte(uint8(48 + _i % 10));
-            _i /= 10;
-        }
-        return string(bstr);
-    }*/
-
-
 }

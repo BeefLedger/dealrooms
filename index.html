@@ -122,10 +122,10 @@
             const params = {
                 buyer: await signer.getAddress(),
                 seller: sellerAddress,
-                arbitrator: "0x59a665f2b8118Eb17E0b2E588088e0d2C83eE7c3", //Cassandra
+                arbitrator: arbitratorAddress, // "0x59a665f2b8118Eb17E0b2E588088e0d2C83eE7c3", //Cassandra
             }
             //console.log(JSON.stringify(params, undefined, 4))
-            dealRoomController = new DealService.DealService.DealRoomController(params, signer);
+            dealRoomController = new DealService.DealService.DealRoomController(DEALROOM_HUB, params, signer);
             dealRoomContract = await dealRoomController.getDealRoomContract()
             console.log(`Deal Room contract: ${dealRoomContract.address}`)
         }

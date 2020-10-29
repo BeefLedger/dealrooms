@@ -22,6 +22,7 @@
     "test": "test"
   },
   "dependencies": {
+    "abi-decoder": "^2.3.0",
     "bootstrap": "^4.5.2",
     "date-fns": "^2.11.1",
     "ethers": "4",

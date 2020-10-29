@@ -14,7 +14,7 @@ import { BigNumber, bigNumberify } from "ethers/utils"
 
 type Actor = {
     idx: number
-    assets: number[]
+    assets: number[]    cd ....
     tokens: number
     address: string
 }

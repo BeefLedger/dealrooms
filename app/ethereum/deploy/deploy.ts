@@ -24,6 +24,9 @@ export type DeployedEnvironment = {
     erc721?: Erc721Detailed
 }
 
+export const ERROR_NO_EVENT_FOUND = "NO_EVENT_FOUND"
+export const ERROR_MULTIPLE_EVENTS = "ERROR_MULTIPLE_EVENTS"
+
 export async function deployErc20(owner: string, signer: Signer): Promise<Erc20Detailed>  {
     const contract = await deployContract<Erc20Detailed>(signer, artifactErc20, "BEEF Token", "BEEF", 1 )
     if (owner) {
@@ -74,17 +77,37 @@ export type DealRoomCreateParams = {
 }
 
 
+
 export async function deployDealRoom(params: DealRoomCreateParams, owner: string, signer: Signer): Promise<DealRoomDetails>  {
-    console.log(1)
-    const DealRoomHubContract = await getDealRoomHubContract(params.dealRoomHubAddress, signer)
-    console.log(2, JSON.stringify(params, undefined, 4))
-    const tx = await DealRoomHubContract.functions.makeRoom(params)
-    const receipt = await tx.wait()
-    console.log(JSON.stringify(receipt, undefined, 4))
-    // TODO: Find out where the contract address is stashed
-    const dealRoomDetails = await DealRoomHubContract.functions.getRoom("dummy")
-    console.log(4)
-    return dealRoomDetails;
+    try {
+        let roomAddress: string
+        const DealRoomHubContract = await getDealRoomHubContract(params.dealRoomHubAddress, signer)
+        const tx = await DealRoomHubContract.functions.makeRoom(params)
+        const receipt = await tx.wait()
+
+        //TODO: Make this a generic event finder
+        const newRoomEvents = receipt.events?.filter(evt => evt.event === 'NewRoomEvent')
+        if (newRoomEvents) { 
+            if (newRoomEvents.length > 0) {
+                if (newRoomEvents.length === 1) {
+                    roomAddress = (newRoomEvents[0]?.args as any).addr
+                } else {
+                    throw new Error(ERROR_MULTIPLE_EVENTS)
+                }
+            }
+        } else {
+            throw new Error(ERROR_NO_EVENT_FOUND)
+        } 
+
+        // TODO: Find out where the contract address is stashed
+        const dealRoomDetails = await DealRoomHubContract.functions.getRoom(roomAddress)
+        console.log(4)
+        return dealRoomDetails;
+    }
+    catch (e) {
+        console.error("deployDealRoom()", e)
+    }
+
 }
 
 export async function deployAll(signer: Signer): Promise<DeployedEnvironment> {

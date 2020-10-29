@@ -3,6 +3,9 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 import * as Storage from '../services/storage'
+import { DealRoomController } from 'services/dealRoomController'
+import { getMagicProvider } from 'services/userService'
+import { DEALROOM_HUB } from 'lib/settings'
 
 export type RoomListProps = {
     roomId: string
@@ -11,12 +14,17 @@ export type RoomListProps = {
 export default function RoomList() {
     const [rooms, setRooms] = useState<string[]>([])
 
+
     useEffect(() => {
         load()
     }, []);
 
     async function load() {
-        setRooms(Storage.getJson("rooms") as string[] || [])
+        console.log("RoomList.load()")
+        const magic = await getMagicProvider()
+        const signer = magic.getSigner()
+        const rooms = await DealRoomController.getRooms(DEALROOM_HUB, signer)
+        setRooms(rooms)
     }
     if (rooms && rooms.length) {
         return (

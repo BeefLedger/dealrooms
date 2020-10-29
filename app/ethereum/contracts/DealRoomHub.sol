@@ -15,8 +15,8 @@ contract DealRoomHub {
         address arbitrator;
         address sensorApprover;
         address docApprover;
-        address mainMultiSig;
-        address agentsMultiSig;
+        address dealMultiSig;
+        address agentMultiSig;
     }
 
     mapping (address => address[]) private roomsByUser;
@@ -32,6 +32,10 @@ contract DealRoomHub {
         address docApprover;
     }
 
+    event NewRoomEvent(
+        address addr
+    );
+
     function makeRoom(MakeRoomParams memory params) public returns (address) {
         DealRoom room = new DealRoom(params.buyer, params.seller);
         require(params.buyer != address(0), "BUYER_MISSING");
@@ -45,17 +49,17 @@ contract DealRoomHub {
         agents[0] = params.buyer;
         agents[1] = params.seller;
         agents[2] = params.arbitrator; 
-        MultiSigWallet agentsMultiSig = new MultiSigWallet(agents, 2);
+        MultiSigWallet agentMultiSig = new MultiSigWallet(agents, 2);
         
         //Make a Main multisig, 3/3 with Agents, DocApprover, SensorApprover
         address[] memory mainSignatories = new address[](3);
         mainSignatories[0] = params.sensorApprover;
         mainSignatories[1] = params.docApprover; 
-        mainSignatories[2] = address(agentsMultiSig);  
-        MultiSigWallet mainMultiSig = new MultiSigWallet(mainSignatories, 3);
+        mainSignatories[2] = address(agentMultiSig);  
+        MultiSigWallet dealMultiSig = new MultiSigWallet(mainSignatories, 3);
         
         //Give the room to the Main Multisig
-        room.changeOwner(address(mainMultiSig));
+        room.changeOwner(address(dealMultiSig));
 
         //===Record room details (without upsetting the compiler)
         //Add to list
@@ -63,6 +67,10 @@ contract DealRoomHub {
         //Index by buyer and seller
         roomsByUser[params.buyer].push(address(room));
         roomsByUser[params.seller].push(address(room));
+        roomsByUser[params.arbitrator].push(address(room));
+        roomsByUser[params.sensorApprover].push(address(room));
+        roomsByUser[params.docApprover].push(address(room));
+
         //Index by address
         roomDetailsByAddress[address(room)].addr = address(room);
         roomDetailsByAddress[address(room)].buyer = params.buyer;
@@ -70,8 +78,10 @@ contract DealRoomHub {
         roomDetailsByAddress[address(room)].arbitrator = params.arbitrator;        
         roomDetailsByAddress[address(room)].sensorApprover = params.sensorApprover;
         roomDetailsByAddress[address(room)].docApprover = params.docApprover;
-        roomDetailsByAddress[address(room)].mainMultiSig = address(mainMultiSig);
-        roomDetailsByAddress[address(room)].agentsMultiSig = address(agentsMultiSig);
+        roomDetailsByAddress[address(room)].dealMultiSig = address(dealMultiSig);
+        roomDetailsByAddress[address(room)].agentMultiSig = address(agentMultiSig);
+
+        emit NewRoomEvent(address(room));
 
         return address(room);
     }

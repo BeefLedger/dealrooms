@@ -7,44 +7,14 @@ import * as DataStorage from '../services/storage'
 // import { demoEnvironment } from 'ethereum/demo/setup'
 import { useRouter } from 'next/router'
 import { MagicUserMetadata } from 'magic-sdk'
-import { DEALROOM_HUB } from 'lib/settings'
-
-
+import { DEALROOM_HUB, DEFAULT_ACCOUNTS } from 'lib/settings'
 
 const accounts = [
     {
         address: "0x0",
         name: "Select..."
     },
-    {
-        address: "0xB051764B2da6Aa16b9Bc439BcAd1c309Ad7a32CA",
-        name: "Alice Angstrom"
-    },
-    {
-        address: "0x89CFC4E15C4b2fAb2b3029eae40B137B91C2129e",
-        name: "Bruce Bullock"
-    },
-    {
-        address: "0xe2724151E5C905A82aF7AB4476748655E22d72D6",
-        name: "Charlie Crank"
-    },
-    {
-        address: "0x0Ad0a7Aa5395B09435b7cd42Eb254a163a4a5cf9",
-        name: "Daniel Dumphrey"
-    },
-    {
-        address: "0xAd6ed15133884D83d3A6b93006fd34a13d9E5A7E",
-        name: "Eric Ellison"
-    },
-    {
-        address: "0x3c8f64283Da1846252b201bb4ab198cDFeFAAE3c",
-        name: "Big Bazza's Bargain Burgers"
-    },
-    {
-        address: "0xd5AE65265C8F8E09C48da86DE16287F5d90c75e5",
-        name: "Earsman Farming Solutions"
-    },
-]
+].concat(DEFAULT_ACCOUNTS)
 
 const sensors = [
     {
@@ -99,24 +69,22 @@ export default function NewRoomForm() {
                 throw Error('Not signed in')
             }
             const provider = getMagicProvider()
-            const controller = new DealRoomController(
-                {
-                    dealRoomHubAddress: DEALROOM_HUB,
-                    buyer,
-                    seller,
-                    arbitrator,
-                    docApprover,
-                    sensorApprover,
-                },
-                provider.getSigner()
-            )
+            const signer = await provider.getSigner()
+            const roomAddress = await DealRoomController.deployRoom({
+                dealRoomHubAddress: DEALROOM_HUB,
+                buyer,
+                seller,
+                arbitrator,
+                docApprover,
+                sensorApprover,
+            },
+            signer)
+        
+            const controller = new DealRoomController(DEALROOM_HUB, roomAddress, signer)
             await controller.init();
-            const contract = await controller.getDealRoomContract();
+            const dealRoomContract = await controller.getDealRoomContract();
 
-            router.push(`/room/[room_id]`, `/room/${contract.address}`)
-
-            DataStorage.push("rooms", contract.address) //setItem("dealRoomAddress", contract.address)
-            //console.log(`Contract ${contract.address}`)
+            router.push(`/room/[room_id]`, `/room/${dealRoomContract.address}`)
         }
         catch (err) {
             setLoading(false)
@@ -179,7 +147,7 @@ export default function NewRoomForm() {
                     <InputGroup.Text>0x</InputGroup.Text>
                 </InputGroup.Prepend>
                 <Form.Control as="select" placeholder="Ethereum address" onChange={(e)=>setDocApprover(e.target.value)}>
-                    {docApproverOptions}
+                    {selectOptions}
                 </Form.Control>
             </InputGroup>
 
@@ -189,7 +157,7 @@ export default function NewRoomForm() {
                     <InputGroup.Text>0x</InputGroup.Text>
                 </InputGroup.Prepend>
                 <Form.Control as="select" placeholder="Ethereum address" onChange={(e)=>setSensorApprover(e.target.value)}>
-                    {sensorOptions}
+                    {selectOptions}
                 </Form.Control>
             </InputGroup>
 

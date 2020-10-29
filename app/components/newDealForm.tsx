@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import { getUser, getMagicProvider } from '../services/userService'
 import { DealRoomController, Deal } from '../services/dealRoomController'
 import * as DataStorage from '../services/storage'
+import { DEALROOM_HUB, DEFAULT_ERC20, DEFAULT_ERC721 } from 'lib/settings'
 
 export type NewDealProps = {
     roomId: string;
@@ -39,9 +40,12 @@ const NewDealForm = (props: NewDealProps) => {
 
         let dealRoomController: DealRoomController
         const provider = getMagicProvider()
-        dealRoomController = new DealRoomController(props.roomId, provider.getSigner() )
+        dealRoomController = new DealRoomController(DEALROOM_HUB, props.roomId, provider.getSigner() )
         setBuyer(await dealRoomController.getBuyer())
         setSeller(await dealRoomController.getSeller())
+        setErc20(DEFAULT_ERC20)
+        setErc721(DEFAULT_ERC721)
+
     }
 
     async function handleSubmit (e)  {
@@ -55,7 +59,8 @@ const NewDealForm = (props: NewDealProps) => {
             }
             const provider = getMagicProvider()
 
-            const controller = new DealRoomController(props.roomId, provider.getSigner())
+            const controller = new DealRoomController(DEALROOM_HUB, props.roomId, provider.getSigner())
+            await controller.init()
 
             const assetItems = assets.split("\n")
             
@@ -90,7 +95,7 @@ const NewDealForm = (props: NewDealProps) => {
                 <InputGroup.Prepend>
                     <InputGroup.Text>0x</InputGroup.Text>
                 </InputGroup.Prepend>
-                <Form.Control type="text" placeholder="Ethereum address" onChange={(e)=>setErc20(e.target.value)} />
+                <Form.Control type="text" placeholder="Ethereum address" onChange={(e)=>setErc20(e.target.value)} value={erc20} />
             </InputGroup>
 
             <Form.Label>Asset contract (ERC-721)</Form.Label>
@@ -98,7 +103,7 @@ const NewDealForm = (props: NewDealProps) => {
                 <InputGroup.Prepend>
                     <InputGroup.Text>0x</InputGroup.Text>
                 </InputGroup.Prepend>
-                <Form.Control type="text" placeholder="Ethereum address" onChange={(e)=>setErc721(e.target.value)} />
+                <Form.Control type="text" placeholder="Ethereum address" onChange={(e)=>setErc721(e.target.value)} value={erc721} />
             </InputGroup>
 
             <Form.Label>Asset identifiers</Form.Label>
