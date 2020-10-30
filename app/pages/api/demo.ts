@@ -1,4 +1,4 @@
-import { setupDemo } from "../../ethereum/demo/setup"
+import { setupDemo } from "../../lib/demo/setup"
 
 export default async (req, res) => {
     console.log("Setting up demo")

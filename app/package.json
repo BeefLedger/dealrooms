@@ -14,7 +14,7 @@
     "contracts:compile": "cd ethereum && truffle compile",
     "remix": "remixd -s ./contracts --remix-ide https://remix.ethereum.org",
     "testrpc": "ganache-cli --db ./ethereum/db  -m abuse forget cool step task knife bargain vacant lemon manual various pride",
-    "dev": "next dev",
+    "dev": "NODE_OPTIONS='--inspect' next dev",
     "build": "yarn contracts:build && next build",
     "start": "next start"
   },
@@ -22,12 +22,15 @@
     "test": "test"
   },
   "dependencies": {
+    "@types/mongoose": "^5.7.36",
     "abi-decoder": "^2.3.0",
     "bootstrap": "^4.5.2",
+    "config": "^3.3.2",
     "date-fns": "^2.11.1",
     "ethers": "4",
     "gray-matter": "^4.0.2",
     "magic-sdk": "latest",
+    "mongoose": "^5.10.11",
     "next": "9.3.5",
     "react": "16.13.1",
     "react-bootstrap": "^1.3.0",
