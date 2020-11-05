@@ -1,9 +1,10 @@
-import { deployAll, DeployedEnvironment } from "ethereum/deploy/deploy";
-import { sendEth } from "ethereum/utils";
-import { DEFAULT_ACCOUNTS } from "lib/settings";
-import { getProvider } from "services/chain/providerFactory";
+import { deployAll, DeployedEnvironment } from "../../ethereum/deploy/deploy";
+import { sendEth } from "../../ethereum/utils";
+import { ADMIN, DEFAULT_ACCOUNTS } from "../../lib/settings";
+import { getProvider } from "../../services/chain/providerFactory";
 
-const ADMIN = "0xB051764B2da6Aa16b9Bc439BcAd1c309Ad7a32CA"
+//import { UserModel } from "../db/users/users.model";
+//import { connect, disconnect } from "../db/connection"
 
 export let demoEnvironment: DeployedEnvironment
 

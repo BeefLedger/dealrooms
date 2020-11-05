@@ -7,7 +7,7 @@ import {
 	Col
 } from 'react-bootstrap'
 
-const Post = () => {
+const Deal = () => {
     const router = useRouter()
 
     let [dealId, setDealId] = useState(null)
@@ -40,4 +40,4 @@ const Post = () => {
     )
 }
 
-export default Post
+export default Deal

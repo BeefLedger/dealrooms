@@ -1,0 +1,8 @@
+{
+    "db": {
+        "server": "cluster0.uclyr.gcp.mongodb.net",
+        "database": "beefledger",
+        "user": "baz",
+        "password": "Wu5K5SSTaexbskG"
+    }
+}

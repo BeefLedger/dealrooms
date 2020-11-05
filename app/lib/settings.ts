@@ -4,9 +4,13 @@ const ADDRESSES =
     erc721: "0xd0A7B949278904C5814422Da94e902062c093920",
     DealRoomHub: "0x79faf7851dae9E2e858A1a2201003e414B300C14"
 }
+
 export const DEALROOM_HUB = ADDRESSES.DealRoomHub
 export const DEFAULT_ERC20 = ADDRESSES.erc20
 export const DEFAULT_ERC721 = ADDRESSES.erc721
+
+// Admin account for default provider (local chain only)
+export const ADMIN = "0xB051764B2da6Aa16b9Bc439BcAd1c309Ad7a32CA"
 
 export const DEFAULT_ACCOUNTS = [
     {

@@ -1,22 +1,18 @@
 
-import * as artifactDealRoom from "../abi/DealRoom.json"
 import * as artifactDealRoomHub from "../abi/DealRoomHub.json"
 import * as artifactErc20 from "../abi/ERC20Detailed.json"
 import * as artifactErc721 from "../abi/ERC721Detailed.json"
 import * as artifactMultisig from "../abi/MultiSigWallet.json"
-
-import { getSigner } from "../../services/chain/signerFactory"
 
 import { deployContract } from "../../services/chain/contractFactory"
 import { Erc20Detailed } from "../types/Erc20Detailed"
 import { Erc721Detailed } from "../types/Erc721Detailed"
 import { DealRoomHub } from "../types/DealRoomHub"
 import { MultiSigWallet } from "../types/MultiSigWallet"
-import { DealRoom } from "../types/DealRoom"
 
 import { Signer } from "ethers"
-import { getDealRoomHubContract } from "services/chain/prefabContractFactory"
-import { DealRoomDetails } from "services/dealRoomController"
+import { getDealRoomHubContract } from "../../services/chain/prefabContractFactory"
+import { DealRoomDetails } from "../../services/dealRoomController"
 
 export type DeployedEnvironment = {
     DealRoomHub?: DealRoomHub
