@@ -17,7 +17,7 @@ import { DealRoomDetails } from "../../services/dealRoomController"
 export type DeployedEnvironment = {
     DealRoomHub?: DealRoomHub
     erc20?: Erc20Detailed
-    erc721?: Erc721Detailed
+    erc721?: Erc721Detailed 
 }
 
 export const ERROR_NO_EVENT_FOUND = "NO_EVENT_FOUND"

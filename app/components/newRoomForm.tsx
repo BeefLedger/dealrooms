@@ -80,7 +80,7 @@ export default function NewRoomForm() {
             },
             signer)
         
-            const controller = new DealRoomController(DEALROOM_HUB, roomAddress, signer)
+            const controller = new DealRoomController(roomAddress, signer)
             await controller.init();
             const dealRoomContract = await controller.getDealRoomContract();
 

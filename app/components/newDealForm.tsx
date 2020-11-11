@@ -40,7 +40,7 @@ const NewDealForm = (props: NewDealProps) => {
 
         let dealRoomController: DealRoomController
         const provider = getMagicProvider()
-        dealRoomController = new DealRoomController(DEALROOM_HUB, props.roomId, provider.getSigner() )
+        dealRoomController = new DealRoomController(props.roomId, provider.getSigner() )
         setBuyer(await dealRoomController.getBuyer())
         setSeller(await dealRoomController.getSeller())
         setErc20(DEFAULT_ERC20)
@@ -59,7 +59,7 @@ const NewDealForm = (props: NewDealProps) => {
             }
             const provider = getMagicProvider()
 
-            const controller = new DealRoomController(DEALROOM_HUB, props.roomId, provider.getSigner())
+            const controller = new DealRoomController(props.roomId, provider.getSigner())
             await controller.init()
 
             const assetItems = assets.split("\n")

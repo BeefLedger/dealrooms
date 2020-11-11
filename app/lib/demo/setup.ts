@@ -6,27 +6,37 @@ import { getProvider } from "../../services/chain/providerFactory";
 //import { UserModel } from "../db/users/users.model";
 //import { connect, disconnect } from "../db/connection"
 
-export let demoEnvironment: DeployedEnvironment
+const ERC20_DEMO_AMOUNT = 10000
 
-export async function setupDemo(): Promise<DeployedEnvironment> {
-    if (demoEnvironment) return
+export type DemoEnvironment = {
+    deployedEnvironment?: DeployedEnvironment
+    erc20Allocations?: { [address: string]: number }
+    erc721Allocations?: { [address: string]: number[] }   
+}
+
+export const demoEnvironment: DemoEnvironment = {
+    erc721Allocations: {},
+    erc20Allocations: {}
+}
+
+export async function setupDemo(): Promise<DemoEnvironment> {
     
     const provider = await getProvider()
     // Create ERC-721 contract
     // Create ERC-20 contract
     // Create DealRoomHub
-    const de = await deployAll(provider.getSigner(ADMIN))
+    demoEnvironment.deployedEnvironment = await deployAll(provider.getSigner(ADMIN))
     const accounts = DEFAULT_ACCOUNTS //await provider.listAccounts()
     console.log(JSON.stringify(accounts))
     try {
-        await de.erc20.addMinter(ADMIN)
+        await demoEnvironment.deployedEnvironment.erc20.addMinter(ADMIN)
     }
     catch (e) {
         console.warn("Didn't add ERC-20 minter")
     }
 
     try {
-        await de.erc721.addMinter(ADMIN)
+        await demoEnvironment.deployedEnvironment.erc721.addMinter(ADMIN)
     }
     catch (e) {
         console.warn("Didn't add ERC-721 minter")
@@ -35,20 +45,22 @@ export async function setupDemo(): Promise<DeployedEnvironment> {
     let assetId = 0
 
     for (const acct of accounts) {
+        demoEnvironment.erc721Allocations[acct.address] = []
         console.log(`Sending ETH to ${acct.address} ${acct.name}`)
         await sendEth(acct.address, 0.5, provider.getSigner())
         console.log(`Minting coins to ${acct.address} ${acct.name}`)
-        de.erc20.mint(acct.address, 10000)
+        demoEnvironment.deployedEnvironment.erc20.mint(acct.address, ERC20_DEMO_AMOUNT)
+        demoEnvironment.erc20Allocations[acct.address] = ERC20_DEMO_AMOUNT
         for (let i=0; i<5; i++) {
             assetId++
             console.log(`Minting asset ${assetId} to ${acct.address} (${acct.name})`)
-            await de.erc721.mint(acct.address, assetId)
+            await demoEnvironment.deployedEnvironment.erc721.mint(acct.address, assetId)
+            demoEnvironment.erc721Allocations[acct.address].push(assetId)
         }
     }
 
-    console.log(`erc721: ${de.erc721.address}`)
-    console.log(`erc20: ${de.erc20.address}`)
-    demoEnvironment = de;
-    return de;
-}
+    console.log(`erc721: ${demoEnvironment.deployedEnvironment.erc721.address}`)
+    console.log(`erc20: ${demoEnvironment.deployedEnvironment.erc20.address}`)
 
+    return demoEnvironment;
+}
