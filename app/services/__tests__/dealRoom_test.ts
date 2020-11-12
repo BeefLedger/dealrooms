@@ -12,6 +12,8 @@ let dealRoomController: DealRoomController
 let demoEnvironment: DemoEnvironment
 let dealRoomHubAddress: string
 let provider: JsonRpcProvider
+let sellerOriginalCoinBalance: BigNumber
+let buyerOriginalAssetBalance: BigNumber
 
 const MINUTE_MS = 60 * 1000
 
@@ -34,6 +36,8 @@ describe("Deploy dealroom", () => {
         provider = await getProvider()
         demoEnvironment = await setupDemo(TESTRPC_ACCOUNTS[1].address, TESTRPC_ACCOUNTS)
         dealRoomHubAddress = demoEnvironment.deployedEnvironment.DealRoomHub.address
+        sellerOriginalCoinBalance = await demoEnvironment.deployedEnvironment.erc20.balanceOf(ROOM_1.seller)
+        buyerOriginalAssetBalance = await demoEnvironment.deployedEnvironment.erc721.balanceOf(ROOM_1.buyer)
         expect(dealRoomHubAddress).toBeDefined()
         expect(demoEnvironment).toBeDefined()
         expect(demoEnvironment.deployedEnvironment).toBeDefined()
@@ -138,7 +142,7 @@ describe("Deploy dealroom", () => {
         expect(deal1.status).toBe(DealStatus.Open)
     }, 1 * MINUTE_MS)
 
-    it("Docs: signature", async() => {
+    it("Docs: signature settles", async() => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.docApprover))
         await dealRoomController.init()
         await dealRoomController.approveDealSettlementProposal(deal1.id)
@@ -174,5 +178,33 @@ describe("Deploy dealroom", () => {
         expect(failed).toBeTruthy()
         let missingCoins = await dealRoomController.getDealMissingCoins(deal1.id)
         expect(missingCoins).toEqual(0)
+    }, 1 * MINUTE_MS)
+
+    it("Agent: seller can withdraw coins after settlement", async() => {
+        let failed = false
+        dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.seller))
+        await dealRoomController.init()
+        try {
+            await dealRoomController.withdrawDealCoins(deal1.id)
+        } catch (e) {
+            failed = true
+        }
+        expect(failed).toBeFalsy()
+        const newBalance = await demoEnvironment.deployedEnvironment.erc20.balanceOf(ROOM_1.seller)
+        expect(newBalance.toNumber() - sellerOriginalCoinBalance.toNumber()).toEqual(deal1.price.toNumber())
+    }, 1 * MINUTE_MS)
+
+    it("Agent: buyer can withdraw assets after settlement", async() => {
+        let failed = false
+        dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.buyer))
+        await dealRoomController.init()
+        try {
+            await dealRoomController.withdrawDealAssets(deal1.id)
+        } catch (e) {
+            failed = true
+        }
+        expect(failed).toBeFalsy()
+        const newAssetBalance = await demoEnvironment.deployedEnvironment.erc721.balanceOf(ROOM_1.buyer)
+        expect(newAssetBalance.toNumber() - buyerOriginalAssetBalance.toNumber()).toEqual(deal1.assetItems.length)
     }, 1 * MINUTE_MS)
 })
