@@ -19,23 +19,22 @@ export const demoEnvironment: DemoEnvironment = {
     erc20Allocations: {}
 }
 
-export async function setupDemo(accounts: any[] ): Promise<DemoEnvironment> {
-    
+export async function setupDemo(adminAddress, accounts: any[] ): Promise<DemoEnvironment> {
     const provider = await getProvider()
     // Create ERC-721 contract
     // Create ERC-20 contract
     // Create DealRoomHub
-    demoEnvironment.deployedEnvironment = await deployAll(provider.getSigner(ADMIN))
+    demoEnvironment.deployedEnvironment = await deployAll(provider.getSigner(adminAddress))
     console.log(JSON.stringify(accounts))
     try {
-        await demoEnvironment.deployedEnvironment.erc20.addMinter(ADMIN)
+        await demoEnvironment.deployedEnvironment.erc20.addMinter(adminAddress)
     }
     catch (e) {
         console.warn("Didn't add ERC-20 minter")
     }
 
     try {
-        await demoEnvironment.deployedEnvironment.erc721.addMinter(ADMIN)
+        await demoEnvironment.deployedEnvironment.erc721.addMinter(adminAddress)
     }
     catch (e) {
         console.warn("Didn't add ERC-721 minter")
@@ -46,7 +45,7 @@ export async function setupDemo(accounts: any[] ): Promise<DemoEnvironment> {
     for (const acct of accounts) {
         demoEnvironment.erc721Allocations[acct.address] = []
         console.log(`Sending ETH to ${acct.address} ${acct.name}`)
-        await sendEth(acct.address, 0.5, provider.getSigner())
+        await sendEth(acct.address, 0.1, provider.getSigner())
         console.log(`Minting coins to ${acct.address} ${acct.name}`)
         demoEnvironment.deployedEnvironment.erc20.mint(acct.address, ERC20_DEMO_AMOUNT)
         demoEnvironment.erc20Allocations[acct.address] = ERC20_DEMO_AMOUNT

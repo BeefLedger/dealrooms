@@ -115,9 +115,6 @@ export async function deployAll(signer: Signer): Promise<DeployedEnvironment> {
     return result
 }
 
-/*export async function setupDemoEnvironment(): Promise<DeployedEnvironment> {
-    return await setupDemo()
-}*/
 
 
 

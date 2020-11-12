@@ -123,4 +123,3 @@ export function decodeMultiSigTransaction(encoded: string): any {
     //Identify the method and parameters
     return decodeParams(encoded, MultiSigCompiled.abi)   
 }
-
