@@ -11,16 +11,16 @@ import "../introspection/ERC165.sol";
  */
 contract ERC721Enumerable is Context, ERC165, ERC721, IERC721Enumerable {
     // Mapping from owner to list of owned token IDs
-    mapping(address => uint256[]) private _ownedTokens;
+    mapping(address => uint256[]) private _ownedCoins;
 
     // Mapping from token ID to index of the owner tokens list
-    mapping(uint256 => uint256) private _ownedTokensIndex;
+    mapping(uint256 => uint256) private _ownedCoinsIndex;
 
     // Array with all token ids, used for enumeration
-    uint256[] private _allTokens;
+    uint256[] private _allCoins;
 
-    // Mapping from token id to position in the allTokens array
-    mapping(uint256 => uint256) private _allTokensIndex;
+    // Mapping from token id to position in the allCoins array
+    mapping(uint256 => uint256) private _allCoinsIndex;
 
     /*
      *     bytes4(keccak256('totalSupply()')) == 0x18160ddd
@@ -47,7 +47,7 @@ contract ERC721Enumerable is Context, ERC165, ERC721, IERC721Enumerable {
      */
     function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256) {
         require(index < balanceOf(owner), "ERC721Enumerable: owner index out of bounds");
-        return _ownedTokens[owner][index];
+        return _ownedCoins[owner][index];
     }
 
     /**
@@ -55,7 +55,7 @@ contract ERC721Enumerable is Context, ERC165, ERC721, IERC721Enumerable {
      * @return uint256 representing the total amount of tokens
      */
     function totalSupply() public view returns (uint256) {
-        return _allTokens.length;
+        return _allCoins.length;
     }
 
     /**
@@ -66,7 +66,7 @@ contract ERC721Enumerable is Context, ERC165, ERC721, IERC721Enumerable {
      */
     function tokenByIndex(uint256 index) public view returns (uint256) {
         require(index < totalSupply(), "ERC721Enumerable: global index out of bounds");
-        return _allTokens[index];
+        return _allCoins[index];
     }
 
     /**
@@ -95,7 +95,7 @@ contract ERC721Enumerable is Context, ERC165, ERC721, IERC721Enumerable {
 
         _addTokenToOwnerEnumeration(to, tokenId);
 
-        _addTokenToAllTokensEnumeration(tokenId);
+        _addTokenToAllCoinsEnumeration(tokenId);
     }
 
     /**
@@ -109,10 +109,10 @@ contract ERC721Enumerable is Context, ERC165, ERC721, IERC721Enumerable {
         super._burn(owner, tokenId);
 
         _removeTokenFromOwnerEnumeration(owner, tokenId);
-        // Since tokenId will be deleted, we can clear its slot in _ownedTokensIndex to trigger a gas refund
-        _ownedTokensIndex[tokenId] = 0;
+        // Since tokenId will be deleted, we can clear its slot in _ownedCoinsIndex to trigger a gas refund
+        _ownedCoinsIndex[tokenId] = 0;
 
-        _removeTokenFromAllTokensEnumeration(tokenId);
+        _removeTokenFromAllCoinsEnumeration(tokenId);
     }
 
     /**
@@ -121,7 +121,7 @@ contract ERC721Enumerable is Context, ERC165, ERC721, IERC721Enumerable {
      * @return uint256[] List of token IDs owned by the requested address
      */
     function _tokensOfOwner(address owner) internal view returns (uint256[] storage) {
-        return _ownedTokens[owner];
+        return _ownedCoins[owner];
     }
 
     /**
@@ -130,24 +130,24 @@ contract ERC721Enumerable is Context, ERC165, ERC721, IERC721Enumerable {
      * @param tokenId uint256 ID of the token to be added to the tokens list of the given address
      */
     function _addTokenToOwnerEnumeration(address to, uint256 tokenId) private {
-        _ownedTokensIndex[tokenId] = _ownedTokens[to].length;
-        _ownedTokens[to].push(tokenId);
+        _ownedCoinsIndex[tokenId] = _ownedCoins[to].length;
+        _ownedCoins[to].push(tokenId);
     }
 
     /**
      * @dev Private function to add a token to this extension's token tracking data structures.
      * @param tokenId uint256 ID of the token to be added to the tokens list
      */
-    function _addTokenToAllTokensEnumeration(uint256 tokenId) private {
-        _allTokensIndex[tokenId] = _allTokens.length;
-        _allTokens.push(tokenId);
+    function _addTokenToAllCoinsEnumeration(uint256 tokenId) private {
+        _allCoinsIndex[tokenId] = _allCoins.length;
+        _allCoins.push(tokenId);
     }
 
     /**
      * @dev Private function to remove a token from this extension's ownership-tracking data structures. Note that
-     * while the token is not assigned a new owner, the `_ownedTokensIndex` mapping is _not_ updated: this allows for
+     * while the token is not assigned a new owner, the `_ownedCoinsIndex` mapping is _not_ updated: this allows for
      * gas optimizations e.g. when performing a transfer operation (avoiding double writes).
-     * This has O(1) time complexity, but alters the order of the _ownedTokens array.
+     * This has O(1) time complexity, but alters the order of the _ownedCoins array.
      * @param from address representing the previous owner of the given token ID
      * @param tokenId uint256 ID of the token to be removed from the tokens list of the given address
      */
@@ -155,46 +155,46 @@ contract ERC721Enumerable is Context, ERC165, ERC721, IERC721Enumerable {
         // To prevent a gap in from's tokens array, we store the last token in the index of the token to delete, and
         // then delete the last slot (swap and pop).
 
-        uint256 lastTokenIndex = _ownedTokens[from].length.sub(1);
-        uint256 tokenIndex = _ownedTokensIndex[tokenId];
+        uint256 lastTokenIndex = _ownedCoins[from].length.sub(1);
+        uint256 tokenIndex = _ownedCoinsIndex[tokenId];
 
         // When the token to delete is the last token, the swap operation is unnecessary
         if (tokenIndex != lastTokenIndex) {
-            uint256 lastTokenId = _ownedTokens[from][lastTokenIndex];
+            uint256 lastTokenId = _ownedCoins[from][lastTokenIndex];
 
-            _ownedTokens[from][tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
-            _ownedTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
+            _ownedCoins[from][tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
+            _ownedCoinsIndex[lastTokenId] = tokenIndex; // Update the moved token's index
         }
 
         // This also deletes the contents at the last position of the array
-        _ownedTokens[from].length--;
+        _ownedCoins[from].length--;
 
-        // Note that _ownedTokensIndex[tokenId] hasn't been cleared: it still points to the old slot (now occupied by
+        // Note that _ownedCoinsIndex[tokenId] hasn't been cleared: it still points to the old slot (now occupied by
         // lastTokenId, or just over the end of the array if the token was the last one).
     }
 
     /**
      * @dev Private function to remove a token from this extension's token tracking data structures.
-     * This has O(1) time complexity, but alters the order of the _allTokens array.
+     * This has O(1) time complexity, but alters the order of the _allCoins array.
      * @param tokenId uint256 ID of the token to be removed from the tokens list
      */
-    function _removeTokenFromAllTokensEnumeration(uint256 tokenId) private {
+    function _removeTokenFromAllCoinsEnumeration(uint256 tokenId) private {
         // To prevent a gap in the tokens array, we store the last token in the index of the token to delete, and
         // then delete the last slot (swap and pop).
 
-        uint256 lastTokenIndex = _allTokens.length.sub(1);
-        uint256 tokenIndex = _allTokensIndex[tokenId];
+        uint256 lastTokenIndex = _allCoins.length.sub(1);
+        uint256 tokenIndex = _allCoinsIndex[tokenId];
 
         // When the token to delete is the last token, the swap operation is unnecessary. However, since this occurs so
         // rarely (when the last minted token is burnt) that we still do the swap here to avoid the gas cost of adding
         // an 'if' statement (like in _removeTokenFromOwnerEnumeration)
-        uint256 lastTokenId = _allTokens[lastTokenIndex];
+        uint256 lastTokenId = _allCoins[lastTokenIndex];
 
-        _allTokens[tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
-        _allTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
+        _allCoins[tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
+        _allCoinsIndex[lastTokenId] = tokenIndex; // Update the moved token's index
 
         // This also deletes the contents at the last position of the array
-        _allTokens.length--;
-        _allTokensIndex[tokenId] = 0;
+        _allCoins.length--;
+        _allCoinsIndex[tokenId] = 0;
     }
 }

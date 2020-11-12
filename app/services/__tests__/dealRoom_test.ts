@@ -67,7 +67,7 @@ describe("Deploy dealroom", () => {
         expect(deal1.id).toBeDefined()
     }, 1 * MINUTE_MS)
 
-    it("Initial signature from sensor", async() => {
+    it("Sensor: propose settlement", async() => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.sensorApprover))
         await dealRoomController.init()
         await dealRoomController.proposeMainSettleDeal(deal1.id)
@@ -100,21 +100,21 @@ describe("Deploy dealroom", () => {
     it("Agent: buyer deposit coins", async() => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.buyer))
         await dealRoomController.init()
-        await dealRoomController.depositDealTokens(deal1.id, deal1.price)
-        const missingCoins = await dealRoomController.getDealMissingTokens(deal1.id)
+        await dealRoomController.depositDealCoins(deal1.id, deal1.price)
+        const missingCoins = await dealRoomController.getDealMissingCoins(deal1.id)
         expect(missingCoins).toEqual(0)
     }, 1 * MINUTE_MS)
 
     it("Agent: buyer withdraw coins before settlement", async() => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.buyer))
         await dealRoomController.init()
-        await dealRoomController.withdrawDealTokens(deal1.id)
-        let missingCoins = await dealRoomController.getDealMissingTokens(deal1.id)
+        await dealRoomController.withdrawDealCoins(deal1.id)
+        let missingCoins = await dealRoomController.getDealMissingCoins(deal1.id)
         expect(missingCoins).toEqual(deal1.price.toNumber())
 
         //Now put them back
-        await dealRoomController.depositDealTokens(deal1.id, deal1.price)
-        missingCoins = await dealRoomController.getDealMissingTokens(deal1.id)
+        await dealRoomController.depositDealCoins(deal1.id, deal1.price)
+        missingCoins = await dealRoomController.getDealMissingCoins(deal1.id)
         expect(missingCoins).toEqual(0)
     }, 1 * MINUTE_MS)
 
@@ -167,12 +167,12 @@ describe("Deploy dealroom", () => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.buyer))
         await dealRoomController.init()
         try {
-            await dealRoomController.withdrawDealTokens(deal1.id)
+            await dealRoomController.withdrawDealCoins(deal1.id)
         } catch (e) {
             failed = true
         }
         expect(failed).toBeTruthy()
-        let missingCoins = await dealRoomController.getDealMissingTokens(deal1.id)
+        let missingCoins = await dealRoomController.getDealMissingCoins(deal1.id)
         expect(missingCoins).toEqual(0)
     }, 1 * MINUTE_MS)
 })

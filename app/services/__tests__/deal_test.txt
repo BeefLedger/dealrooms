@@ -222,9 +222,9 @@ describe("Reset", () => {
         });
         it("Check GREEN deal status", async () => {
             const missingAssets = await dealRoom.missingDealAssets(Deals.GREEN_1.id)
-            const missingTokens = await dealRoom.missingDealTokens(Deals.GREEN_1.id)
+            const missingCoins = await dealRoom.missingDealCoins(Deals.GREEN_1.id)
             expect(bnEquals(missingAssets, Deals.GREEN_1.assets.length)).toBeTruthy()
-            expect(bnEquals(missingTokens, Deals.GREEN_1.price)).toBeTruthy()
+            expect(bnEquals(missingCoins, Deals.GREEN_1.price)).toBeTruthy()
         });
         it("Deposit tokens", async () => {
             if (!de.erc20 || !dealRoom) {
@@ -233,8 +233,8 @@ describe("Reset", () => {
             // Get connection to ERC20 for the Buyer's signer
             let buyerErc20: Erc20Detailed = await getErc20Contract(de.erc20?.address, Deals.GREEN_1.room.buyer.address)
             await buyerErc20.transfer(dealRoom.address, Deals.GREEN_1.price)
-            const missingTokens = await dealRoom.missingDealTokens(Deals.GREEN_1.id)
-            expect(bnEquals(missingTokens, 0)).toBeTruthy()
+            const missingCoins = await dealRoom.missingDealCoins(Deals.GREEN_1.id)
+            expect(bnEquals(missingCoins, 0)).toBeTruthy()
         });
         it("Deposit assets", async () => {
             if (!de.erc721 || !dealRoom) {
@@ -277,7 +277,7 @@ describe("Reset", () => {
             let sellerDealRoom: DealRoom = await getDealRoomContract(dealRoom.address, Deals.GREEN_1.room.seller.address)
 
             let oldBalance = await sellerErc20.balanceOf(Deals.GREEN_1.room.seller.address);
-            await sellerDealRoom.withdrawDealTokens(Deals.GREEN_1.id)
+            await sellerDealRoom.withdrawDealCoins(Deals.GREEN_1.id)
             let newBalance = await de.erc20.balanceOf(Deals.GREEN_1.room.seller.address);
             expect(bnEquals(newBalance, bnToNumber(oldBalance) + Deals.GREEN_1.price)).toBeTruthy();
 

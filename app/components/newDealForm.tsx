@@ -109,7 +109,7 @@ const NewDealForm = (props: NewDealProps) => {
             <Form.Label>Asset identifiers</Form.Label>
             <Form.Control as="textarea" rows={6} onChange={(e)=>setAssets(e.target.value)} />
 
-            <Form.Label>Price in tokens</Form.Label>
+            <Form.Label>Price in coins</Form.Label>
             <Form.Control type="text" onChange={(e)=>setPrice(e.target.value)} />
             <Button
                     onClick={handleSubmit}

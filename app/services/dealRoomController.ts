@@ -112,8 +112,8 @@ export class DealRoomController {
         this.details = await this._getRoomDetails()
     }
 
-    public async depositDealTokens(id: BigNumberish, amount: BigNumberish): Promise<ContractReceipt> {
-        console.log("depositDealTokens()")
+    public async depositDealCoins(id: BigNumberish, amount: BigNumberish): Promise<ContractReceipt> {
+        console.log("depositDealCoins()")
         const tokenContract = await this._getDealTokenContract(id)
         const roomContract = await this._getDealRoomContract()
         return (await tokenContract.transfer(roomContract.address, amount)).wait()
@@ -257,9 +257,9 @@ export class DealRoomController {
         return results
     }
 
-    public async getDealMissingTokens(id: BigNumberish): Promise<number> {
+    public async getDealMissingCoins(id: BigNumberish): Promise<number> {
         const contract = await this._getDealRoomContract()
-        return (await contract.missingDealTokens(id)).toNumber()
+        return (await contract.missingDealCoins(id)).toNumber()
     }
 
     // Send a new transaction to the main multisig to settle the deal
@@ -331,9 +331,9 @@ export class DealRoomController {
         return receipt
     }
 
-    public async withdrawDealTokens(dealId: BigNumberish): Promise<ContractReceipt> {
+    public async withdrawDealCoins(dealId: BigNumberish): Promise<ContractReceipt> {
         const contract = await this._getDealRoomContract()
-        const transaction = await contract.withdrawDealTokens(dealId)
+        const transaction = await contract.withdrawDealCoins(dealId)
         const receipt = await transaction.wait() 
         return receipt      
     }

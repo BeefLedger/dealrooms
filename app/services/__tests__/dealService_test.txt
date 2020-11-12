@@ -189,9 +189,9 @@ describe("Reset", () => {
         })
         it("Check GREEN deal status", async () => {
             const missingAssets = await dealRoomController.getDealMissingAssets(Deals.GREEN_1.id)
-            const missingTokens = await dealRoomController.getDealMissingTokens(Deals.GREEN_1.id)
+            const missingCoins = await dealRoomController.getDealMissingCoins(Deals.GREEN_1.id)
             expect(bnEquals(missingAssets, Deals.GREEN_1.assets.length)).toBeTruthy()
-            expect(bnEquals(missingTokens, Deals.GREEN_1.price)).toBeTruthy()
+            expect(bnEquals(missingCoins, Deals.GREEN_1.price)).toBeTruthy()
         })
         it("Deposit tokens", async () => {
 
@@ -199,11 +199,11 @@ describe("Reset", () => {
             dealRoomController = new DealRoomController(await dealRoomController.getAddress(), await getSigner(Deals.GREEN_1.room.buyer.address))
 
             // Buyer transfers tokens to the Deal Room contract
-            await dealRoomController.depositDealTokens(Deals.GREEN_1.id, Deals.GREEN_1.price)
+            await dealRoomController.depositDealCoins(Deals.GREEN_1.id, Deals.GREEN_1.price)
 
             // Now there are no missing tokens
-            const missingTokens = await dealRoomController.getDealMissingTokens(Deals.GREEN_1.id)
-            expect(bnEquals(missingTokens, 0)).toBeTruthy()
+            const missingCoins = await dealRoomController.getDealMissingCoins(Deals.GREEN_1.id)
+            expect(bnEquals(missingCoins, 0)).toBeTruthy()
         })
         it("Deposit assets", async () => {
             // Get connection to DealRoom for the Seller's signer
@@ -230,8 +230,8 @@ describe("Reset", () => {
             // console.log(JSON.stringify(deal, undefined, 4))
             const missingAssets = (await dealRoomController.getDealMissingAssets(Deals.GREEN_1.id))
             expect(bnEquals(missingAssets, 0)).toBeTruthy()
-            const missingTokens = await dealRoomController.getDealMissingTokens(Deals.GREEN_1.id)
-            expect(bnEquals(missingTokens, 0)).toBeTruthy()
+            const missingCoins = await dealRoomController.getDealMissingCoins(Deals.GREEN_1.id)
+            expect(bnEquals(missingCoins, 0)).toBeTruthy()
         })
         it("Settle deal", async() => {
             // Seller signs multisig
@@ -256,7 +256,7 @@ describe("Reset", () => {
             dealRoomController = new DealRoomController(await dealRoomController.getAddress(), await getSigner(Deals.GREEN_1.room.seller.address))
 
             let oldBalance = await de.erc20.balanceOf(Deals.GREEN_1.room.seller.address)
-            await dealRoomController.withdrawDealTokens(Deals.GREEN_1.id)
+            await dealRoomController.withdrawDealCoins(Deals.GREEN_1.id)
             let newBalance = await de.erc20.balanceOf(Deals.GREEN_1.room.seller.address)
             expect(bnEquals(newBalance, bnToNumber(oldBalance) + Deals.GREEN_1.price)).toBeTruthy()
 

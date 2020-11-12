@@ -84,10 +84,10 @@ contract DealRoom {
         return (deal.assetItems.length - assetDeposits);
     }
 
-    function missingDealTokens(
+    function missingDealCoins(
         uint256 id
     ) public view dealExists(id, true) returns (uint256) {
-        //Check that all the tokens have been deposited, and return the amount missing
+        //Check that all the coins have been deposited, and return the amount missing
         Deal memory deal = getDeal(id);
         if (deal.status == DealStatus.Settled) {
             return 0;
@@ -108,7 +108,7 @@ contract DealRoom {
 
         uint missing = missingDealAssets(id);
         require(missingDealAssets(id) == 0, "DEAL_ASSETS_MISSING");
-        require(missingDealTokens(id) == 0, "DEAL_TOKENS_MISSING");
+        require(missingDealCoins(id) == 0, "DEAL_TOKENS_MISSING");
         //emit Debug("Missing deal assets", missing);
         _setDealStatus(id, DealStatus.Settled);
     }
@@ -139,7 +139,7 @@ contract DealRoom {
         }
     }
 
-    function withdrawDealTokens(uint256 dealId) public dealExists(dealId, true) {
+    function withdrawDealCoins(uint256 dealId) public dealExists(dealId, true) {
         Deal memory deal = getDeal(dealId);
 
         if (deal.status == DealStatus.Settled) {

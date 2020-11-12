@@ -33,7 +33,7 @@ export default function DealView(props: DealViewProps) {
     const [dealStatus, setDealStatus] = useState("")
     const [assetStatus, setAssetStatus] = useState<AssetStatus[]>([])
     const [missingAssets, setMissingAssets] = useState(-1)
-    const [missingTokens, setMissingTokens] = useState(-1)
+    const [missingCoins, setMissingCoins] = useState(-1)
     const [myTokenBalance, setMyTokenBalance] = useState<BigNumberish>(0)
     const [myAssetBalance, setMyAssetBalance] = useState<BigNumberish>(0)
     const [dealRoomController, setDealRoomController] = useState<DealRoomController>(null)
@@ -76,19 +76,19 @@ export default function DealView(props: DealViewProps) {
         setIAmBuyer(_user.publicAddress === _buyer) 
         setMyTokenBalance((new BigNumber(_myTokenBalance)).toNumber())
         setMyAssetBalance((new BigNumber(_myAssetBalance)).toNumber())
-        setMissingTokens(await _dealRoomController.getDealMissingTokens(_deal.id))  
+        setMissingCoins(await _dealRoomController.getDealMissingCoins(_deal.id))  
         setMissingAssets(await _dealRoomController.getDealMissingAssets(_deal.id))
         setAssetStatus(_assetStatus)
         setAgentConfirmations((new BigNumber(_deal.agentConfirmations)).toNumber())
         setDealConfirmations((new BigNumber(_deal.dealConfirmations)).toNumber())
     }
 
-    async function handleDepositTokens() {
+    async function handleDepositCoins() {
         if (!dealRoomController) {
             return
         }
-        await dealRoomController.depositDealTokens(deal.id, deal.price)
-        //setMissingTokens(await dealRoomController.getDealMissingTokens(deal.id)) 
+        await dealRoomController.depositDealCoins(deal.id, deal.price)
+        //setMissingCoins(await dealRoomController.getDealMissingCoins(deal.id)) 
         await setup() 
     }
 
@@ -103,12 +103,12 @@ export default function DealView(props: DealViewProps) {
         await setup()
     }
 
-    async function handleWithdrawTokens() {
+    async function handleWithdrawCoins() {
         if (!dealRoomController) {
             return
         }
-        await dealRoomController.withdrawDealTokens(deal.id)
-        // setMissingTokens(await dealRoomController.getDealMissingTokens(deal.id))  
+        await dealRoomController.withdrawDealCoins(deal.id)
+        // setMissingCoins(await dealRoomController.getDealMissingCoins(deal.id))  
         await setup()
     }
 
@@ -244,7 +244,7 @@ export default function DealView(props: DealViewProps) {
                     
                 </Table>
 
-                <h4>Tokens</h4>
+                <h4>Coins</h4>
                 <Table bordered size="sm">
                     <tbody>
                         <tr>
@@ -252,16 +252,16 @@ export default function DealView(props: DealViewProps) {
                             <td>{myTokenBalance}</td>
                         </tr>
                         <tr>
-                            <th>Price in tokens</th>
+                            <th>Price in coins</th>
                             <td>{deal.price.toNumber()}</td>
                         </tr>
                         <tr>
-                            <th>Tokens deposited</th>
-                            <td>{deal.price.toNumber()-missingTokens}</td>
+                            <th>Coins deposited</th>
+                            <td>{deal.price.toNumber()-missingCoins}</td>
                         </tr>
                         <tr>
-                            <th>Tokens pending</th>
-                            <td className={missingTokens?"important":"safe"}>{missingTokens}</td>
+                            <th>Coins pending</th>
+                            <td className={missingCoins?"important":"safe"}>{missingCoins}</td>
                         </tr>
                     </tbody>
                     
@@ -323,17 +323,17 @@ export default function DealView(props: DealViewProps) {
                 </Button>
                 
                 <Button
-                    onClick={handleDepositTokens}
+                    onClick={handleDepositCoins}
                     variant="primary"
                 >
-                    {loading ? 'Sending...' : 'Deposit tokens'}
+                    {loading ? 'Sending...' : 'Deposit coins'}
                 </Button>
 
                 <Button
-                    onClick={handleWithdrawTokens}
+                    onClick={handleWithdrawCoins}
                     variant="primary"
                 >
-                    {loading ? 'Sending...' : 'Withdraw tokens'}
+                    {loading ? 'Sending...' : 'Withdraw coins'}
                 </Button>
 
                 <Button

@@ -28,7 +28,7 @@ contract ERC721 is Context, ERC165, IERC721 {
     mapping (uint256 => address) private _tokenApprovals;
 
     // Mapping from owner to number of owned token
-    mapping (address => Counters.Counter) private _ownedTokensCount;
+    mapping (address => Counters.Counter) private _ownedCoinsCount;
 
     // Mapping from owner to operator approvals
     mapping (address => mapping (address => bool)) private _operatorApprovals;
@@ -62,7 +62,7 @@ contract ERC721 is Context, ERC165, IERC721 {
     function balanceOf(address owner) public view returns (uint256) {
         require(owner != address(0), "ERC721: balance query for the zero address");
 
-        return _ownedTokensCount[owner].current();
+        return _ownedCoinsCount[owner].current();
     }
 
     /**
@@ -260,7 +260,7 @@ contract ERC721 is Context, ERC165, IERC721 {
         require(!_exists(tokenId), "ERC721: token already minted");
 
         _tokenOwner[tokenId] = to;
-        _ownedTokensCount[to].increment();
+        _ownedCoinsCount[to].increment();
 
         emit Transfer(address(0), to, tokenId);
     }
@@ -277,7 +277,7 @@ contract ERC721 is Context, ERC165, IERC721 {
 
         _clearApproval(tokenId);
 
-        _ownedTokensCount[owner].decrement();
+        _ownedCoinsCount[owner].decrement();
         _tokenOwner[tokenId] = address(0);
 
         emit Transfer(owner, address(0), tokenId);
@@ -305,8 +305,8 @@ contract ERC721 is Context, ERC165, IERC721 {
 
         _clearApproval(tokenId);
 
-        _ownedTokensCount[from].decrement();
-        _ownedTokensCount[to].increment();
+        _ownedCoinsCount[from].decrement();
+        _ownedCoinsCount[to].increment();
 
         _tokenOwner[tokenId] = to;
 
