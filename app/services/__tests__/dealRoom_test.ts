@@ -3,7 +3,7 @@ import { JsonRpcProvider } from "ethers/providers"
 
 import { ADMIN, TESTRPC_ACCOUNTS } from "../../lib/settings"
 import { getProvider } from "../../services/chain/providerFactory"
-import { Deal, DealRoomController } from "../../services/dealRoomController"
+import { Deal, DealRoomController, DealStatus } from "../../services/dealRoomController"
 import { DealRoomCreateParams } from "../../ethereum/deploy/deploy"
 import { DemoEnvironment, setupDemo } from "../../lib/demo/setup"
 import { BigNumber } from "ethers/utils"
@@ -63,6 +63,7 @@ describe("Deploy dealroom", () => {
             assetItems: demoEnvironment.erc721Allocations[ROOM_1.seller]
         }
         deal1 = await dealRoomController.makeDeal(deal1)
+        expect(deal1.status).toBe(DealStatus.Open)
         expect(deal1.id).toBeDefined()
     }, 1 * MINUTE_MS)
 
@@ -72,6 +73,7 @@ describe("Deploy dealroom", () => {
         await dealRoomController.proposeMainSettleDeal(deal1.id)
         deal1 = await dealRoomController.getDeal(deal1.id)
         expect(deal1.dealConfirmations).toMatchObject(new BigNumber(1))
+        expect(deal1.status).toBe(DealStatus.Open)
     }, 1 * MINUTE_MS)
 
     it("Agent: seller deposit assets", async() => {
@@ -123,16 +125,54 @@ describe("Deploy dealroom", () => {
         deal1 = await dealRoomController.getDeal(deal1.id)
         expect(deal1.agentConfirmations).toMatchObject(new BigNumber(1))
         expect(deal1.dealConfirmations).toMatchObject(new BigNumber(1))
+        expect(deal1.status).toBe(DealStatus.Open)
     }, 1 * MINUTE_MS)
-
-
 
     it("Agent: buyer signature", async() => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.buyer))
         await dealRoomController.init()
-        await dealRoomController.proposeAgentsSettleDeal(deal1.id)
+        await dealRoomController.approveAgentSettlementProposal(deal1.id)
         deal1 = await dealRoomController.getDeal(deal1.id)
         expect(deal1.agentConfirmations).toMatchObject(new BigNumber(2))
-        expect(deal1.dealConfirmations).toMatchObject(new BigNumber(1))
+        expect(deal1.dealConfirmations).toMatchObject(new BigNumber(2))
+        expect(deal1.status).toBe(DealStatus.Open)
+    }, 1 * MINUTE_MS)
+
+    it("Docs: signature", async() => {
+        dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.docApprover))
+        await dealRoomController.init()
+        await dealRoomController.approveDealSettlementProposal(deal1.id)
+        deal1 = await dealRoomController.getDeal(deal1.id)
+        expect(deal1.agentConfirmations).toMatchObject(new BigNumber(2))
+        expect(deal1.dealConfirmations).toMatchObject(new BigNumber(3))
+        expect(deal1.status).toBe(DealStatus.Settled)
+    }, 1 * MINUTE_MS)
+
+    it("Agent: seller cannot withdraw assets after settlement", async() => {
+        let failed = false
+        dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.seller))
+        await dealRoomController.init()
+        try {
+            await dealRoomController.withdrawDealAssets(deal1.id)
+        } catch (e) {
+            failed = true
+        }
+        expect(failed).toBeTruthy()
+        let missingAssets = await dealRoomController.getDealMissingAssets(deal1.id)
+        expect(missingAssets).toEqual(0)
+    }, 1 * MINUTE_MS)
+
+    it("Agent: buyer cannot withdraw coins after settlement", async() => {
+        let failed = false
+        dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.buyer))
+        await dealRoomController.init()
+        try {
+            await dealRoomController.withdrawDealTokens(deal1.id)
+        } catch (e) {
+            failed = true
+        }
+        expect(failed).toBeTruthy()
+        let missingCoins = await dealRoomController.getDealMissingTokens(deal1.id)
+        expect(missingCoins).toEqual(0)
     }, 1 * MINUTE_MS)
 })

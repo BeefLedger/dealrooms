@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 import "./ERC721/IERC721Full.sol";
 import "./ERC20/IERC20.sol";
 
+
 /// @title DealRoom -- allows atomic swap for ERC20/ERC721
 /// @author Barry Earsman
 contract DealRoom {

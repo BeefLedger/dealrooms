@@ -45,6 +45,13 @@ export type AssetStatus = {
     owner: string
 }
 
+export const DealStatus = {
+    Unknown: 0,
+    Open: 1,
+    Cancelled: 2,
+    Settled: 3       
+}
+
 //TODO: Make a DealRoomFactory to simplify constructor for DealRoomController
 //DealRoomController's constructor would only take an address.
 //DealRoomFactory(DealRoomCreateParams) {}
