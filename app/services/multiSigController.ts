@@ -116,7 +116,6 @@ export const decodeParams = (data, abi) => {
 
 export function decodeDealRoomTransaction(encoded: string): any {
     //Identify the method and parameters
-    debugger
     return decodeParams(encoded, DealRoomCompiled.abi)   
 }
 

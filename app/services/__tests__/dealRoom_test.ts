@@ -1,7 +1,7 @@
 
 import { JsonRpcProvider } from "ethers/providers"
 
-import { ADMIN, DEFAULT_ACCOUNTS } from "../../lib/settings"
+import { ADMIN, TESTRPC_ACCOUNTS } from "../../lib/settings"
 import { getProvider } from "../../services/chain/providerFactory"
 import { Deal, DealRoomController } from "../../services/dealRoomController"
 import { DealRoomCreateParams } from "../../ethereum/deploy/deploy"
@@ -14,11 +14,11 @@ let dealRoomHubAddress: string
 let provider: JsonRpcProvider
 
 const ROOM_1 = {
-    buyer: DEFAULT_ACCOUNTS[5].address,
-    seller: DEFAULT_ACCOUNTS[6].address,
-    arbitrator: DEFAULT_ACCOUNTS[0].address,
-    docApprover: DEFAULT_ACCOUNTS[3].address,
-    sensorApprover: DEFAULT_ACCOUNTS[2].address,
+    buyer: TESTRPC_ACCOUNTS[5].address,
+    seller: TESTRPC_ACCOUNTS[6].address,
+    arbitrator: TESTRPC_ACCOUNTS[0].address,
+    docApprover: TESTRPC_ACCOUNTS[3].address,
+    sensorApprover: TESTRPC_ACCOUNTS[2].address,
 }
 
 let deal1: Deal
@@ -31,7 +31,7 @@ describe("Deploy dealroom", () => {
     beforeAll(async ()=> {
         //Deploy ERC20 and ERC720, mint some and assign them
         provider = await getProvider()
-        demoEnvironment = await setupDemo()
+        demoEnvironment = await setupDemo(TESTRPC_ACCOUNTS)
         dealRoomHubAddress = demoEnvironment.deployedEnvironment.DealRoomHub.address
         expect(dealRoomHubAddress).toBeDefined()
         expect(demoEnvironment).toBeDefined()
@@ -50,8 +50,9 @@ describe("Deploy dealroom", () => {
     })
 
     it("Makes a deal", async () => {
-        dealRoomController = new DealRoomController(roomAddress, provider.getSigner(ROOM_1.seller))
+        dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.seller))
         expect(dealRoomController).toBeDefined()
+        await dealRoomController.init()
         deal1 = {
             erc20: demoEnvironment.deployedEnvironment.erc20.address,
             erc721: demoEnvironment.deployedEnvironment.erc721.address,

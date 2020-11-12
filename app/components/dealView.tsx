@@ -52,7 +52,7 @@ export default function DealView(props: DealViewProps) {
         //Get data
         const provider = getMagicProvider()
         const _user = await getUser()       
-        const _dealRoomController = new DealRoomController(props.roomId, provider.getSigner()) 
+        const _dealRoomController = new DealRoomController(DEALROOM_HUB, props.roomId, provider.getSigner()) 
         await _dealRoomController.init()      
         const _deal = await _dealRoomController.getDeal(props.dealId)
         const _buyer = await _dealRoomController.getBuyer()

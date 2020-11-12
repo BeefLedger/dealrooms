@@ -7,14 +7,14 @@ import * as DataStorage from '../services/storage'
 // import { demoEnvironment } from 'ethereum/demo/setup'
 import { useRouter } from 'next/router'
 import { MagicUserMetadata } from 'magic-sdk'
-import { DEALROOM_HUB, DEFAULT_ACCOUNTS } from 'lib/settings'
+import { DEALROOM_HUB, DEMO_ACCOUNTS } from 'lib/settings'
 
 const accounts = [
     {
         address: "0x0",
         name: "Select..."
     },
-].concat(DEFAULT_ACCOUNTS)
+].concat(DEMO_ACCOUNTS)
 
 const sensors = [
     {
@@ -80,7 +80,7 @@ export default function NewRoomForm() {
             },
             signer)
         
-            const controller = new DealRoomController(roomAddress, signer)
+            const controller = new DealRoomController(DEALROOM_HUB, roomAddress, signer)
             await controller.init();
             const dealRoomContract = await controller.getDealRoomContract();
 

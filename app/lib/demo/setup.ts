@@ -1,6 +1,6 @@
 import { deployAll, DeployedEnvironment } from "../../ethereum/deploy/deploy";
 import { sendEth } from "../../ethereum/utils";
-import { ADMIN, DEFAULT_ACCOUNTS } from "../../lib/settings";
+import { ADMIN } from "../../lib/settings";
 import { getProvider } from "../../services/chain/providerFactory";
 
 //import { UserModel } from "../db/users/users.model";
@@ -19,14 +19,13 @@ export const demoEnvironment: DemoEnvironment = {
     erc20Allocations: {}
 }
 
-export async function setupDemo(): Promise<DemoEnvironment> {
+export async function setupDemo(accounts: any[] ): Promise<DemoEnvironment> {
     
     const provider = await getProvider()
     // Create ERC-721 contract
     // Create ERC-20 contract
     // Create DealRoomHub
     demoEnvironment.deployedEnvironment = await deployAll(provider.getSigner(ADMIN))
-    const accounts = DEFAULT_ACCOUNTS //await provider.listAccounts()
     console.log(JSON.stringify(accounts))
     try {
         await demoEnvironment.deployedEnvironment.erc20.addMinter(ADMIN)

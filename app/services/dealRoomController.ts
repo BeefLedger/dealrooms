@@ -52,7 +52,7 @@ export type AssetStatus = {
 export class DealRoomController {
     private _signer: Signer
     private _dealRoomAddress?: string
-    // private _dealRoomHubAddress?: string
+    private _dealRoomHubAddress?: string
     public dealRoomContract?: DealRoom
     public dealRoomHubContract?: DealRoomHub
     public details?: DealRoomDetails
@@ -87,9 +87,9 @@ export class DealRoomController {
     //--- Instance methods
 
     // Constructor - Make an object for controlling a specific Deal
-    constructor(dealRoomAddress: string, signer: Signer) {
+    constructor(hubAddress: string, dealRoomAddress: string, signer: Signer) {
         this._signer = signer
-        //this._dealRoomHubAddress = hubAddress
+        this._dealRoomHubAddress = hubAddress
         this._dealRoomAddress = dealRoomAddress
     }
 
@@ -101,7 +101,7 @@ export class DealRoomController {
         } 
 
         // Ask the deal room hub for all the details
-        // this.dealRoomHubContract = await this._getDealRoomHubContract();
+        this.dealRoomHubContract = await this._getDealRoomHubContract();
         this.details = await this._getRoomDetails()
     }
 
@@ -358,7 +358,7 @@ export class DealRoomController {
         }
     }
 
-    /* private async _getDealRoomHubContract(): Promise<DealRoomHub> {
+    private async _getDealRoomHubContract(): Promise<DealRoomHub> {
         try {
             console.log("_getDealRoomHubContractlRoomContract()")
             //If the contract hasn't been instantiated yet,
@@ -373,7 +373,7 @@ export class DealRoomController {
             throw Error(`Failed to get DealRoom contract: ${e}`)
         }
 
-    } */
+    }
 
     private async _getDealTokenContract(id: BigNumberish): Promise<Erc20Detailed> {
         console.log("_getDealTokenContract()")
