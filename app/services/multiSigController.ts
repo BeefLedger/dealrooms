@@ -11,17 +11,22 @@ export const ERROR_MULTIPLE_SUBMISSION_EVENTS = "MULTIPLE_SUBMISSION_EVENTS"
 export const ERROR_NO_SUBMISSION_FOUND = "NO_SUBMISSION_FOUND"
 export const ERROR_NOT_MULTISIG_OWNER = "NOT_MULTISIG_OWNER"
 
+export type MultiSigTransaction = {
+    id: number;
+    data: string;
+    destination: string;
+    executed: boolean;
+    timestamp: ethers.utils.BigNumber;
+}
 
 export async function submitMultiSigTransaction(
     multiSigContract: MultiSigWallet,
-    transactionId: BigNumberish,
     destinationAddress: string,
     abi: any,
     fnName: string,
     params: any[],
     signer: Signer
-): Promise<boolean> {
-    debugger
+): Promise<BigNumberish> {
     //Check that the signer is an owner
     if (!(await isaMemberOfMultiSig(await signer.getAddress(), multiSigContract))) {
         throw new Error(ERROR_NOT_MULTISIG_OWNER)
@@ -30,13 +35,13 @@ export async function submitMultiSigTransaction(
     //Make the transaction 
     console.log(`Making transaction for fn ${fnName}, params ${JSON.stringify(params, undefined, 4)}` ) 
     const encodedData = new ethers.utils.Interface(abi).functions[fnName].encode(params)
-    const transaction = await multiSigContract.submitTransaction(transactionId, destinationAddress, 0, encodedData)
+    const transaction = await multiSigContract.submitTransaction(destinationAddress, 0, encodedData)
     const receipt = await transaction.wait() 
                 
     //Obtain the transaction ID created in the multisig
     try {
         if (receipt.events) {
-            return (getSubmittedTransactionId(receipt) == transactionId)
+            return (getSubmittedTransactionId(receipt))
         }
         throw `No submission events`         
     }
@@ -53,7 +58,7 @@ export async function submitDuplexMultiSigApproval(
     secondaryMultiSigContract: MultiSigWallet,
     secondaryTransactionId: BigNumberish,
     signer: Signer
-): Promise<boolean> {
+): Promise<BigNumberish> {
 
     //Check that the signer is an owner
     if (!(await isaMemberOfMultiSig(await signer.getAddress(), primaryMultiSigContract))) {
@@ -62,7 +67,6 @@ export async function submitDuplexMultiSigApproval(
 
     return submitMultiSigTransaction(
         primaryMultiSigContract,
-        transactionId,
         secondaryMultiSigContract.address,
         MultiSigCompiled.abi,
         "confirmTransaction",
@@ -95,6 +99,22 @@ export function getSubmittedTransactionId(receipt: ContractReceipt): BigNumberis
         }
     } 
     throw new Error(ERROR_NO_SUBMISSION_FOUND)
+}
+
+export async function getTransactions(multiSigContract: MultiSigWallet): Promise<MultiSigTransaction[]> {
+    const transactions: MultiSigTransaction[] = []
+    const transactionCount = (await multiSigContract.transactionCount()).toNumber()
+    for (let i = 0; i < transactionCount; i ++ ) {
+        const transaction: { 0: string; 1: string; 2: boolean; 3: ethers.utils.BigNumber } = await multiSigContract.getTransaction(i)
+        transactions.push({
+            id: i,
+            data: transaction[0],
+            destination: transaction[1],
+            executed: transaction[2],
+            timestamp: transaction[3],
+        })
+    }
+    return transactions
 }
 
 

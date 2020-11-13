@@ -76,7 +76,7 @@ describe("Deploy dealroom", () => {
         await dealRoomController.init()
         await dealRoomController.proposeMainSettleDeal(deal1.id)
         deal1 = await dealRoomController.getDeal(deal1.id)
-        expect(deal1.dealConfirmations).toMatchObject(new BigNumber(1))
+        expect(deal1.dealConfirmations).toEqual(1)
         expect(deal1.status).toBe(DealStatus.Open)
     }, 1 * MINUTE_MS)
 
@@ -127,8 +127,8 @@ describe("Deploy dealroom", () => {
         await dealRoomController.init()
         await dealRoomController.proposeAgentsSettleDeal(deal1.id)
         deal1 = await dealRoomController.getDeal(deal1.id)
-        expect(deal1.agentConfirmations).toMatchObject(new BigNumber(1))
-        expect(deal1.dealConfirmations).toMatchObject(new BigNumber(1))
+        expect(deal1.agentConfirmations).toEqual(1)
+        expect(deal1.dealConfirmations).toEqual(1)
         expect(deal1.status).toBe(DealStatus.Open)
     }, 1 * MINUTE_MS)
 
@@ -137,8 +137,8 @@ describe("Deploy dealroom", () => {
         await dealRoomController.init()
         await dealRoomController.approveAgentSettlementProposal(deal1.id)
         deal1 = await dealRoomController.getDeal(deal1.id)
-        expect(deal1.agentConfirmations).toMatchObject(new BigNumber(2))
-        expect(deal1.dealConfirmations).toMatchObject(new BigNumber(2))
+        expect(deal1.agentConfirmations).toEqual(2)
+        expect(deal1.dealConfirmations).toEqual(2)
         expect(deal1.status).toBe(DealStatus.Open)
     }, 1 * MINUTE_MS)
 
@@ -147,8 +147,8 @@ describe("Deploy dealroom", () => {
         await dealRoomController.init()
         await dealRoomController.approveDealSettlementProposal(deal1.id)
         deal1 = await dealRoomController.getDeal(deal1.id)
-        expect(deal1.agentConfirmations).toMatchObject(new BigNumber(2))
-        expect(deal1.dealConfirmations).toMatchObject(new BigNumber(3))
+        expect(deal1.agentConfirmations).toEqual(2)
+        expect(deal1.dealConfirmations).toEqual(3)
         expect(deal1.status).toBe(DealStatus.Settled)
     }, 1 * MINUTE_MS)
 
