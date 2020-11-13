@@ -54,7 +54,6 @@ export async function submitMultiSigTransaction(
 //Submit a multisig transaction that approves a transaction in a second multisig
 export async function submitDuplexMultiSigApproval(
     primaryMultiSigContract: MultiSigWallet,
-    transactionId: BigNumberish,
     secondaryMultiSigContract: MultiSigWallet,
     secondaryTransactionId: BigNumberish,
     signer: Signer

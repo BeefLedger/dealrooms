@@ -69,16 +69,25 @@ describe("Deploy dealroom", () => {
         deal1 = await dealRoomController.makeDeal(deal1)
         expect(deal1.status).toBe(DealStatus.Open)
         expect(deal1.id).toBeDefined()
-    }, 1 * MINUTE_MS)
+    }, 10 * MINUTE_MS)
+
+    it("Sensor: propose dummy settlement without effect", async() => {
+        dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.sensorApprover))
+        await dealRoomController.init()
+        await dealRoomController.proposeMainSettleDeal(new BigNumber(1000))
+        deal1 = await dealRoomController.getDeal(deal1.id)
+        expect(deal1.dealConfirmations).toEqual(0)
+        expect(deal1.status).toBe(DealStatus.Open)
+    }, 10 * MINUTE_MS)
 
     it("Sensor: propose settlement", async() => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.sensorApprover))
         await dealRoomController.init()
-        await dealRoomController.proposeMainSettleDeal(deal1.id)
+        const transactionId = await dealRoomController.proposeMainSettleDeal(deal1.id)
         deal1 = await dealRoomController.getDeal(deal1.id)
         expect(deal1.dealConfirmations).toEqual(1)
         expect(deal1.status).toBe(DealStatus.Open)
-    }, 1 * MINUTE_MS)
+    }, 10 * MINUTE_MS)
 
     it("Agent: seller deposit assets", async() => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.seller))
@@ -206,5 +215,5 @@ describe("Deploy dealroom", () => {
         expect(failed).toBeFalsy()
         const newAssetBalance = await demoEnvironment.deployedEnvironment.erc721.balanceOf(ROOM_1.buyer)
         expect(newAssetBalance.toNumber() - buyerOriginalAssetBalance.toNumber()).toEqual(deal1.assetItems.length)
-    }, 1 * MINUTE_MS)
+    }, 1 * MINUTE_MS)  
 })
