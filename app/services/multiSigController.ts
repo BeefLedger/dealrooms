@@ -9,6 +9,7 @@ import * as DealRoomCompiled from "../ethereum/abi/DealRoom.json"
 
 export const ERROR_MULTIPLE_SUBMISSION_EVENTS = "MULTIPLE_SUBMISSION_EVENTS"
 export const ERROR_NO_SUBMISSION_FOUND = "NO_SUBMISSION_FOUND"
+export const ERROR_NO_SUBMISSION_HASH_FOUND = "ERROR_NO_SUBMISSION_HASH_FOUND"
 export const ERROR_NOT_MULTISIG_OWNER = "NOT_MULTISIG_OWNER"
 
 export type MultiSigTransaction = {
@@ -38,7 +39,8 @@ export async function submitMultiSigTransaction(
     }
     
     //Make the transaction 
-    console.log(`Making transaction for fn ${fnName}, params ${JSON.stringify(params, undefined, 4)}` ) 
+    const signerAddress = await signer.getAddress()
+    console.log(`Signer ${signerAddress}: Making transaction for fn ${fnName}, params ${JSON.stringify(params, undefined, 4)}` ) 
     const encodedData = new ethers.utils.Interface(abi).functions[fnName].encode(params)
     const transaction = await multiSigContract.submitTransaction(destinationAddress, 0, encodedData)
     const receipt = await transaction.wait() 
@@ -98,7 +100,6 @@ export async function submitDuplexMultiSigProposal(
     if (!(await isaMemberOfMultiSig(await signer.getAddress(), primaryMultiSigContract))) {
         throw new Error(ERROR_NOT_MULTISIG_OWNER)
     }
-
     const encodedData = new ethers.utils.Interface(destinationAbi).functions[destinationFnName].encode(destinationParams)
     return submitMultiSigTransaction(
         primaryMultiSigContract,
@@ -122,21 +123,28 @@ export async function approveMultiSigTransaction(multiSigContract: MultiSigHashe
 }
 
 export function getSubmissionId(receipt: ContractReceipt): BigNumberish {
-    const submissionEvents = receipt.events?.filter(evt => evt.event === 'Submission')
+    const submissionEvents = receipt.events?.filter(evt => evt.event === 'Submission' || evt.event === 'Confirmation')
     if (submissionEvents) { 
         if (submissionEvents.length > 0) {
-            if (submissionEvents.length === 1) {
-                const transactionId: BigNumberish = (submissionEvents[0]?.args as any).transactionId
-                return transactionId
-            }
-            throw new Error(ERROR_MULTIPLE_SUBMISSION_EVENTS)
+            const transactionId: BigNumberish = (submissionEvents[0]?.args as any).transactionId
+            return transactionId          
         }
     } 
+    /*const confirmationEvents = receipt.events?.filter(evt => evt.event === 'Confirmation')
+    if (confirmationEvents) { 
+        if (confirmationEvents.length > 0) {
+            if (confirmationEvents.length === 1) {
+                const transactionId: BigNumberish = (confirmationEvents[0]?.args as any).transactionId
+                return transactionId
+            }
+            throw new Error(ERROR_MULTIPLE_CONFIRMATION_EVENTS)
+        }
+    }*/
     throw new Error(ERROR_NO_SUBMISSION_FOUND)
 }
 
 export function getSubmissionHash(receipt: ContractReceipt): string {
-    const submissionEvents = receipt.events?.filter(evt => evt.event === 'SubmissionHash')
+    const submissionEvents = receipt.events?.filter(evt => evt.event === 'SubmissionHashed')
     if (submissionEvents) { 
         if (submissionEvents.length > 0) {
             if (submissionEvents.length === 1) {
@@ -146,7 +154,7 @@ export function getSubmissionHash(receipt: ContractReceipt): string {
             throw new Error(ERROR_MULTIPLE_SUBMISSION_EVENTS)
         }
     } 
-    throw new Error(ERROR_NO_SUBMISSION_FOUND)
+    throw new Error(ERROR_NO_SUBMISSION_HASH_FOUND)
 }
 
 export async function getTransactions(multiSigContract: MultiSigHashed): Promise<MultiSigTransaction[]> {
@@ -167,7 +175,7 @@ export async function getTransactions(multiSigContract: MultiSigHashed): Promise
 
 export async function isaMemberOfMultiSig(addr: string, multiSigContract: MultiSigHashed): Promise<boolean> {
     const owners = await multiSigContract.getOwners()
-    console.log(`isaMemberOfMultiSig(${addr}): ${JSON.stringify(owners, undefined, 4)}`)
+    // console.log(`isaMemberOfMultiSig(${addr}): ${JSON.stringify(owners, undefined, 4)}`)
     if (!owners.includes(addr)) {
         const owners = await multiSigContract.getOwners()
         return false

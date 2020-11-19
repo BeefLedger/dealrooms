@@ -10,16 +10,6 @@ contract MultiSigHashed is MultiSigWallet {
         bool hashed;
     }
 
-    /*
-     *  Storage
-     */
-    /*mapping (uint256 => Transaction) public transactions;
-    mapping (uint256 => mapping (address => bool)) public confirmations;
-    mapping (address => bool) public isOwner;
-    address[] public owners;
-    uint256 public required;
-    uint256 public transactionCount;*/
-
     event SubmissionHashed(bytes32 indexed hash);
 
     mapping (bytes32 => TransactionHash) public transactionHashes;
@@ -36,17 +26,18 @@ contract MultiSigHashed is MultiSigWallet {
         return existingTransactionHash.id;
     }
 
-    function addTransaction(address destination, uint256 value, bytes memory data) internal 
+    function submitTransaction(address destination, uint256 value, bytes memory data) public 
         notNull(destination) returns (uint256 transactionId)
     {
         bytes32 hash = _toHash(destination, value, data);
         TransactionHash memory existingTransactionHash  = transactionHashes[hash];
         if (existingTransactionHash.hashed) {
             super.confirmTransaction(existingTransactionHash.id);
+            emit SubmissionHashed(hash);
             return existingTransactionHash.id;
         } 
         else {
-            transactionId = super.addTransaction(destination, value, data);
+            transactionId = super.submitTransaction(destination, value, data);
             transactionHashes[hash] = TransactionHash(
                 transactionId,
                 true

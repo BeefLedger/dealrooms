@@ -214,7 +214,7 @@ export class DealRoomController {
             if (agentTransaction) {
                 agentConfirmations = (await agentMultiSigContract.getConfirmationCount(agentTransaction.id)).toNumber()
             }  
-            console.log("dealTransaction", JSON.stringify(dealTransaction, undefined, 4))
+            // console.log("dealTransaction", JSON.stringify(dealTransaction, undefined, 4))
 
             // Return the Deal
             return {
