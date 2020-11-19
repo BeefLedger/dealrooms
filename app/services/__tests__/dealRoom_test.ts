@@ -154,7 +154,7 @@ describe("Deploy dealroom", () => {
     it("Docs: signature settles", async() => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.docApprover))
         await dealRoomController.init()
-        await dealRoomController.approveDealSettlementProposal(deal1.id)
+        await dealRoomController.proposeMainSettleDeal(deal1.id)
         deal1 = await dealRoomController.getDeal(deal1.id)
         expect(deal1.agentConfirmations).toEqual(2)
         expect(deal1.dealConfirmations).toEqual(3)

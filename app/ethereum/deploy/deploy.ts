@@ -2,13 +2,13 @@
 import * as artifactDealRoomHub from "../abi/DealRoomHub.json"
 import * as artifactErc20 from "../abi/ERC20Detailed.json"
 import * as artifactErc721 from "../abi/ERC721Detailed.json"
-import * as artifactMultisig from "../abi/MultiSigWallet.json"
+import * as artifactMultisig from "../abi/MultiSigHashed.json"
 
 import { deployContract } from "../../services/chain/contractFactory"
 import { Erc20Detailed } from "../types/Erc20Detailed"
 import { Erc721Detailed } from "../types/Erc721Detailed"
 import { DealRoomHub } from "../types/DealRoomHub"
-import { MultiSigWallet } from "../types/MultiSigWallet"
+import { MultiSigHashed } from "../types/MultiSigHashed"
 
 import { Signer } from "ethers"
 import { getDealRoomHubContract } from "../../services/chain/prefabContractFactory"
@@ -43,10 +43,10 @@ export async function deployErc721(owner: string, signer: Signer): Promise<Erc72
     return contract
 }
 
-export async function deployMultisig(owners: string[], approvalsRequired: number, signer: Signer): Promise<MultiSigWallet>  {
+export async function deployMultisig(owners: string[], approvalsRequired: number, signer: Signer): Promise<MultiSigHashed>  {
     try {
         console.log(`deployMultisig()`)
-        const contract = await deployContract<MultiSigWallet>(signer, artifactMultisig, owners, approvalsRequired)
+        const contract = await deployContract<MultiSigHashed>(signer, artifactMultisig, owners, approvalsRequired)
         console.log(`Deployed Multisig contract to ${contract.address}`)
         return contract
     } catch (e) {
@@ -77,6 +77,7 @@ export type DealRoomCreateParams = {
 export async function deployDealRoom(params: DealRoomCreateParams, owner: string, signer: Signer): Promise<DealRoomDetails>  {
     try {
         let roomAddress: string
+        debugger
         const DealRoomHubContract = await getDealRoomHubContract(params.dealRoomHubAddress, signer)
         const tx = await DealRoomHubContract.functions.makeRoom(params)
         const receipt = await tx.wait()

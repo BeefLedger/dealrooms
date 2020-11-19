@@ -4,7 +4,7 @@
 import { getProvider } from "../chain/providerFactory"
 
 import { bnEquals, bnToNumber } from "../../lib/bigNumbers"
-import { MultiSigWallet } from "../../ethereum/types/MultiSigWallet"
+import { MultiSigHashed } from "../../ethereum/types/MultiSigHashed"
 import { DealRoom } from "../../ethereum/types/DealRoom"
 import { DealRoomController, DealRoomCreateParams, Deal } from "../dealRoomController"
 import { getSigner } from "../chain/signerFactory"

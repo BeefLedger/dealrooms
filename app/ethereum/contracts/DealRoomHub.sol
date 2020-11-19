@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 pragma solidity ^0.5.0;
 
 import "./DealRoom.sol";
-import "./multisig/MultiSigWallet.sol";
+import "./multisig/MultiSigHashed.sol";
 
 contract DealRoomHub {
     address owner;
@@ -49,14 +49,14 @@ contract DealRoomHub {
         agents[0] = params.buyer;
         agents[1] = params.seller;
         agents[2] = params.arbitrator; 
-        MultiSigWallet agentMultiSig = new MultiSigWallet(agents, 2);
+        MultiSigHashed agentMultiSig = new MultiSigHashed(agents, 2);
         
         //Make a Main multisig, 3/3 with Agents, DocApprover, SensorApprover
         address[] memory mainSignatories = new address[](3);
         mainSignatories[0] = params.sensorApprover;
         mainSignatories[1] = params.docApprover; 
         mainSignatories[2] = address(agentMultiSig);  
-        MultiSigWallet dealMultiSig = new MultiSigWallet(mainSignatories, 3);
+        MultiSigHashed dealMultiSig = new MultiSigHashed(mainSignatories, 3);
         
         //Give the room to the Main Multisig
         room.changeOwner(address(dealMultiSig));

@@ -16,7 +16,7 @@ import { Erc721Detailed } from "../types/Erc721Detailed";
 
 import { bnEquals, bnToNumber } from "../util/bigNumbers";
 import { DealRoomDeployer } from "../types/DealRoomDeployer";
-import { MultiSigWallet } from "../types/MultiSigWallet";
+import { MultiSigHashed } from "../types/MultiSigHashed";
 
 //const buyerIdx = 2;
 //const sellerIdx = 3;

@@ -96,7 +96,6 @@ export default function DealView(props: DealViewProps) {
         if (!dealRoomController) {
             return
         }
-        debugger
         await dealRoomController.depositDealAssets(deal.id, deal.assetItems)
         // setMissingAssets(await dealRoomController.getDealMissingAssets(deal.id))
         // setAssetStatus(await dealRoomController.getDealAssetStatus(dealId))
@@ -113,7 +112,6 @@ export default function DealView(props: DealViewProps) {
     }
 
     async function handleWithdrawAssets() {
-        debugger
         if (!dealRoomController) {
             return
         }
@@ -134,18 +132,6 @@ export default function DealView(props: DealViewProps) {
         }
     }
 
-    async function handleApproveAgentsApprove() {
-        if (!dealRoomController) {
-            return
-        }
-        try {
-            setLoading(true)
-            await dealRoomController.approveAgentSettlementProposal(deal.id)
-        } finally {
-            setLoading(false)
-        }
-    }
-
     async function handleProposeMainSettle() {
         if (!dealRoomController) {
             return
@@ -153,18 +139,6 @@ export default function DealView(props: DealViewProps) {
         try {
             setLoading(true)
             await dealRoomController.proposeMainSettleDeal(deal.id)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    async function handleApproveMainSettle() {
-        if (!dealRoomController) {
-            return
-        }
-        try {
-            setLoading(true)
-            await dealRoomController.approveDealSettlementProposal(deal.id)
         } finally {
             setLoading(false)
         }
@@ -180,7 +154,7 @@ export default function DealView(props: DealViewProps) {
 
     const approveAgentsApproveButton = (
         <Button
-            onClick={handleApproveAgentsApprove}
+            onClick={handleProposeAgentsApprove}
             variant="primary"
         >
             {loading ? 'Sending...' : 'Approve Agents Sign'}
@@ -198,7 +172,7 @@ export default function DealView(props: DealViewProps) {
 
     const approveSettleMainButton = (
         <Button
-            onClick={handleApproveMainSettle}
+            onClick={handleProposeMainSettle}
             variant="primary"
         >
             {loading ? 'Sending...' : 'Approve Settlement'}
@@ -344,10 +318,7 @@ export default function DealView(props: DealViewProps) {
                 </Button>
 
                 {requestSettleMainButton}
-                {approveSettleMainButton}
-
                 {requestAgentsApproveButton}
-                {approveAgentsApproveButton}
                 {}
 
             </>

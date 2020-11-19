@@ -2,17 +2,16 @@ import * as Erc20DetailedCompiled  from "../../ethereum/abi/ERC20Detailed.json"
 import * as Erc721DetailedCompiled from "../../ethereum/abi/ERC721Detailed.json"
 import * as DealRoomHubCompiled from "../../ethereum/abi/DealRoomHub.json"
 import * as DealRoomCompiled from "../../ethereum/abi/DealRoom.json"
-import * as MultiSigWalletCompiled from "../../ethereum/abi/MultiSigWallet.json"
+import * as MultiSigHashedCompiled from "../../ethereum/abi/MultiSigHashed.json"
 
 import { DealRoomHub } from "ethereum/types/DealRoomHub"
 import { DealRoom } from "../../ethereum/types/DealRoom"
 import { Erc20Detailed } from "../../ethereum/types/Erc20Detailed"
 import { Erc721Detailed } from "../../ethereum/types/Erc721Detailed"
-import { MultiSigWallet } from "../../ethereum/types/MultiSigWallet"
+import { MultiSigHashed } from "../../ethereum/types/MultiSigHashed"
 
 import { getContract } from "./contractFactory"
 import { Signer } from "ethers"
-
 
 export async function getDealRoomHubContract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<DealRoomHub> {
     //console.log(` getContract(${address}, DealRoomCompiled.abi, ${JSON.stringify(signerIdxOrAddressOrSigner)})`)
@@ -32,6 +31,6 @@ export async function getErc721Contract(address: string, signerIdxOrAddressOrSig
     return getContract(address, Erc721DetailedCompiled.abi, signerIdxOrAddressOrSigner)
 }
 
-export async function getMultisigContract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<MultiSigWallet> {
-    return getContract(address, MultiSigWalletCompiled.abi, signerIdxOrAddressOrSigner)
+export async function getMultiSigContract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<MultiSigHashed> {
+    return getContract(address, MultiSigHashedCompiled.abi, signerIdxOrAddressOrSigner)
 }
