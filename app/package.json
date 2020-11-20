@@ -7,7 +7,7 @@
     "fs": false
   },
   "scripts": {
-    "test": "jest --runInBand multi*",
+    "test": "jest --runInBand dealRoom_test.ts",
     "contracts:type": "yarn typechain --target ./node_modules/@typechain/ethers-v4 --outDir ./ethereum/types './ethereum/abi/**/*.json'",
     "contracts:clear": "rm -rf ./ethereum/abis && rm -rf ./ethereum/types",
     "contracts:build": "yarn contracts:clear && yarn contracts:compile && yarn contracts:type",

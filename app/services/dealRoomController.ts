@@ -422,7 +422,7 @@ export class DealRoomController {
         return ContractFactory.getErc721Contract(deal.erc721, this._signer)
     }
 
-    private async _getDealMultiSig(): Promise<MultiSigController> {
+    public async _getDealMultiSig(): Promise<MultiSigController> {
         if (!this.details) {
             throw new Error(ERROR_ROOM_NOT_LOADED)
         }

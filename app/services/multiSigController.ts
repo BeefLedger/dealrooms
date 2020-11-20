@@ -48,6 +48,16 @@ export class MultiSigController {
         }
     }
 
+    public async makeHash(
+        destinationAddress: string,
+        abi: any,
+        fnName: string,
+        params: any[]): Promise<string>
+    {
+    const encodedData = new ethers.utils.Interface(abi).functions[fnName].encode(params) 
+        return this._contract.makeHash(destinationAddress, 0, encodedData)
+    }
+
     public async submitMultiSigTransaction(
         destinationAddress: string,
         abi: any,
@@ -64,7 +74,7 @@ export class MultiSigController {
         console.log(`Signer ${this._signerAddress}: Making transaction for fn ${fnName}, params ${JSON.stringify(params, undefined, 4)}` ) 
         const encodedData = new ethers.utils.Interface(abi).functions[fnName].encode(params)
 
-        const transaction = await this._contract.submitTransaction(destinationAddress, 0, encodedData)
+        const transaction = await this._contract.submitTransaction(destinationAddress, 0, encodedData, {gasLimit: new BigNumber("5999999")})
         const receipt = await transaction.wait() 
                     
         //Obtain the transaction ID created in the multisig

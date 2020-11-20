@@ -175,7 +175,7 @@ contract MultiSigHashed {
     /// @return Returns transaction ID.
     function submitTransaction(address destination, uint256 value, bytes memory data) public returns (bytes32 hash) {
         addTransaction(destination, value, data);
-        confirmTransaction(hash);
+        //confirmTransaction(hash);
     }
 
     /// @dev Allows an owner to confirm a transaction.
@@ -277,8 +277,15 @@ contract MultiSigHashed {
             });
             hashes[transactionCount] = hash;
             transactionCount += 1;
+            confirmTransaction(hash);
             emit Submission(hash);
+        } else {
+            confirmTransaction(hash);
         }
+    }
+
+    function makeHash(address destination, uint256 value, bytes memory data) public view returns (bytes32 hash) {
+        return _toHash(destination, value, data);
     }
 
     /*
@@ -329,7 +336,7 @@ contract MultiSigHashed {
         );
     }
 
-    function getTransactionByIdx(uint256 idx) internal view returns (bytes32, bytes memory, address, bool, uint256) {
+    function getTransactionByIdx(uint256 idx) public view returns (bytes32, bytes memory, address, bool, uint256)  {
         Transaction memory txn = transactions[hashes[idx]];
         return (
             txn.hash,
