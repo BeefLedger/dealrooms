@@ -3,12 +3,14 @@ import * as artifactDealRoomHub from "../abi/DealRoomHub.json"
 import * as artifactErc20 from "../abi/ERC20Detailed.json"
 import * as artifactErc721 from "../abi/ERC721Detailed.json"
 import * as artifactMultisig from "../abi/MultiSigHashed.json"
+import * as artifactTestContract from "../abi/TestContract.json"
 
 import { deployContract } from "../../services/chain/contractFactory"
 import { Erc20Detailed } from "../types/Erc20Detailed"
 import { Erc721Detailed } from "../types/Erc721Detailed"
 import { DealRoomHub } from "../types/DealRoomHub"
 import { MultiSigHashed } from "../types/MultiSigHashed"
+import { TestContract } from "../types/TestContract"
 
 import { Signer } from "ethers"
 import { getDealRoomHubContract } from "../../services/chain/prefabContractFactory"
@@ -42,6 +44,19 @@ export async function deployErc721(owner: string, signer: Signer): Promise<Erc72
     console.log(`Deployed Erc721 contract to ${contract.address}`)  
     return contract
 }
+
+export async function deployTestContract(signer: Signer): Promise<TestContract>  {
+    try {
+        console.log(`deployMultisig()`)
+        const contract = await deployContract<TestContract>(signer, artifactTestContract)
+        console.log(`Deployed test contract to ${contract.address}`)
+        return contract
+    } catch (e) {
+        throw `deployTestContract(): ${e}`
+    }
+
+}
+
 
 export async function deployMultisig(owners: string[], approvalsRequired: number, signer: Signer): Promise<MultiSigHashed>  {
     try {
@@ -98,7 +113,7 @@ export async function deployDealRoom(params: DealRoomCreateParams, owner: string
 
         // TODO: Find out where the contract address is stashed
         const dealRoomDetails = await DealRoomHubContract.functions.getRoom(roomAddress)
-        console.log(4)
+        console.log(`Deal Room Details: ${JSON.stringify(dealRoomDetails)}`)
         return dealRoomDetails;
     }
     catch (e) {

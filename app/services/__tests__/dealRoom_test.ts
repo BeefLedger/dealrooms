@@ -42,6 +42,8 @@ describe("Deploy dealroom", () => {
         expect(demoEnvironment).toBeDefined()
         expect(demoEnvironment.deployedEnvironment).toBeDefined()
         expect(demoEnvironment.deployedEnvironment.DealRoomHub).toBeDefined()
+        
+
     }, 1 * MINUTE_MS)
 
     it("Makes a room", async (): Promise<any> => {
@@ -53,7 +55,7 @@ describe("Deploy dealroom", () => {
         roomAddress = await DealRoomController.deployRoom(dealRoomCreateParams, provider.getSigner(ADMIN))
         expect(roomAddress).toBeDefined()
         expect(roomAddress.length).toEqual(42)
-        console.log("'Makes a room' complete")
+        console.log(`Created room: ${roomAddress}`)
     }, 1 * MINUTE_MS)
 
     it("Makes a deal", async () => {
@@ -74,7 +76,7 @@ describe("Deploy dealroom", () => {
         expect(deal1.id).toBeDefined()
     }, 10 * MINUTE_MS)
 
-    it("Sensor: propose dummy settlement without effect", async() => {
+    /*it("Sensor: propose dummy settlement without effect", async() => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.sensorApprover))
         await dealRoomController.init()
         await dealRoomController.proposeMainSettleDeal(new BigNumber(1000))
@@ -82,7 +84,7 @@ describe("Deploy dealroom", () => {
         expect(deal1.dealConfirmations).toEqual(0)
         expect(deal1.status).toBe(DealStatus.Open)
     }, 10 * MINUTE_MS)
-
+*/
     it("Sensor: propose settlement", async() => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.sensorApprover))
         await dealRoomController.init()

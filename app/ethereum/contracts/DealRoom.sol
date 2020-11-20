@@ -106,7 +106,7 @@ contract DealRoom {
         //emit Debug("Deal ID", deal.id);
         //emit Debug("Deal ID", deal.id);
 
-        uint missing = missingDealAssets(id);
+        //uint missing = missingDealAssets(id);
         require(missingDealAssets(id) == 0, "DEAL_ASSETS_MISSING");
         require(missingDealCoins(id) == 0, "DEAL_TOKENS_MISSING");
         //emit Debug("Missing deal assets", missing);

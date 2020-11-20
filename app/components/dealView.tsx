@@ -6,6 +6,8 @@ import { getMagicProvider, getUser } from '../services/userService'
 import { Button, Table } from 'react-bootstrap'
 import { MagicUserMetadata } from 'magic-sdk'
 import { BigNumber, BigNumberish } from 'ethers/utils'
+import * as MultiSigController from "../services/multiSigController"
+
 import { DEALROOM_HUB } from 'lib/settings'
 
 export type DealViewProps = { 
@@ -39,6 +41,12 @@ export default function DealView(props: DealViewProps) {
     const [dealRoomController, setDealRoomController] = useState<DealRoomController>(null)
     const [agentConfirmations, setAgentConfirmations] = useState(0)
     const [dealConfirmations, setDealConfirmations] = useState(0)
+    const [agentMultiSigContractAddress, setAgentMultiSigContractAddress] = useState("")
+    const [dealMultiSigContractAddress, setDealMultiSigContractAddress] = useState("")
+    const [agentSettleTransaction, setAgentSettleTransaction] = useState(null)
+    const [dealSettleTransaction, setDealSettleTransaction] = useState(null)
+    const [agentSettleTransactionCall, setAgentSettleTransactionCall] = useState(null)
+    const [agentSettleTransactionCallWillCall, setAgentSettleTransactionCallWillCall] = useState({})
 
     useEffect(() => {
         setup()
@@ -60,6 +68,12 @@ export default function DealView(props: DealViewProps) {
         const _myTokenBalance = await _dealRoomController.getMyTokenBalance(_deal.id)
         const _myAssetBalance = await _dealRoomController.getMyAssetBalance(_deal.id)
         const _assetStatus = await _dealRoomController.getDealAssetStatus(_deal.id)
+        const _agentMultiSig = await _dealRoomController.getAgentMultiSigContractAddress()
+        const _dealMultiSig = await _dealRoomController.getDealMultiSigContractAddress()
+        const _agentSettleTransaction = await _dealRoomController.getAgentDealSettleTransaction(_deal.id)
+        const _dealSettleTransaction = await _dealRoomController.getDealSettleTransaction(_deal.id)
+        const _agentSettleTransactionCall = await MultiSigController.decodeMultiSigTransaction(_agentSettleTransaction.data)
+        //const _agentSettleTransactionCallWillCall = await MultiSigController.decodeDealRoomTransaction(_agentSettleTransactionCall.params[2].data)
 
         //Set state
         //Note: the state change is asynchronous
@@ -81,6 +95,13 @@ export default function DealView(props: DealViewProps) {
         setAssetStatus(_assetStatus)
         setAgentConfirmations((new BigNumber(_deal.agentConfirmations)).toNumber())
         setDealConfirmations((new BigNumber(_deal.dealConfirmations)).toNumber())
+        setAgentMultiSigContractAddress(_agentMultiSig)
+        setDealMultiSigContractAddress(_dealMultiSig)
+        setAgentSettleTransaction(_agentSettleTransaction)
+        setDealSettleTransaction(_dealSettleTransaction)
+        setAgentSettleTransactionCall(_agentSettleTransactionCall)
+        //setAgentSettleTransactionCallWillCall(_agentSettleTransactionCallWillCall)
+
     }
 
     async function handleDepositCoins() {
@@ -193,6 +214,14 @@ export default function DealView(props: DealViewProps) {
                             <th>Asset Contract (ERC-721)</th>
                             <td>{deal?.erc721}</td>
                         </tr>
+                        <tr>
+                            <th>Deal MultiSig</th>
+                            <td>{dealMultiSigContractAddress}</td>
+                        </tr>
+                        <tr>
+                            <th>Agent MultiSig</th>
+                            <td>{agentMultiSigContractAddress}</td>
+                        </tr>
                     </tbody>
                 </Table>
 
@@ -213,6 +242,22 @@ export default function DealView(props: DealViewProps) {
                         <tr>
                             <th>Deal signatures</th>
                             <td>{new BigNumber(deal.dealConfirmations).toNumber()}/3</td>
+                        </tr>
+                        <tr>
+                            <th>Agent Settle transaction</th>
+                            <td>{JSON.stringify(agentSettleTransaction, undefined, 4)}</td>
+                        </tr>
+                        <tr>
+                            <th>Agent Settle call</th>
+                            <td>{JSON.stringify(agentSettleTransactionCall, undefined, 4)}</td>
+                        </tr>
+                        <tr>
+                            <th>Agent Settle call will execute</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Deal Settle transaction</th>
+                            <td>{JSON.stringify(dealSettleTransaction, undefined, 4)}</td>
                         </tr>
                     </tbody>
                     

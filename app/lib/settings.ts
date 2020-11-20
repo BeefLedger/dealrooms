@@ -1,8 +1,8 @@
 const ADDRESSES = 
 {
-    erc20: "0x89D93f91606eb4B3F428A1998E01d53F5b4A628D",
-    erc721: "0x8e1d27B21A6Da88e52721A22cEFa97e8eCadE978",
-    DealRoomHub: "0x9657E2A2A14A819c7D60B03A7f6bbd378c78244f"
+    erc20: "0xc932a3617930567A47Dc822d32B13a740743a709",
+    erc721: "0x3fDb030ED0FD7ff9536DfA96E910320Ea2ddf12F",
+    DealRoomHub: "0xc10CE10aF9AA8AB72F61182a35C39b79c4E5152e"
 }
 export const DEALROOM_HUB = ADDRESSES.DealRoomHub
 export const DEFAULT_ERC20 = ADDRESSES.erc20
@@ -48,7 +48,8 @@ export const TESTRPC_ACCOUNTS = [
 export const DEMO_ACCOUNTS = [
     {
         //barryearsman+arbitrator@gmail.com
-        address: "0xbb5ac46e32eD3bb9402AAc3cfb77Ae7DE623ca9F",
+        //address: "0xbb5ac46e32eD3bb9402AAc3cfb77Ae7DE623ca9F",
+        address: "0xB051764B2da6Aa16b9Bc439BcAd1c309Ad7a32CA", //My test wallet
         name: "Alice Angstrom (Arbitrator)"
     },
     {

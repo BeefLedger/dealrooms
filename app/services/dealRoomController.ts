@@ -205,14 +205,14 @@ export class DealRoomController {
             const dealTransaction = await this.getDealSettleTransaction(dealId)
             let dealConfirmations: number = 0
             if (dealTransaction) {
-                dealConfirmations = (await dealMultiSigContract.getConfirmationCount(dealTransaction.id)).toNumber()
+                dealConfirmations = (await dealMultiSigContract.getConfirmationCount(dealTransaction.hash)).toNumber()
             }
             
             // Get agent transaction and confirmations (if any) from agent multisig
             const agentTransaction = await this.getAgentDealSettleTransaction(dealId) //TODO: Optimise this
             let agentConfirmations: number = 0
             if (agentTransaction) {
-                agentConfirmations = (await agentMultiSigContract.getConfirmationCount(agentTransaction.id)).toNumber()
+                agentConfirmations = (await agentMultiSigContract.getConfirmationCount(agentTransaction.hash)).toNumber()
             }  
             // console.log("dealTransaction", JSON.stringify(dealTransaction, undefined, 4))
 
@@ -285,13 +285,13 @@ export class DealRoomController {
     }
 
     // Send a new transaction to the main multisig to settle the deal
-    public async proposeMainSettleDeal(dealId: BigNumberish): Promise<MultiSigController.MultiSigSubmissionResult> {
+    public async proposeMainSettleDeal(dealId: BigNumberish): Promise<string> {
         console.log(`Proposing settle deal ${dealId}`)
 
         const dealRoomContract: DealRoom = await this.getDealRoomContract()
         const dealMultisigContract: MultiSigHashed = await this._getDealMultiSigContract();
 
-        const result = await MultiSigController.submitMultiSigTransaction(
+        const hash = await MultiSigController.submitMultiSigTransaction(
             dealMultisigContract,
             dealRoomContract.address,
             DealRoomCompiled.abi,
@@ -299,8 +299,8 @@ export class DealRoomController {
             [dealId],
             this._signer
         )
-        console.log(`*** Submitted main multisig transaction ${result.id}:${result.hash}`)
-        return result
+        console.log(`*** Submitted main multisig transaction ${hash}`)
+        return hash
     }
 
     // Send a new transaction to the agents multisig to "approve" the deal in the main multisig
@@ -308,52 +308,28 @@ export class DealRoomController {
 
         console.log("proposeAgentsSettleDeal()")
 
-            const deal: Deal = await this.getDeal(dealId)
+        const deal: Deal = await this.getDeal(dealId)
 
-            // const dealRoomContract: DealRoom = await this.getDealRoomContract()
-            const dealMultiSigContract: MultiSigHashed = await this._getDealMultiSigContract();
-            const agentMultiSigContract: MultiSigHashed = await this._getAgentMultiSigContract();
-            
-            //Submit a transaction to approve a transaction
-            //If the deal has a proposal transaction,
-            //if (deal.dealTransaction) {
-            /*if (deal.agentTransaction) {
-                // Agent proposal already there, so just approve it
-                MultiSigController.approveMultiSigTransaction(agentMultiSigContract, deal.agentTransaction.id, this._signer)
-            } else {*/
-                // Make a new agent proposal to approve deal settlement proposal
-                const result = await MultiSigController.submitDuplexMultiSigProposal(
-                    agentMultiSigContract,
-                    dealMultiSigContract,
-                    this._dealRoomAddress,
-                    DealRoomCompiled.abi,
-                    "settle",
-                    [dealId],
-                    this._signer
-                )
-                console.log(`*** Submitted agent multisig transaction ${result.id}:${result.hash}`)
-            //}
-            //} else {
-            //    throw new Error("No deal proposal yet")
-            //console.log("proposeSettleDeal() complete")     
+        // const dealRoomContract: DealRoom = await this.getDealRoomContract()
+        const dealMultiSigContract: MultiSigHashed = await this._getDealMultiSigContract();
+        const agentMultiSigContract: MultiSigHashed = await this._getAgentMultiSigContract();
+        
+        //Submit a transaction to approve a transaction
+
+        // Make a new agent proposal to approve deal settlement proposal
+        const hash = await MultiSigController.submitDuplexMultiSigProposal(
+            agentMultiSigContract,
+            dealMultiSigContract,
+            this._dealRoomAddress,
+            DealRoomCompiled.abi,
+            "settle",
+            [dealId],
+            this._signer
+        )
+        console.log(`*** Submitted agent multisig transaction ${hash}`)
     }
 
-    public async approveDealSettlementProposal(dealId: BigNumberish): Promise<ContractReceipt> {
-        const multiSigContract = await this._getDealMultiSigContract()
-        const transaction = await this.getDealSettleTransaction(dealId)
-        const receipt = await MultiSigController.approveMultiSigTransaction(multiSigContract, transaction.id, this._signer)
-        return receipt
-    }
-
-    public async approveAgentSettlementProposal(dealId: BigNumberish): Promise<ContractReceipt> {
-        const multisigContract = await this._getAgentMultiSigContract()
-        //const transactionId = await this.getDealSettleTransactionId(dealId) // await getMultiSigApprovalTransactionId(dealId, multisigContract)
-        const transactionId = dealId;
-        const receipt = await MultiSigController.approveMultiSigTransaction(multisigContract, transactionId, this._signer)
-        return receipt
-    }
-
-    private async getDealSettleTransaction(dealId: BigNumberish): Promise<MultiSigTransaction | null> {
+    public async getDealSettleTransaction(dealId: BigNumberish): Promise<MultiSigTransaction | null> {
         let result: MultiSigTransaction = null
         const multiSigContract = await this._getDealMultiSigContract()
         // Find transaction that corresponds to settle(dealId)
@@ -370,7 +346,7 @@ export class DealRoomController {
         }    
     }
 
-    private async getAgentDealSettleTransaction(dealId: BigNumberish): Promise<MultiSigTransaction | null> {
+    public async getAgentDealSettleTransaction(dealId: BigNumberish): Promise<MultiSigTransaction | null> {
         let result: MultiSigTransaction = null
         const dealSettleTransaction = await this.getDealSettleTransaction(dealId)
         const multiSigContract = await this._getAgentMultiSigContract()
@@ -401,6 +377,14 @@ export class DealRoomController {
         const transaction = await contract.withdrawDealAssets(dealId, deal.assetItems.length)
         const receipt = await transaction.wait() 
         return receipt      
+    }
+
+    public async getAgentMultiSigContractAddress(): Promise<string> {
+        return (await this._getAgentMultiSigContract()).address
+    }
+
+    public async getDealMultiSigContractAddress(): Promise<string> {
+        return (await this._getDealMultiSigContract()).address
     }
 
     //--- Private methods ------------------------------------- //
