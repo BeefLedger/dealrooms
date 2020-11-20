@@ -13,11 +13,10 @@ import * as Deployer from "../ethereum/deploy/deploy"
 import * as ContractFactory from "./chain/prefabContractFactory"
 import { DealRoomHub } from "ethereum/types/DealRoomHub"
 // import { DealRoomFactory } from "ethereum/types/DealRoomFactory"
-import * as MultiSigController from "./multiSigController"
+import { MultiSigController, MultiSigTransaction } from "./multiSigController"
 // import { randomInt } from "lib/random"
 
 export const ERROR_ROOM_NOT_LOADED = "ROOM_NOT_LOADED"
-type MultiSigTransaction = MultiSigController.MultiSigTransaction
 
 export type DealRoomDetails = {
     addr: string
@@ -96,7 +95,6 @@ export class DealRoomController {
 
     //--- Instance methods
 
-    // Constructor - Make an object for controlling a specific Deal
     constructor(hubAddress: string, dealRoomAddress: string, signer: Signer) {
         this._signer = signer
         this._dealRoomHubAddress = hubAddress
@@ -179,8 +177,6 @@ export class DealRoomController {
         const contract = await this._getDealRoomContract()
         const tx = await contract.makeDeal(deal.erc20, deal.erc721, deal.price, deal.assetItems)
         const receipt = await tx.wait()
-        //console.log(`makeDeal result`, JSON.stringify(receipt, undefined, 4))
-        //const multisig = await this._getMultisigContract()
         
         return this.getDeal(nextDealId)
     }
@@ -198,21 +194,21 @@ export class DealRoomController {
             }
             
             // Get multisigs from Room
-            const dealMultiSigContract: MultiSigHashed = await this._getDealMultiSigContract();
-            const agentMultiSigContract: MultiSigHashed = await this._getAgentMultiSigContract();
+            const dealMultiSig: MultiSigController = await this._getDealMultiSig();
+            const agentMultiSig: MultiSigController = await this._getAgentMultiSig();
             
             // Get deal transaction and confirmations (if any) from main multisig
             const dealTransaction = await this.getDealSettleTransaction(dealId)
             let dealConfirmations: number = 0
             if (dealTransaction) {
-                dealConfirmations = (await dealMultiSigContract.getConfirmationCount(dealTransaction.hash)).toNumber()
+                dealConfirmations = (await dealMultiSig.getConfirmations(dealTransaction.hash)).length
             }
             
             // Get agent transaction and confirmations (if any) from agent multisig
             const agentTransaction = await this.getAgentDealSettleTransaction(dealId) //TODO: Optimise this
             let agentConfirmations: number = 0
             if (agentTransaction) {
-                agentConfirmations = (await agentMultiSigContract.getConfirmationCount(agentTransaction.hash)).toNumber()
+                agentConfirmations = (await agentMultiSig.getConfirmations(agentTransaction.hash)).length
             }  
             // console.log("dealTransaction", JSON.stringify(dealTransaction, undefined, 4))
 
@@ -289,15 +285,13 @@ export class DealRoomController {
         console.log(`Proposing settle deal ${dealId}`)
 
         const dealRoomContract: DealRoom = await this.getDealRoomContract()
-        const dealMultisigContract: MultiSigHashed = await this._getDealMultiSigContract();
+        const dealMultiSig: MultiSigController = await this._getDealMultiSig();
 
-        const hash = await MultiSigController.submitMultiSigTransaction(
-            dealMultisigContract,
+        const hash = await dealMultiSig.submitMultiSigTransaction(
             dealRoomContract.address,
             DealRoomCompiled.abi,
             "settle",
-            [dealId],
-            this._signer
+            [dealId]
         )
         console.log(`*** Submitted main multisig transaction ${hash}`)
         return hash
@@ -311,29 +305,27 @@ export class DealRoomController {
         const deal: Deal = await this.getDeal(dealId)
 
         // const dealRoomContract: DealRoom = await this.getDealRoomContract()
-        const dealMultiSigContract: MultiSigHashed = await this._getDealMultiSigContract();
-        const agentMultiSigContract: MultiSigHashed = await this._getAgentMultiSigContract();
+        const dealMultiSig: MultiSigController = await this._getDealMultiSig();
+        const agentMultiSig: MultiSigController = await this._getAgentMultiSig();
         
         //Submit a transaction to approve a transaction
 
         // Make a new agent proposal to approve deal settlement proposal
-        const hash = await MultiSigController.submitDuplexMultiSigProposal(
-            agentMultiSigContract,
-            dealMultiSigContract,
+        const hash = await agentMultiSig.submitDuplexMultiSigProposal(
+            this.getAgentMultiSigContractAddress(),
             this._dealRoomAddress,
             DealRoomCompiled.abi,
             "settle",
             [dealId],
-            this._signer
         )
         console.log(`*** Submitted agent multisig transaction ${hash}`)
     }
 
     public async getDealSettleTransaction(dealId: BigNumberish): Promise<MultiSigTransaction | null> {
         let result: MultiSigTransaction = null
-        const multiSigContract = await this._getDealMultiSigContract()
+        const multiSigContract = await this._getDealMultiSig()
         // Find transaction that corresponds to settle(dealId)
-        const transactions = await MultiSigController.getTransactions(multiSigContract)
+        const transactions = await multiSigContract.getTransactions()
         if (transactions.length) {
             result = transactions.find((transaction: MultiSigTransaction) => {
                 const decodedTransaction = MultiSigController.decodeDealRoomTransaction(transaction.data)
@@ -348,9 +340,8 @@ export class DealRoomController {
 
     public async getAgentDealSettleTransaction(dealId: BigNumberish): Promise<MultiSigTransaction | null> {
         let result: MultiSigTransaction = null
-        const dealSettleTransaction = await this.getDealSettleTransaction(dealId)
-        const multiSigContract = await this._getAgentMultiSigContract()
-        const transactions = await MultiSigController.getTransactions(multiSigContract)
+        const multiSigContract = await this._getAgentMultiSig()
+        const transactions = await multiSigContract.getTransactions()
         if (transactions.length) {
             result = transactions.find((transaction: MultiSigTransaction) => {
                 const decodedTransaction = MultiSigController.decodeMultiSigTransaction(transaction.data)
@@ -379,12 +370,12 @@ export class DealRoomController {
         return receipt      
     }
 
-    public async getAgentMultiSigContractAddress(): Promise<string> {
-        return (await this._getAgentMultiSigContract()).address
+    public getAgentMultiSigContractAddress(): string {
+        return this.details.agentMultiSig
     }
 
-    public async getDealMultiSigContractAddress(): Promise<string> {
-        return (await this._getDealMultiSigContract()).address
+    public getDealMultiSigContractAddress(): string {
+        return this.details.dealMultiSig
     }
 
     //--- Private methods ------------------------------------- //
@@ -431,18 +422,22 @@ export class DealRoomController {
         return ContractFactory.getErc721Contract(deal.erc721, this._signer)
     }
 
-    private async _getDealMultiSigContract(): Promise<MultiSigHashed> {
+    private async _getDealMultiSig(): Promise<MultiSigController> {
         if (!this.details) {
             throw new Error(ERROR_ROOM_NOT_LOADED)
         }
-        return await ContractFactory.getMultiSigContract(this.details.dealMultiSig, this._signer)
+        const msController: MultiSigController = new MultiSigController(this.details.dealMultiSig, this._signer)
+        await msController.init()
+        return msController
     }
 
-    private async _getAgentMultiSigContract(): Promise<MultiSigHashed> {
+    private async _getAgentMultiSig(): Promise<MultiSigController> {
         if (!this.details) {
             throw new Error(ERROR_ROOM_NOT_LOADED)
         }
-        return await ContractFactory.getMultiSigContract(this.details.agentMultiSig, this._signer)
+        const msController: MultiSigController = new MultiSigController(this.details.agentMultiSig, this._signer)
+        await msController.init()
+        return msController
     }
 
     private async _getRoomDetails(): Promise<DealRoomDetails> {

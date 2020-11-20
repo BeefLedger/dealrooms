@@ -28,7 +28,7 @@ contract MultiSigHashed {
     mapping (bytes32 => Transaction) public transactions;
     mapping (bytes32 => mapping (address => bool)) public confirmations;
     mapping (address => bool) public isOwner;
-    bytes32[] public hashes;
+    mapping (uint256 => bytes32) public hashes;
     address[] public owners;
     uint256 public required;
     uint256 public transactionCount;
@@ -66,22 +66,26 @@ contract MultiSigHashed {
     }
 
     modifier confirmed(bytes32 hash, address owner) {
-        require(confirmations[hash][owner], "not confirmed");
+        require(confirmations[hash][owner], ": not confirmed");
         _;
     }
 
     modifier notConfirmed(bytes32 hash, address owner) {
-        require(!confirmations[hash][owner], "is already confirmed");
+        require(!confirmations[hash][owner], ": is already confirmed");
         _;
     }
 
+    function ownerHasConfirmed(bytes32 hash, address owner) public view returns (bool) {
+        return confirmations[hash][owner];
+    }
+
     modifier notExecuted(bytes32 hash) {
-        require(!transactions[hash].executed, "tx already executed");
+        require(!transactions[hash].executed, ": tx already executed");
         _;
     }
 
     modifier notNull(address _address) {
-        require(_address != address(0), "address is null");
+        require(_address != address(0), ": address is null");
         _;
     }
 
@@ -170,7 +174,7 @@ contract MultiSigHashed {
     /// @param data Transaction data payload.
     /// @return Returns transaction ID.
     function submitTransaction(address destination, uint256 value, bytes memory data) public returns (bytes32 hash) {
-        hash = addTransaction(destination, value, data);
+        addTransaction(destination, value, data);
         confirmTransaction(hash);
     }
 

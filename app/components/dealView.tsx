@@ -6,7 +6,7 @@ import { getMagicProvider, getUser } from '../services/userService'
 import { Button, Table } from 'react-bootstrap'
 import { MagicUserMetadata } from 'magic-sdk'
 import { BigNumber, BigNumberish } from 'ethers/utils'
-import * as MultiSigController from "../services/multiSigController"
+import { MultiSigController } from "../services/multiSigController"
 
 import { DEALROOM_HUB } from 'lib/settings'
 
