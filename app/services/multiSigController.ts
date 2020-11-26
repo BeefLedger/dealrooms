@@ -70,7 +70,7 @@ export class MultiSigController {
         }
         
         //Make the transaction 
-        await this._signerAddress
+        //await this._signerAddress
         console.log(`Signer ${this._signerAddress}: Making transaction for fn ${fnName}, params ${JSON.stringify(params, undefined, 4)}` ) 
         const encodedData = new ethers.utils.Interface(abi).functions[fnName].encode(params)
 

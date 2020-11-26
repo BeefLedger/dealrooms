@@ -163,11 +163,11 @@ describe("Double-layer Multisig", () => {
         expect(confirmations).toHaveLength(1)
     })
 
-    it("Second signature on contract 1", async () => {
+    it("Second signature on multisig 1", async () => {
 
-        let transactions = await signer5MultiSig2.getTransactions()
-        console.log("TRANSACTIONS BEFORE SECOND SIG", JSON.stringify(transactions, undefined, 4))
-        let confirmations = await signer4MultiSig1.getConfirmations(hash)
+        //let transactions = await signer5MultiSig2.getTransactions()
+        //console.log("TRANSACTIONS BEFORE SECOND SIG", JSON.stringify(transactions, undefined, 4))
+        
 
         hash = await signer4MultiSig1.submitDuplexMultiSigProposal(
             multiSig2.address,
@@ -177,25 +177,30 @@ describe("Double-layer Multisig", () => {
             [new BigNumber(500)],
         )        
         expect(hash).toBeDefined()
-
+        let confirmations = await signer4MultiSig1.getConfirmations(hash)
         expect(confirmations).toHaveLength(2)
+
+        //let otherConfirmations = await signer5MultiSig2.getConfirmations(hash)
+        //expect(otherConfirmations).toHaveLength(1)
     })
 
     it("Final signature on contract 2", async () => {
         //Find out what the hash on contract 2 should be
-        const expectedHash = await signer5MultiSig2.makeHash(            
+        let expectedHash = await signer5MultiSig2.makeHash(            
             testContract.address,
             TestContractCompiled.abi,
             "doSomethingInt",
             [new BigNumber(500)]
         )
-        console.log("EXPECTED HASH", `${expectedHash}`)
+        //console.log("EXPECTED HASH", `${hash}`)
+        let confirmations = await signer5MultiSig2.getConfirmations(expectedHash)
+        expect(confirmations).toHaveLength(1)
 
-        let transactions = await signer5MultiSig2.getTransactions()
-        console.log("TRANSACTIONS AFTER SECOND SIG", JSON.stringify(transactions, undefined, 4))
-        let confirmations2 = await signer5MultiSig2.getConfirmations(expectedHash)
-        console.log(`CONFIRMATIONS for ${expectedHash}`, JSON.stringify(confirmations2, undefined, 4))
-        expect(confirmations2).toHaveLength(1)
+        //let transactions = await signer5MultiSig2.getTransactions()
+        //console.log("TRANSACTIONS AFTER SECOND SIG", JSON.stringify(transactions, undefined, 4))
+
+        //console.log(`CONFIRMATIONS for ${expectedHash}`, JSON.stringify(confirmations2, undefined, 4))
+
         hash = await signer5MultiSig2.submitMultiSigTransaction(
             testContract.address,
             TestContractCompiled.abi,
@@ -203,9 +208,8 @@ describe("Double-layer Multisig", () => {
             [new BigNumber(500)],
         )  
         expect(hash).toEqual(expectedHash)      
-        expect(hash).toBeDefined()
-        confirmations2 = await signer5MultiSig2.getConfirmations(expectedHash)
-        expect(confirmations2).toHaveLength(2)
+        confirmations = await signer5MultiSig2.getConfirmations(expectedHash)
+        expect(confirmations).toHaveLength(2)
     })
 
     it("Transaction executed", async () => {
