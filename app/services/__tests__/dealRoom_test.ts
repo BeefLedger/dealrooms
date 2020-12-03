@@ -26,7 +26,6 @@ const ROOM_1 = {
 }
 
 let deal1: Deal
-
 let roomAddress: string
 
 describe("Deploy dealroom", () => {
