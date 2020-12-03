@@ -8,7 +8,6 @@ export async function deployContract <T extends Contract>(
     ...args: any[]
 ): Promise<T> {
     try {
-        console.log(`Deploying contract from ${await signer.getAddress()}`)
         const contractFactory = ContractFactory.fromSolidity(compilerOutput.default, signer);
         const contract: T = (await contractFactory.deploy(...args)) as T;
         return (await contract.deployed()) as T;

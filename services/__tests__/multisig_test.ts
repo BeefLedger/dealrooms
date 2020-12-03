@@ -18,76 +18,6 @@ let multiSig: MultiSigHashed
 let testContract: TestContract
 let hash: string
 let multiSigAddress: string
-/*
-describe("Single-layer Multisig", () => {
-    beforeAll(async ()=> {       
-        provider = getProvider()
-        signer1 = provider.getSigner(TESTRPC_ACCOUNTS[3].address)
-        signer2 = provider.getSigner(TESTRPC_ACCOUNTS[4].address)
-        testContract = await deployTestContract(signer1)
-
-    }, 10000)
-
-    it("Deploy multisig", async () =>
-    {
-        multiSig = await deployMultisig(
-            [
-                TESTRPC_ACCOUNTS[3].address,
-                TESTRPC_ACCOUNTS[4].address
-            ],
-            2,
-            signer1
-        )
-        multiSigAddress = multiSig.address
-        signer1MultiSig = new MultiSigController(multiSigAddress, signer1)
-        signer2MultiSig = new MultiSigController(multiSigAddress, signer2)
-        await signer1MultiSig.init()
-        await signer2MultiSig.init()
-        expect(multiSig).toBeDefined()
-    }, 10000)
-
-    it("Submit transaction to multisig", async () => {
-        hash = await signer1MultiSig.submitMultiSigTransaction(
-            testContract.address,
-            TestContractCompiled.abi,
-            "doSomethingInt",
-            [new BigNumber(100)],
-
-        )        
-        expect(hash).toBeDefined()
-
-        let retrievedTransaction = await signer1MultiSig.getTransaction(hash)
-        let fnCall = MultiSigController.decodeParams(retrievedTransaction.data, TestContractCompiled.abi)  
-        
-        expect(retrievedTransaction.destination).toEqual(testContract.address)
-        console.log(JSON.stringify(fnCall, undefined, 4))
-        expect(fnCall.name === "doSomethingInt")
-        expect(Number(fnCall.params[0].value) == 100)
-
-        let confirmations = await signer1MultiSig.getConfirmations(hash)
-        console.log(`Confirmations: ${JSON.stringify(confirmations, undefined, 4)}`)
-        expect(confirmations).toHaveLength(1)
-    })
-
-    it("Second signature", async () => {
-        let hash2 = await signer2MultiSig.submitMultiSigTransaction(
-            testContract.address,
-            TestContractCompiled.abi,
-            "doSomethingInt",
-            [new BigNumber(100)],
-        )  
-        expect (hash).toEqual(hash2)
-        let confirmations = await signer2MultiSig.getConfirmations(hash)
-        expect(confirmations).toHaveLength(2)
-    })
-
-    it("Transaction executed", async () => {
-        //testContract = getContract(testContract.address, MultiSigHashedCompiled.abi, signerIdxOrAddressOrSigner)
-        const result = await testContract.getSomethingInt()
-        expect(Number(result)).toEqual(100)
-    })
-})
-*/
 let signer3: JsonRpcSigner
 let signer4: JsonRpcSigner
 let signer5: JsonRpcSigner
@@ -155,19 +85,13 @@ describe("Double-layer Multisig", () => {
         let fnCall = MultiSigController.decodeMultiSigTransaction(retrievedTransaction.data)  
         
         expect(retrievedTransaction.destination).toEqual(multiSig2.address)
-        console.log(JSON.stringify(fnCall, undefined, 4))
         expect(fnCall.name === "submitTransaction")
 
         let confirmations = await signer3MultiSig1.getConfirmations(hash)
-        console.log(`Confirmations: ${JSON.stringify(confirmations, undefined, 4)}`)
         expect(confirmations).toHaveLength(1)
     })
 
     it("Second signature on multisig 1", async () => {
-
-        //let transactions = await signer5MultiSig2.getTransactions()
-        //console.log("TRANSACTIONS BEFORE SECOND SIG", JSON.stringify(transactions, undefined, 4))
-        
 
         hash = await signer4MultiSig1.submitDuplexMultiSigProposal(
             multiSig2.address,
@@ -179,9 +103,6 @@ describe("Double-layer Multisig", () => {
         expect(hash).toBeDefined()
         let confirmations = await signer4MultiSig1.getConfirmations(hash)
         expect(confirmations).toHaveLength(2)
-
-        //let otherConfirmations = await signer5MultiSig2.getConfirmations(hash)
-        //expect(otherConfirmations).toHaveLength(1)
     })
 
     it("Final signature on contract 2", async () => {
@@ -192,14 +113,8 @@ describe("Double-layer Multisig", () => {
             "doSomethingInt",
             [new BigNumber(500)]
         )
-        //console.log("EXPECTED HASH", `${hash}`)
         let confirmations = await signer5MultiSig2.getConfirmations(expectedHash)
         expect(confirmations).toHaveLength(1)
-
-        //let transactions = await signer5MultiSig2.getTransactions()
-        //console.log("TRANSACTIONS AFTER SECOND SIG", JSON.stringify(transactions, undefined, 4))
-
-        //console.log(`CONFIRMATIONS for ${expectedHash}`, JSON.stringify(confirmations2, undefined, 4))
 
         hash = await signer5MultiSig2.submitMultiSigTransaction(
             testContract.address,
@@ -213,7 +128,6 @@ describe("Double-layer Multisig", () => {
     })
 
     it("Transaction executed", async () => {
-        //testContract = getContract(testContract.address, MultiSigHashedCompiled.abi, signerIdxOrAddressOrSigner)
         const result = await testContract.getSomethingInt()
         expect(Number(result)).toEqual(500)
     })

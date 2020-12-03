@@ -14,12 +14,10 @@ import { getContract } from "./contractFactory"
 import { Signer } from "ethers"
 
 export async function getDealRoomHubContract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<DealRoomHub> {
-    //console.log(` getContract(${address}, DealRoomCompiled.abi, ${JSON.stringify(signerIdxOrAddressOrSigner)})`)
     return getContract<DealRoomHub>(address, DealRoomHubCompiled.abi, signerIdxOrAddressOrSigner) as Promise<DealRoomHub>
 }
 
 export async function getDealRoomContract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<DealRoom> {
-    //console.log(` getContract(${address}, DealRoomCompiled.abi, ${JSON.stringify(signerIdxOrAddressOrSigner)})`)
     return getContract<DealRoom>(address, DealRoomCompiled.abi, signerIdxOrAddressOrSigner) as Promise<DealRoom>
 }
 

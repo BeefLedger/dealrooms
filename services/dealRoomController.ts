@@ -110,14 +110,12 @@ export class DealRoomController {
     }
 
     public async depositDealCoins(id: BigNumberish, amount: BigNumberish): Promise<ContractReceipt> {
-        console.log("depositDealCoins()")
         const tokenContract = await this._getDealTokenContract(id)
         const roomContract = await this._getDealRoomContract()
         return (await tokenContract.transfer(roomContract.address, amount)).wait()
     }
 
     public async depositDealAssets(id: BigNumberish, items: BigNumberish[]): Promise<ContractReceipt[]> {
-        console.log("depositDealAssets()")
         const assetContract = await this._getDealAssetContract(id)
         const roomContract = await this._getDealRoomContract()
         const receipts: ContractReceipt[] = []

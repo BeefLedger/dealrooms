@@ -5,10 +5,7 @@ let database: Mongoose.Connection;
 
 // Connect Mongoose to the DB server
 export async function connect(): Promise<Mongoose.Connection> {
-    //mongodb+srv://baz:<password>@cluster0.uclyr.gcp.mongodb.net/<dbname>?retryWrites=true&w=majority
     const uri = `mongodb+srv://${config.db.user}:${config.db.password}@${config.db.server}/${config.db.database}?ssl=true`
-               //mongodb+srv://baz:<password>@cluster0.uclyr.gcp.mongodb.net/<dbname>?retryWrites=true&w=majority
-    console.log(`uri: ${uri}`)
     if (!database) {
         await Mongoose.connect(uri, {
             useNewUrlParser: true,

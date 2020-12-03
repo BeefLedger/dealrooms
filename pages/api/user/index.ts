@@ -29,12 +29,8 @@ async function handleGet(req: NextApiRequest, res: NextApiResponse) {
 
 
 async function handlePost(req: NextApiRequest, res: NextApiResponse) {  
-    console.log(1)
-    await connect()
-    console.log(2)
-    
+    await connect()  
     const userData: IUserDocument = req.body as IUserDocument
-    console.log(3, `${JSON.stringify(userData, undefined, 4)}`)
     const result = await UserModel.create(userData)
     
     res.status(201).json(result)

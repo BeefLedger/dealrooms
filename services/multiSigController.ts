@@ -70,8 +70,7 @@ export class MultiSigController {
         }
         
         //Make the transaction 
-        //await this._signerAddress
-        console.log(`Signer ${this._signerAddress}: Making transaction for fn ${fnName}, params ${JSON.stringify(params, undefined, 4)}` ) 
+
         const encodedData = new ethers.utils.Interface(abi).functions[fnName].encode(params)
 
         const transaction = await this._contract.submitTransaction(destinationAddress, 0, encodedData, {gasLimit: new BigNumber("5999999")})
@@ -80,14 +79,12 @@ export class MultiSigController {
         //Obtain the transaction ID created in the multisig
         try {
             if (receipt.events) {
-                console.log(JSON.stringify(receipt.events, undefined, 4))
                 const result = await MultiSigController.getSubmissionHash(receipt)
                 return result
             }
             throw `No submission events`      
         }
         catch (e) {
-            //console.error(JSON.stringify(e, undefined, 4))
             throw `Error getting submission results: ${e}`
         }
     }

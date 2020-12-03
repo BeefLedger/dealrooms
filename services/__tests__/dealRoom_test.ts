@@ -55,7 +55,6 @@ describe("Deploy dealroom", () => {
         roomAddress = await DealRoomController.deployRoom(dealRoomCreateParams, provider.getSigner(ADMIN))
         expect(roomAddress).toBeDefined()
         expect(roomAddress.length).toEqual(42)
-        console.log(`Created room: ${roomAddress}`)
     }, 1 * MINUTE_MS)
 
     it("Makes a deal", async () => {
@@ -70,27 +69,24 @@ describe("Deploy dealroom", () => {
         }
         deal1 = await dealRoomController.makeDeal(deal1)
         deal1 = await dealRoomController.getDeal(deal1.id)
-        console.log(`*** Room contract ${roomAddress}`)
-        console.log(`*** Agent multisig contract ${dealRoomController.getAgentMultiSigContractAddress()}`)
-        console.log(`*** Deal multisig contract ${dealRoomController.getDealMultiSigContractAddress()}`)
+
         expect(deal1.agentConfirmations).toEqual(0)
         expect(deal1.dealConfirmations).toEqual(0)
         expect(deal1.status).toBe(DealStatus.Open)
         expect(deal1.id).toBeDefined()
     }, 10 * MINUTE_MS)
 
-/*    it("Sensor: propose dummy settlement without effect", async() => {
+    it("Sensor: propose dummy settlement without effect", async() => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.sensorApprover))
         await dealRoomController.init()
         await dealRoomController.proposeMainSettleDeal(new BigNumber(1000))
         deal1 = await dealRoomController.getDeal(deal1.id)
         const ms = await dealRoomController._getDealMultiSig()
         const transactions = await ms.getTransactions()
-        console.log("*******Transactions", `${JSON.stringify(transactions, undefined, 4)}`)
         expect(deal1.dealConfirmations).toEqual(0)
         expect(deal1.status).toBe(DealStatus.Open)
     }, 10 * MINUTE_MS)
-*/
+
     it("Sensor: propose settlement", async() => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.sensorApprover))
         await dealRoomController.init()
@@ -99,16 +95,6 @@ describe("Deploy dealroom", () => {
 
         expect(deal1.dealConfirmations).toEqual(1)
         expect(deal1.status).toBe(DealStatus.Open)
-        //const ms = await dealRoomController._getDealMultiSig()
-        //let transactions = await ms.getTransactions()
-        //let confirmations = await ms.getConfirmations(transactions[0].hash)
-        //console.log("*******Transactions", `${JSON.stringify(transactions, undefined, 4)}`)
-        //console.log("*******Confirmations", `${JSON.stringify(confirmations, undefined, 4)}`)
-        //await dealRoomController.proposeMainSettleDeal(deal1.id)
-        //transactions = await ms.getTransactions()
-        //confirmations = await ms.getConfirmations(transactions[0].hash)
-        //console.log("*******Transactions", `${JSON.stringify(transactions, undefined, 4)}`)
-        //console.log("*******Confirmations", `${JSON.stringify(confirmations, undefined, 4)}`)
     }, 10 * MINUTE_MS)
 
     it("Agent: seller deposit assets", async() => {
