@@ -111,7 +111,6 @@ export async function deployDealRoom(params: DealRoomCreateParams, owner: string
             throw new Error(ERROR_NO_EVENT_FOUND)
         } 
 
-        // TODO: Find out where the contract address is stashed
         const dealRoomDetails = await DealRoomHubContract.functions.getRoom(roomAddress)
         console.log(`Deal Room Details: ${JSON.stringify(dealRoomDetails)}`)
         return dealRoomDetails;
