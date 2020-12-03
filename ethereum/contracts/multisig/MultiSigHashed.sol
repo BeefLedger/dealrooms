@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: LGPLv3
 pragma solidity >=0.5.0 <0.7.0;
 
 /// @title Multisignature wallet - Allows multiple parties to agree on transactions before execution.
@@ -95,7 +96,13 @@ contract MultiSigHashed {
     }
 
     /// @dev Fallback function allows to deposit ether.
-    function() external payable {
+    fallback() external payable {
+        if (msg.value > 0)
+            emit Deposit(msg.sender, msg.value);
+    }
+
+    // @dev Explicitly defined function for receiving ether.
+    receive() external payable {
         if (msg.value > 0)
             emit Deposit(msg.sender, msg.value);
     }
@@ -139,7 +146,7 @@ contract MultiSigHashed {
                 break;
             }
         }
-        owners.length -= 1;
+        owners.pop();
         if (required > owners.length)
             changeRequirement(owners.length);
         emit OwnerRemoval(owner);
@@ -172,9 +179,9 @@ contract MultiSigHashed {
     /// @param destination Transaction target address.
     /// @param value Transaction ether value.
     /// @param data Transaction data payload.
-    /// @return Returns transaction ID.
+    /// @return hash representing transaction ID.
     function submitTransaction(address destination, uint256 value, bytes memory data) public returns (bytes32 hash) {
-        addTransaction(destination, value, data);
+        return addTransaction(destination, value, data);
         //confirmTransaction(hash);
     }
 
@@ -227,8 +234,7 @@ contract MultiSigHashed {
         assembly {
             let x := mload(0x40)   // "Allocate" memory for output (0x40 is where "free memory" pointer is stored by convention)
             let d := add(data, 32) // First 32 bytes are the padded length of data, so exclude that
-            result := call(
-                sub(gas, 34710),   // 34710 is the value that solidity is currently emitting
+            result := call(sub(gas(), 34710),   // 34710 is the value that solidity is currently emitting
                                    // It includes callGas (700) + callVeryLow (3, to pay for SUB) + callValueTransferGas (9000) +
                                    // callNewAccountGas (25000, in case the destination address does not exist and needs creating)
                 destination,
@@ -262,7 +268,6 @@ contract MultiSigHashed {
     /// @param destination Transaction target address.
     /// @param value Transaction ether value.
     /// @param data Transaction data payload.
-    /// @return Returns transaction ID.
     function addTransaction(address destination, uint256 value, bytes memory data) internal
         notNull(destination) returns (bytes32 hash) {
         hash = _toHash(destination, value, data);
@@ -284,7 +289,7 @@ contract MultiSigHashed {
         }
     }
 
-    function makeHash(address destination, uint256 value, bytes memory data) public view returns (bytes32 hash) {
+    function makeHash(address destination, uint256 value, bytes memory data) public pure returns (bytes32 hash) {
         return _toHash(destination, value, data);
     }
 
@@ -293,7 +298,7 @@ contract MultiSigHashed {
      */
     /// @dev Returns number of confirmations of a transaction.
     /// @param hash Transaction ID.
-    /// @return Number of confirmations.
+    /// @return count of confirmations.
     function getConfirmationCount(bytes32 hash) public view returns (uint256 count) {
         for (uint256 i = 0; i < owners.length; i++) {
             if (confirmations[hash][owners[i]])  count += 1;
@@ -301,14 +306,13 @@ contract MultiSigHashed {
     }
 
     /// @dev Returns list of owners.
-    /// @return List of owner addresses.
+    /// @return address list of owner addresses.
     function getOwners() public view returns (address[] memory) {
         return owners;
     }
 
     /// @dev Returns array with owner addresses, which confirmed transaction.
     /// @param hash Transaction ID.
-    /// @return Returns array of owner addresses.
     function getConfirmations(bytes32 hash) public view returns (address[] memory _confirmations) {
         address[] memory confirmationsTemp = new address[](owners.length);
         uint256 count = 0;

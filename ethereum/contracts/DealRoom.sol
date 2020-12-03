@@ -1,8 +1,9 @@
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.6.0;
 pragma experimental ABIEncoderV2;
 
-import "./ERC721/IERC721Full.sol";
-import "./ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 
 /// @title DealRoom -- allows atomic swap for ERC20/ERC721
@@ -10,7 +11,7 @@ import "./ERC20/IERC20.sol";
 contract DealRoom {
     address public creator;
     address public owner;
-    IERC721Full public erc721;
+    IERC721 public erc721;
     IERC20 public erc20;
     uint256 public dealCount;
     Deal[] public deals;
@@ -24,7 +25,7 @@ contract DealRoom {
     struct Deal {
         uint256 id;
         IERC20 erc20;
-        IERC721Full erc721;
+        IERC721 erc721;
         uint256 price;
         uint256[] assetItems;
         DealStatus status;
@@ -48,7 +49,7 @@ contract DealRoom {
 
     function makeDeal(
         IERC20 _erc20,
-        IERC721Full _erc721,
+        IERC721 _erc721,
         uint256 _price,
         uint256[] memory _assetItems
     ) public  {

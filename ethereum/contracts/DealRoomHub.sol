@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma experimental ABIEncoderV2;
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.0;
 
 import "./DealRoom.sol";
 import "./multisig/MultiSigHashed.sol";
