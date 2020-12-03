@@ -53,7 +53,6 @@ export default function DealView(props: DealViewProps) {
     }, [props.dealId, props.roomId]);
 
     async function setup() {
-        console.log(`setup(): ${props.dealId}, ${props.roomId}`)
         if (props.dealId == undefined || !props.roomId) {
             return
         }

@@ -31,7 +31,6 @@ export async function deployErc20(owner: string, signer: Signer): Promise<Erc20D
         await contract.transferOwnership(owner)
         await contract.addMinter(owner);  
     }
-    console.log(`Deployed Erc20 contract to ${contract.address}`)
     return contract
 }
 
@@ -41,15 +40,12 @@ export async function deployErc721(owner: string, signer: Signer): Promise<Erc72
         await contract.transferOwnership(owner)
         await contract.addMinter(owner);
     }
-    console.log(`Deployed Erc721 contract to ${contract.address}`)  
     return contract
 }
 
 export async function deployTestContract(signer: Signer): Promise<TestContract>  {
     try {
-        console.log(`deployMultisig()`)
         const contract = await deployContract<TestContract>(signer, artifactTestContract)
-        console.log(`Deployed test contract to ${contract.address}`)
         return contract
     } catch (e) {
         throw `deployTestContract(): ${e}`
@@ -60,9 +56,7 @@ export async function deployTestContract(signer: Signer): Promise<TestContract> 
 
 export async function deployMultisig(owners: string[], approvalsRequired: number, signer: Signer): Promise<MultiSigHashed>  {
     try {
-        console.log(`deployMultisig()`)
         const contract = await deployContract<MultiSigHashed>(signer, artifactMultisig, owners, approvalsRequired)
-        console.log(`Deployed Multisig contract to ${contract.address}`)
         return contract
     } catch (e) {
         throw `deployMultisig(): ${e}`
@@ -71,10 +65,7 @@ export async function deployMultisig(owners: string[], approvalsRequired: number
 }
 
 export async function deployDealRoomHub(owner: string, signer: Signer): Promise<DealRoomHub>  {
-
-    const contract = await deployContract<DealRoomHub>(signer, artifactDealRoomHub)
-    console.log(`Deployed DealRoomHub contract to ${contract.address}`)
-    
+    const contract = await deployContract<DealRoomHub>(signer, artifactDealRoomHub)  
     return contract
 }
 
@@ -112,7 +103,6 @@ export async function deployDealRoom(params: DealRoomCreateParams, owner: string
         } 
 
         const dealRoomDetails = await DealRoomHubContract.functions.getRoom(roomAddress)
-        console.log(`Deal Room Details: ${JSON.stringify(dealRoomDetails)}`)
         return dealRoomDetails;
     }
     catch (e) {

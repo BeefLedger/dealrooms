@@ -31,12 +31,9 @@ const NewDealForm = (props: NewDealProps) => {
 
 
     async function load() {
-
-        console.log('newDealForm: load()')
         if (!props.roomId) {
             return
         }
-        console.log('newDealForm: loading')
 
         let dealRoomController: DealRoomController
         const provider = getMagicProvider()
@@ -71,7 +68,6 @@ const NewDealForm = (props: NewDealProps) => {
                 assetItems
             }
             const updatedDeal = await controller.makeDeal(deal)
-            console.log(JSON.stringify(updatedDeal, undefined, 4))  
             router.push("/room/[room_id]/[deal_id]", `/room/${props.roomId}/${updatedDeal.id}`)
         }
         catch (err) {

@@ -20,7 +20,6 @@ export default function RoomList() {
     }, []);
 
     async function load() {
-        console.log("RoomList.load()")
         const magic = await getMagicProvider()
         const signer = magic.getSigner()
         const rooms = await DealRoomController.getRooms(DEALROOM_HUB, signer)
