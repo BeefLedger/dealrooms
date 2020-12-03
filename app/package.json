@@ -14,7 +14,8 @@
     "contracts:compile": "cd ethereum && truffle compile",
     "remix": "remixd -s ./contracts --remix-ide https://remix.ethereum.org",
     "testrpc": "ganache-cli --db ./ethereum/db  -m abuse forget cool step task knife bargain vacant lemon manual various pride",
-    "dev": "NODE_OPTIONS='--inspect' next dev",
+    "dev": "next dev",
+    "dev2": "NODE_OPTIONS='--inspect' next dev",
     "build": "yarn contracts:build && next build",
     "start": "next start"
   },
