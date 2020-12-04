@@ -1,13 +1,17 @@
 
 import * as artifactDealRoomHub from "../abi/DealRoomHub.json"
-import * as artifactErc20 from "../abi/ERC20Detailed.json"
-import * as artifactErc721 from "../abi/ERC721Detailed.json"
+import * as artifactErc20 from "../abi/Ierc20.json"
+import * as artifactErc721 from "../abi/Ierc721.json"
+import * as artifactTestCoin from "../abi/TestCoin.json"
+import * as artifactTestAsset from "../abi/TestAsset.json"
 import * as artifactMultisig from "../abi/MultiSigHashed.json"
 import * as artifactTestContract from "../abi/TestContract.json"
 
 import { deployContract } from "../../services/chain/contractFactory"
-import { Erc20Detailed } from "../types/Erc20Detailed"
-import { Erc721Detailed } from "../types/Erc721Detailed"
+import { TestCoin } from "../types/TestCoin"
+import { TestAsset } from "../types/TestAsset"
+import { Ierc20 } from "../types/Ierc20"
+import { Ierc721 } from "../types/Ierc721"
 import { DealRoomHub } from "../types/DealRoomHub"
 import { MultiSigHashed } from "../types/MultiSigHashed"
 import { TestContract } from "../types/TestContract"
@@ -18,28 +22,22 @@ import { DealRoomDetails } from "../../services/dealRoomController"
 
 export type DeployedEnvironment = {
     DealRoomHub?: DealRoomHub
-    erc20?: Erc20Detailed
-    erc721?: Erc721Detailed 
+    erc20?: TestCoin
+    erc721?: TestAsset 
 }
 
 export const ERROR_NO_EVENT_FOUND = "NO_EVENT_FOUND"
 export const ERROR_MULTIPLE_EVENTS = "ERROR_MULTIPLE_EVENTS"
 
-export async function deployErc20(owner: string, signer: Signer): Promise<Erc20Detailed>  {
-    const contract = await deployContract<Erc20Detailed>(signer, artifactErc20, "BEEF Token", "BEEF", 1 )
-    if (owner) {
-        await contract.transferOwnership(owner)
-        await contract.addMinter(owner);  
-    }
+export async function deployTestCoin(signer: Signer): Promise<TestCoin> {
+    const contract = await deployContract<TestCoin>(signer, artifactTestCoin )
+
     return contract
 }
 
-export async function deployErc721(owner: string, signer: Signer): Promise<Erc721Detailed>  {
-    const contract = await deployContract<Erc721Detailed>(signer, artifactErc721, "Cattle", "CAT" )
-    if (owner) {
-        await contract.transferOwnership(owner)
-        await contract.addMinter(owner);
-    }
+export async function deployTestAsset(signer: Signer): Promise<TestAsset> {
+    const contract = await deployContract<TestAsset>(signer, artifactTestAsset)
+
     return contract
 }
 
@@ -64,7 +62,7 @@ export async function deployMultisig(owners: string[], approvalsRequired: number
 
 }
 
-export async function deployDealRoomHub(owner: string, signer: Signer): Promise<DealRoomHub>  {
+export async function deployDealRoomHub(signer: Signer): Promise<DealRoomHub>  {
     const contract = await deployContract<DealRoomHub>(signer, artifactDealRoomHub)  
     return contract
 }
@@ -83,7 +81,6 @@ export type DealRoomCreateParams = {
 export async function deployDealRoom(params: DealRoomCreateParams, owner: string, signer: Signer): Promise<DealRoomDetails>  {
     try {
         let roomAddress: string
-        debugger
         const DealRoomHubContract = await getDealRoomHubContract(params.dealRoomHubAddress, signer)
         const tx = await DealRoomHubContract.functions.makeRoom(params)
         const receipt = await tx.wait()
@@ -113,9 +110,9 @@ export async function deployDealRoom(params: DealRoomCreateParams, owner: string
 
 export async function deployAll(signer: Signer): Promise<DeployedEnvironment> {
     const result: DeployedEnvironment = {
-        erc20: await deployErc20("0x658040983DD50DD44826FC7e414626Bb8b8180A9", signer),
-        erc721: await deployErc721("0x658040983DD50DD44826FC7e414626Bb8b8180A9", signer),
-        DealRoomHub: await deployDealRoomHub("0x658040983DD50DD44826FC7e414626Bb8b8180A9", signer),
+        erc20: await deployTestCoin(signer),
+        erc721: await deployTestAsset(signer),
+        DealRoomHub: await deployDealRoomHub(signer),
     }
     return result
 }

@@ -1,13 +1,13 @@
-import * as Erc20DetailedCompiled  from "../../ethereum/abi/ERC20Detailed.json"
-import * as Erc721DetailedCompiled from "../../ethereum/abi/ERC721Detailed.json"
+import * as Erc20DetailedCompiled  from "../../ethereum/abi/Ierc20.json"
+import * as Erc721DetailedCompiled from "../../ethereum/abi/Ierc721.json"
 import * as DealRoomHubCompiled from "../../ethereum/abi/DealRoomHub.json"
 import * as DealRoomCompiled from "../../ethereum/abi/DealRoom.json"
 import * as MultiSigHashedCompiled from "../../ethereum/abi/MultiSigHashed.json"
 
-import { DealRoomHub } from "ethereum/types/DealRoomHub"
+import { DealRoomHub } from "../../ethereum/types/DealRoomHub"
 import { DealRoom } from "../../ethereum/types/DealRoom"
-import { Erc20Detailed } from "../../ethereum/types/Erc20Detailed"
-import { Erc721Detailed } from "../../ethereum/types/Erc721Detailed"
+import { Ierc20 } from "../../ethereum/types/Ierc20"
+import { Ierc721 } from "../../ethereum/types/Ierc721"
 import { MultiSigHashed } from "../../ethereum/types/MultiSigHashed"
 
 import { getContract } from "./contractFactory"
@@ -21,11 +21,11 @@ export async function getDealRoomContract(address: string, signerIdxOrAddressOrS
     return getContract<DealRoom>(address, DealRoomCompiled.abi, signerIdxOrAddressOrSigner) as Promise<DealRoom>
 }
 
-export async function getErc20Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<Erc20Detailed> {
+export async function getErc20Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<Ierc20> {
     return getContract(address, Erc20DetailedCompiled.abi, signerIdxOrAddressOrSigner)
 }
 
-export async function getErc721Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<Erc721Detailed> {
+export async function getErc721Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<Ierc721> {
     return getContract(address, Erc721DetailedCompiled.abi, signerIdxOrAddressOrSigner)
 }
 
