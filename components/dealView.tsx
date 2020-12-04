@@ -69,9 +69,9 @@ export default function DealView(props: DealViewProps) {
         const _assetStatus = await _dealRoomController.getDealAssetStatus(_deal.id)
         const _agentMultiSig = await _dealRoomController.getAgentMultiSigContractAddress()
         const _dealMultiSig = await _dealRoomController.getDealMultiSigContractAddress()
-        const _agentSettleTransaction = await _dealRoomController.getAgentDealSettleTransaction(_deal.id)
-        const _dealSettleTransaction = await _dealRoomController.getDealSettleTransaction(_deal.id)
-        const _agentSettleTransactionCall = await MultiSigController.decodeMultiSigTransaction(_agentSettleTransaction.data)
+        //const _agentSettleTransaction = await _dealRoomController.getAgentDealSettleTransaction(_deal.id)
+        //const _dealSettleTransaction = await _dealRoomController.getDealSettleTransaction(_deal.id)
+        //const _agentSettleTransactionCall = await MultiSigController.decodeMultiSigTransaction(_agentSettleTransaction.data)
         //const _agentSettleTransactionCallWillCall = await MultiSigController.decodeDealRoomTransaction(_agentSettleTransactionCall.params[2].data)
 
         //Set state
@@ -96,9 +96,9 @@ export default function DealView(props: DealViewProps) {
         setDealConfirmations((new BigNumber(_deal.dealConfirmations)).toNumber())
         setAgentMultiSigContractAddress(_agentMultiSig)
         setDealMultiSigContractAddress(_dealMultiSig)
-        setAgentSettleTransaction(_agentSettleTransaction)
-        setDealSettleTransaction(_dealSettleTransaction)
-        setAgentSettleTransactionCall(_agentSettleTransactionCall)
+        //setAgentSettleTransaction(_agentSettleTransaction)
+        //setDealSettleTransaction(_dealSettleTransaction)
+        //setAgentSettleTransactionCall(_agentSettleTransactionCall)
         //setAgentSettleTransactionCallWillCall(_agentSettleTransactionCallWillCall)
 
     }
@@ -140,64 +140,27 @@ export default function DealView(props: DealViewProps) {
         await setup()
     }
 
-    async function handleProposeAgentsApprove() {
+    async function handleProposeSettle() {
         if (!dealRoomController) {
             return
         }
         try {
             setLoading(true)
-            await dealRoomController.proposeAgentsSettleDeal(deal.id)
+            await dealRoomController.proposeSettleDeal(deal.id)
         } finally {
             setLoading(false)
         }
     }
 
-    async function handleProposeMainSettle() {
-        if (!dealRoomController) {
-            return
-        }
-        try {
-            setLoading(true)
-            await dealRoomController.proposeMainSettleDeal(deal.id)
-        } finally {
-            setLoading(false)
-        }
-    }
 
-    const requestAgentsApproveButton = 
+    const requestApproveButton = 
         <Button
-            onClick={handleProposeAgentsApprove}
-            variant="primary"
-        >
-            {loading ? 'Sending...' : 'Propose Agents Sign'}
-        </Button>
-
-    const approveAgentsApproveButton = (
-        <Button
-            onClick={handleProposeAgentsApprove}
-            variant="primary"
-        >
-            {loading ? 'Sending...' : 'Approve Agents Sign'}
-        </Button>
-    )
-
-    const requestSettleMainButton = (
-        <Button
-            onClick={handleProposeMainSettle}
+            onClick={handleProposeSettle}
             variant="primary"
         >
             {loading ? 'Sending...' : 'Propose Settlement'}
         </Button>
-    )
 
-    const approveSettleMainButton = (
-        <Button
-            onClick={handleProposeMainSettle}
-            variant="primary"
-        >
-            {loading ? 'Sending...' : 'Approve Settlement'}
-        </Button>
-    )
 
     if (deal !== null) {
         return (
@@ -361,8 +324,6 @@ export default function DealView(props: DealViewProps) {
                     {loading ? 'Sending...' : 'Withdraw assets'}
                 </Button>
 
-                {requestSettleMainButton}
-                {requestAgentsApproveButton}
                 {}
 
             </>
