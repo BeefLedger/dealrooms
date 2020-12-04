@@ -6,9 +6,6 @@ import abiDecoder from "abi-decoder"
 
 import * as MultiSigCompiled from "../ethereum/abi/MultiSigHashed.json"
 import * as DealRoomCompiled from "../ethereum/abi/DealRoom.json"
-import { TransactionOverrides } from "ethereum/types"
-import { MultiSigWallet } from "ethereum/types/MultiSigWallet"
-import { string } from "yargs"
 import { getMultiSigContract } from "./chain/prefabContractFactory"
 
 export const ERROR_MULTIPLE_SUBMISSION_EVENTS = "MULTIPLE_SUBMISSION_EVENTS"

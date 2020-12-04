@@ -3,9 +3,9 @@ import { Signer, ethers } from "ethers"
 import { ContractReceipt } from "ethers/contract"
 
 import { MultiSigHashed } from "../ethereum/types/MultiSigHashed"
-import { Erc20Detailed } from "../ethereum/types/Erc20Detailed"
+import { Ierc20 } from "../ethereum/types/Ierc20"
 import { DealRoom } from "../ethereum/types/DealRoom"
-import { Erc721Detailed } from "../ethereum/types/Erc721Detailed"
+import { Ierc721 } from "../ethereum/types/Ierc721"
 
 import * as DealRoomCompiled from "../ethereum/abi/DealRoom.json"
 
@@ -69,7 +69,7 @@ export class DealRoomController {
 
     // Deploy a hub contract
     public static async deployHub(signer: Signer): Promise<DealRoomHub> {
-        return Deployer.deployDealRoomHub(await signer.getAddress(), signer)
+        return Deployer.deployDealRoomHub(signer)
     }
 
     // Deploy a room contract
@@ -398,12 +398,12 @@ export class DealRoomController {
 
     }
 
-    private async _getDealTokenContract(id: BigNumberish): Promise<Erc20Detailed> {
+    private async _getDealTokenContract(id: BigNumberish): Promise<Ierc20> {
         const deal = await this.getDeal(id)
         return ContractFactory.getErc20Contract(deal.erc20, this._signer)
     }
 
-    private async _getDealAssetContract(id: BigNumberish): Promise<Erc721Detailed> {
+    private async _getDealAssetContract(id: BigNumberish): Promise<Ierc721> {
         const deal = await this.getDeal(id)
         return ContractFactory.getErc721Contract(deal.erc721, this._signer)
     }
