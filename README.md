@@ -28,7 +28,7 @@ const hubAddress = await DealRoomController.deployHub(signer)
 
 Deploy a new Deal Room:
 
-```
+```typescript
 const dealRoomCreateParams: DealRoomCreateParams = {
     hubAddress: "0x...",
     buyer: "0x...",
@@ -42,7 +42,7 @@ roomAddress = await DealRoomController.deployRoom(dealRoomCreateParams, signer)
 
 Set up a new Deal:
 
-```
+```typescript
 // Make an instance of a DealRoomController
 const dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, signer)
 await dealRoomController.init()
@@ -58,7 +58,7 @@ const myDeal = await dealRoomController.makeDeal({
 
 Seller deposits assets into the escrow contract:
 
-```
+```typescript
 dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, sellerSigner)
 await dealRoomController.init()
 await dealRoomController.depositDealAssets(myDeal.id, [20100123, 20100124, 20100125, 20100126])
@@ -66,7 +66,7 @@ await dealRoomController.depositDealAssets(myDeal.id, [20100123, 20100124, 20100
 
 Buyer deposits coins into the escrow contract:
 
-```
+```typescript
 dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, buyerSigner)
 await dealRoomController.init()
 await dealRoomController.depositDealCoins(myDeal.id, 100)
@@ -74,7 +74,7 @@ await dealRoomController.depositDealCoins(myDeal.id, 100)
 
 Buyer/Seller signs to settle the deal:
 
-```
+```typescript
 dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, agentSigner))
 await dealRoomController.init()
 await dealRoomController.proposeAgentsSettleDeal(myDeal.id)
@@ -82,7 +82,7 @@ await dealRoomController.proposeAgentsSettleDeal(myDeal.id)
 
 Approver signs to settle the deal:
 
-```
+```typescript
 dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, approverSigner)
 await dealRoomController.init()
 await dealRoomController.proposeMainSettleDeal(myDeal.id)
@@ -90,7 +90,7 @@ await dealRoomController.proposeMainSettleDeal(myDeal.id)
 
 Until the deal has settled, the buyer and seller may withdraw their tokens freely. Once the deal has settled, the assets and coins can only be withdrawn by the new owners; the buyer can withdraw assets, the seller can withdraw coins.
 
-```
+```typescript
 dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, sellerSigner)
 await dealRoomController.init()
 await dealRoomController.withdrawDealCoins(myDeal.id)
@@ -117,7 +117,7 @@ Deploy a Hub contract. This is responsible for maintaining a collection of DealR
 ###(static) deployRoom(params: Deployer.DealRoomCreateParams, signer: Signer): Promise\<string\>
 Deploy the contracts for a new DealRoom.
 
-```
+```typescript
 type DealRoomCreateParams = {
     dealRoomHubAddress: string //Address of Hub contract
     buyer: string //Address of signatory
@@ -147,7 +147,7 @@ Return a list of Ethereum address for Deal Room contracts.
 ###makeDeal(deal: Deal): Promise\<Deal\>
 Create a new Deal in the Deal Room. Pass in a Deal struct with the following properties set:
 
-```
+```typescript
 erc20: string // Ethereum address of coin contract
 erc721: string // Ethereum address of token contract
 assetItems: BigNumberish[] // Identifiers of asset items for sale
@@ -157,7 +157,7 @@ price: BigNumber // Requested price
 ###getDeal(dealId: BigNumberish): Promise\<Deal\>
 Get a Deal struct, containing information about the Deal:
 
-```
+```typescript
     id: BigNumberish
     erc20: string
     erc721: string
@@ -187,7 +187,7 @@ Return the number of Coin tokens specified in a deal but not yet deposited in th
 ###getDealAssetStatus(dealId: BigNumberish): Promise<AssetStatus[]>
 Return an array of objects indicating the owner of each asset specified in the Deal.
 
-```
+```typescript
 assetId: BigNumber,
 owner: string
 ```
