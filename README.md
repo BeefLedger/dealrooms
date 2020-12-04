@@ -100,21 +100,20 @@ await dealRoomController.init()
 await dealRoomController.withdrawDealAssets(myDeal.id)
 ```
 
-#DealRoomController methods
+# DealRoomController methods
 
-##Instantiation
+## Instantiation
 
-###constructor(hubAddress: string, dealRoomAddress: string, signer: Signer)
+### constructor(hubAddress: string, dealRoomAddress: string, signer: Signer)
 
 To complete the initialisation, call `init()` after calling the constructor.  Once instantiated, instance methods will operate with the supplied hub, deal room and signer.
 
-##Rooms
+## Rooms
 
-###(static) deployHub(signer: Signer): Promise\<DealRoomHub\> 
+### (static) deployHub(signer: Signer): Promise\<DealRoomHub\> 
 Deploy a Hub contract. This is responsible for maintaining a collection of DealRooms.
 
-
-###(static) deployRoom(params: Deployer.DealRoomCreateParams, signer: Signer): Promise\<string\>
+### (static) deployRoom(params: Deployer.DealRoomCreateParams, signer: Signer): Promise\<string\>
 Deploy the contracts for a new DealRoom.
 
 ```typescript
@@ -128,23 +127,21 @@ type DealRoomCreateParams = {
 }
 ```
 
-
-###getAddress(): Promise\<string\>
+### getAddress(): Promise\<string\>
 Return the Ethereum address of the DealRoom contract.
 
-###getBuyer(): Promise\<string\> 
+### getBuyer(): Promise\<string\> 
 Get the Ethereum address of the Buyer agent
 
-###getSeller(): Promise\<string\>
+### getSeller(): Promise\<string\>
 Get the Ethereum address of the Seller agent
 
-
-###getRooms(hubAddress: string, signer: Signer):Promise\<string[]\>
+### getRooms(hubAddress: string, signer: Signer):Promise\<string[]\>
 Return a list of Ethereum address for Deal Room contracts.
 
-##Deals
+## Deals
 
-###makeDeal(deal: Deal): Promise\<Deal\>
+### makeDeal(deal: Deal): Promise\<Deal\>
 Create a new Deal in the Deal Room. Pass in a Deal struct with the following properties set:
 
 ```typescript
@@ -154,7 +151,7 @@ assetItems: BigNumberish[] // Identifiers of asset items for sale
 price: BigNumber // Requested price
 ```   
 
-###getDeal(dealId: BigNumberish): Promise\<Deal\>
+### getDeal(dealId: BigNumberish): Promise\<Deal\>
 Get a Deal struct, containing information about the Deal:
 
 ```typescript
@@ -170,21 +167,21 @@ Get a Deal struct, containing information about the Deal:
     status: number
 ```
 
-###getDeals(): Promise\<Deal[]\> 
+### getDeals(): Promise\<Deal[]\> 
 Get an array of Deals in the current Room.
 
-###getDealCount(): Promise\<number\>
+### getDealCount(): Promise\<number\>
 Return the number of Deals in the current Room.
 
-##Assets and Coins
+## Assets and Coins
 
-###getDealMissingAssets(id: BigNumberish): Promise\<number\>
+### getDealMissingAssets(id: BigNumberish): Promise\<number\>
 Return an array of Asset tokens specified in a deal but not yet deposited in the escrow contract.
 
-###getDealMissingCoins(id: BigNumberish): Promise\<number\>
+### getDealMissingCoins(id: BigNumberish): Promise\<number\>
 Return the number of Coin tokens specified in a deal but not yet deposited in the escrow contract.
 
-###getDealAssetStatus(dealId: BigNumberish): Promise<AssetStatus[]>
+### getDealAssetStatus(dealId: BigNumberish): Promise<AssetStatus[]>
 Return an array of objects indicating the owner of each asset specified in the Deal.
 
 ```typescript
@@ -192,27 +189,27 @@ assetId: BigNumber,
 owner: string
 ```
 
-###depositDealCoins(id: BigNumberish, amount: BigNumberish): Promise\<ContractReceipt\>
+### depositDealCoins(id: BigNumberish, amount: BigNumberish): Promise\<ContractReceipt\>
 Deposit an amount of Coin tokens into the escrow contract.
 
-###depositDealAssets(id: BigNumberish, items: BigNumberish[]): Promise\<ContractReceipt[]\>
+### depositDealAssets(id: BigNumberish, items: BigNumberish[]): Promise\<ContractReceipt[]\>
 Deposit the specified Asset tokens into the escrow contract.
 
-###withdrawDealCoins(dealId: BigNumberish): Promise<ContractReceipt>
+### withdrawDealCoins(dealId: BigNumberish): Promise<ContractReceipt>
 Withdraw all Coins associated with a given deal.
 
-###withdrawDealAssets(dealId: BigNumberish): Promise<ContractReceipt> 
+### withdrawDealAssets(dealId: BigNumberish): Promise<ContractReceipt> 
 Withdraw all Assets associated with a given deal.
 
-###getMyTokenBalance(id: BigNumberish): Promise\<BigNumberish\>
+### getMyTokenBalance(id: BigNumberish): Promise\<BigNumberish\>
 Return the amount of Coin tokens owned by the current Signer.
 
-###getMyAssetBalance(id: BigNumberish): Promise\<BigNumberish\>
+### getMyAssetBalance(id: BigNumberish): Promise\<BigNumberish\>
 Return a list of Asset tokens owned by the current Signer.
 
-###getAssetOwner(dealId: BigNumberish, assetId: BigNumberish): Promise\<string\>
+### getAssetOwner(dealId: BigNumberish, assetId: BigNumberish): Promise\<string\>
 Return the current owner of a given Asset token.
 
-##Settlement
-###proposeSettleDeal(dealId: BigNumberish): Promise\<string\>
+## Settlement
+### proposeSettleDeal(dealId: BigNumberish): Promise\<string\>
 Sign the Deal as the current Signer, requesting that it be settled.
