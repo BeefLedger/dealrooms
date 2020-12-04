@@ -79,7 +79,7 @@ describe("Deploy dealroom", () => {
     it("Sensor: propose dummy settlement without effect", async() => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.sensorApprover))
         await dealRoomController.init()
-        await dealRoomController.proposeMainSettleDeal(new BigNumber(1000))
+        await dealRoomController.proposeSettleDeal(new BigNumber(1000))
         deal1 = await dealRoomController.getDeal(deal1.id)
         const ms = await dealRoomController._getDealMultiSig()
         const transactions = await ms.getTransactions()
@@ -87,15 +87,6 @@ describe("Deploy dealroom", () => {
         expect(deal1.status).toBe(DealStatus.Open)
     }, 10 * MINUTE_MS)
 
-    it("Sensor: propose settlement", async() => {
-        dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.sensorApprover))
-        await dealRoomController.init()
-        const transactionId = await dealRoomController.proposeMainSettleDeal(deal1.id)
-        deal1 = await dealRoomController.getDeal(deal1.id)
-
-        expect(deal1.dealConfirmations).toEqual(1)
-        expect(deal1.status).toBe(DealStatus.Open)
-    }, 10 * MINUTE_MS)
 
     it("Agent: seller deposit assets", async() => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.seller))
@@ -142,17 +133,27 @@ describe("Deploy dealroom", () => {
     it("Agent: seller signature", async() => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.seller))
         await dealRoomController.init()
-        await dealRoomController.proposeAgentsSettleDeal(deal1.id)
+        await dealRoomController.proposeSettleDeal(deal1.id)
         deal1 = await dealRoomController.getDeal(deal1.id)
         expect(deal1.agentConfirmations).toEqual(1)
-        expect(deal1.dealConfirmations).toEqual(1)
+        expect(deal1.dealConfirmations).toEqual(0)
         expect(deal1.status).toBe(DealStatus.Open)
     }, 1 * MINUTE_MS)
+
+    it("Sensor: propose settlement", async() => {
+        dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.sensorApprover))
+        await dealRoomController.init()
+        const transactionId = await dealRoomController.proposeSettleDeal(deal1.id)
+        deal1 = await dealRoomController.getDeal(deal1.id)
+
+        expect(deal1.dealConfirmations).toEqual(1)
+        expect(deal1.status).toBe(DealStatus.Open)
+    }, 10 * MINUTE_MS)
 
     it("Agent: buyer signature", async() => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.buyer))
         await dealRoomController.init()
-        await dealRoomController.proposeAgentsSettleDeal(deal1.id)
+        await dealRoomController.proposeSettleDeal(deal1.id)
         deal1 = await dealRoomController.getDeal(deal1.id)
         expect(deal1.agentConfirmations).toEqual(2)
         expect(deal1.dealConfirmations).toEqual(2)
@@ -163,7 +164,8 @@ describe("Deploy dealroom", () => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.docApprover))
         await dealRoomController.init()
         deal1 = await dealRoomController.getDeal(deal1.id)
-        await dealRoomController.proposeMainSettleDeal(deal1.id)
+        console.log(JSON.stringify(deal1, undefined, 4))
+        await dealRoomController.proposeSettleDeal(deal1.id)
         deal1 = await dealRoomController.getDeal(deal1.id)
         expect(deal1.agentConfirmations).toEqual(2)
         expect(deal1.dealConfirmations).toEqual(3)
