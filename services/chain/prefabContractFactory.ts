@@ -1,5 +1,5 @@
-import * as Erc20DetailedCompiled  from "../../ethereum/abi/Ierc20.json"
-import * as Erc721DetailedCompiled from "../../ethereum/abi/Ierc721.json"
+import * as Erc20DetailedCompiled  from "../../ethereum/abi/IERC20.json"
+import * as Erc721DetailedCompiled from "../../ethereum/abi/IERC721.json"
 import * as DealRoomHubCompiled from "../../ethereum/abi/DealRoomHub.json"
 import * as DealRoomCompiled from "../../ethereum/abi/DealRoom.json"
 import * as MultiSigHashedCompiled from "../../ethereum/abi/MultiSigHashed.json"

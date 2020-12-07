@@ -1,7 +1,5 @@
 
 import * as artifactDealRoomHub from "../abi/DealRoomHub.json"
-import * as artifactErc20 from "../abi/Ierc20.json"
-import * as artifactErc721 from "../abi/Ierc721.json"
 import * as artifactTestCoin from "../abi/TestCoin.json"
 import * as artifactTestAsset from "../abi/TestAsset.json"
 import * as artifactMultisig from "../abi/MultiSigHashed.json"
@@ -10,8 +8,7 @@ import * as artifactTestContract from "../abi/TestContract.json"
 import { deployContract } from "../../services/chain/contractFactory"
 import { TestCoin } from "../types/TestCoin"
 import { TestAsset } from "../types/TestAsset"
-import { Ierc20 } from "../types/Ierc20"
-import { Ierc721 } from "../types/Ierc721"
+
 import { DealRoomHub } from "../types/DealRoomHub"
 import { MultiSigHashed } from "../types/MultiSigHashed"
 import { TestContract } from "../types/TestContract"
