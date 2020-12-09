@@ -5,7 +5,7 @@ import { ADMIN, TESTRPC_ACCOUNTS } from "../../lib/settings"
 import { getProvider } from "../../services/chain/providerFactory"
 import { Deal, DealRoomController, DealStatus } from "../../services/dealRoomController"
 import { DealRoomCreateParams } from "../../ethereum/deploy/deploy"
-import { DemoEnvironment, setupDemo } from "../../lib/demo/setup"
+import { DemoEnvironment, setupDemo } from "../../lib/testSetup"
 import { BigNumber } from "ethers/utils"
 
 let dealRoomController: DealRoomController

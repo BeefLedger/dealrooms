@@ -3,3 +3,4 @@ ethereum/db
 abi
 ethereum/types
 .next
+dist
