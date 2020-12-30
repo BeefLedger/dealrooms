@@ -1,20 +1,15 @@
 import { BigNumber, BigNumberish, randomBytes } from "ethers/utils"
-import { Signer, ethers } from "ethers"
+import { Signer } from "ethers"
 import { ContractReceipt } from "ethers/contract"
 
-import { MultiSigHashed } from "../ethereum/types/MultiSigHashed"
 import { Ierc20 } from "../ethereum/types/Ierc20"
 import { DealRoom } from "../ethereum/types/DealRoom"
 import { Ierc721 } from "../ethereum/types/Ierc721"
-
 import * as DealRoomCompiled from "../ethereum/abi/DealRoom.json"
-
 import * as Deployer from "../ethereum/deploy/deploy"
-import * as ContractFactory from "./chain/prefabContractFactory"
-import { DealRoomHub } from "ethereum/types/DealRoomHub"
-// import { DealRoomFactory } from "ethereum/types/DealRoomFactory"
+import { DealRoomHub } from "../ethereum/types/DealRoomHub"
 import { MultiSigController, MultiSigTransaction } from "./multiSigController"
-// import { randomInt } from "lib/random"
+import * as ContractFactory from "./chain/prefabContractFactory"
 
 export const ERROR_ROOM_NOT_LOADED = "ROOM_NOT_LOADED"
 

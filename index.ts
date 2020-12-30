@@ -1,3 +1,3 @@
-import * as DealRoom from "./services/dealRoomController" 
-
-exports.DealRoom = DealRoom
+export * from "./services/dealRoomController" 
+export * from "./services/userService" 
+export * from "./services/multiSigController" 

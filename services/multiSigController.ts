@@ -1,9 +1,10 @@
-import { MultiSigHashed } from "ethereum/types/MultiSigHashed"
+
 import { ethers, Signer } from "ethers"
 import { ContractReceipt } from "ethers/contract"
 import { BigNumber, BigNumberish } from "ethers/utils"
 import abiDecoder from "abi-decoder"
 
+import { MultiSigHashed } from "../ethereum/types/MultiSigHashed"
 import * as MultiSigCompiled from "../ethereum/abi/MultiSigHashed.json"
 import * as DealRoomCompiled from "../ethereum/abi/DealRoom.json"
 import { getMultiSigContract } from "./chain/prefabContractFactory"

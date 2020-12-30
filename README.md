@@ -20,6 +20,10 @@ To settle the deal, signatories must sign it. By default, there are 5 possible s
 
 ### Usage
 
+```
+import { DealRoomController } from "dealrooms"
+```
+
 Create a Hub to manage your Deal Rooms:
 
 ```
@@ -110,10 +114,10 @@ To complete the initialisation, call `init()` after calling the constructor.  On
 
 ## Rooms
 
-### (static) deployHub(signer: Signer): Promise\<DealRoomHub\> 
+### [static] deployHub(signer: Signer): Promise\<DealRoomHub\> 
 Deploy a Hub contract. This is responsible for maintaining a collection of DealRooms.
 
-### (static) deployRoom(params: Deployer.DealRoomCreateParams, signer: Signer): Promise\<string\>
+### [static] deployRoom(params: Deployer.DealRoomCreateParams, signer: Signer): Promise\<string\>
 Deploy the contracts for a new DealRoom.
 
 ```typescript
