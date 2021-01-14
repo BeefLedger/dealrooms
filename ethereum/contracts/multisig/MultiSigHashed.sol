@@ -57,7 +57,7 @@ contract MultiSigHashed {
     }
 
     modifier ownerExists(address owner) {
-        require(isOwner[owner], "Owner does not exists");
+        require(isOwner[owner], "Owner does not exist");
         _;
     }
 
