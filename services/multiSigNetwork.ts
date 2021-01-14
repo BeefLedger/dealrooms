@@ -48,7 +48,10 @@ export class MultiSigNetwork {
     }
 
     public async deploy(): Promise<void> {
-        //For each node, deploy the corresponding contract and add the address to the template
+        //For each node, 
+        //deploy the corresponding contract
+        //and add the address to the template
+        //calculate the transaction contents
     }
 
     // Output to a configuration file

@@ -390,7 +390,7 @@ export class DealRoomController {
         if (transactions.length) {
             result = transactions.find((transaction: MultiSigTransaction) => {
                 const decodedTransaction = MultiSigController.decodeMultiSigTransaction(transaction.data)
-                if (decodedTransaction.name === "submitTransaction") { //TODO: Also ceck encoded params are "settle", [dealId]
+                if (decodedTransaction.name === "submitTransaction") { //TODO: Also check encoded params are "settle", [dealId]
                     return true
                 } 
             })
