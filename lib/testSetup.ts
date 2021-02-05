@@ -15,11 +15,12 @@ export const demoEnvironment: DemoEnvironment = {
     erc20Allocations: {}
 }
 
-export async function setupDemo(adminAddress, accounts: any[] ): Promise<DemoEnvironment> {
+export async function setupTest(adminAddress: string, accounts: any[] ): Promise<DemoEnvironment> {
     const provider = await getProvider()
     // Create ERC-721 contract
     // Create ERC-20 contract
     // Create DealRoomHub
+    console.log("Setting up")
     demoEnvironment.deployedEnvironment = await deployAll(provider.getSigner(adminAddress))
 
     let assetId = 0

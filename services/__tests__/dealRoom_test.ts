@@ -5,7 +5,7 @@ import { ADMIN, TESTRPC_ACCOUNTS } from "../../lib/settings"
 import { getProvider } from "../../services/chain/providerFactory"
 import { Deal, DealRoomController, DealStatus } from "../../services/dealRoomController"
 import { DealRoomCreateParams } from "../../ethereum/deploy/deploy"
-import { DemoEnvironment, setupDemo } from "../../lib/testSetup"
+import { DemoEnvironment, setupTest } from "../../lib/testSetup"
 import { BigNumber } from "ethers/utils"
 
 let dealRoomController: DealRoomController
@@ -33,7 +33,7 @@ describe("Deploy dealroom", () => {
     beforeAll(async () => {
         //Deploy ERC20 and ERC720, mint some and assign them
         provider = await getProvider()
-        demoEnvironment = await setupDemo(TESTRPC_ACCOUNTS[1].address, TESTRPC_ACCOUNTS)
+        demoEnvironment = await setupTest(TESTRPC_ACCOUNTS[1].address, TESTRPC_ACCOUNTS)
         dealRoomHubAddress = demoEnvironment.deployedEnvironment.DealRoomHub.address
         sellerOriginalCoinBalance = await demoEnvironment.deployedEnvironment.erc20.balanceOf(ROOM_1.seller)
         buyerOriginalAssetBalance = await demoEnvironment.deployedEnvironment.erc721.balanceOf(ROOM_1.buyer)
