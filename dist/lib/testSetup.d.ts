@@ -9,4 +9,4 @@ export declare type DemoEnvironment = {
     };
 };
 export declare const demoEnvironment: DemoEnvironment;
-export declare function setupDemo(adminAddress: any, accounts: any[]): Promise<DemoEnvironment>;
+export declare function setupTest(adminAddress: string, accounts: any[]): Promise<DemoEnvironment>;

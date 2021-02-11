@@ -29,5 +29,5 @@
   "include": [
     "**/*.ts",
     "./index.ts"
-  ]
+, "next.config.js"  ]
 }

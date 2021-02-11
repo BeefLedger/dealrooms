@@ -15,12 +15,13 @@ export const demoEnvironment = {
     erc721Allocations: {},
     erc20Allocations: {}
 };
-export function setupDemo(adminAddress, accounts) {
+export function setupTest(adminAddress, accounts) {
     return __awaiter(this, void 0, void 0, function* () {
         const provider = yield getProvider();
         // Create ERC-721 contract
         // Create ERC-20 contract
         // Create DealRoomHub
+        console.log("Setting up");
         demoEnvironment.deployedEnvironment = yield deployAll(provider.getSigner(adminAddress));
         let assetId = 0;
         for (const acct of accounts) {

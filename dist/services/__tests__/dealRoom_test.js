@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { ADMIN, TESTRPC_ACCOUNTS } from "../../lib/settings";
 import { getProvider } from "../../services/chain/providerFactory";
 import { DealRoomController, DealStatus } from "../../services/dealRoomController";
-import { setupDemo } from "../../lib/testSetup";
+import { setupTest } from "../../lib/testSetup";
 import { BigNumber } from "ethers/utils";
 let dealRoomController;
 let demoEnvironment;
@@ -32,7 +32,7 @@ describe("Deploy dealroom", () => {
     beforeAll(() => __awaiter(void 0, void 0, void 0, function* () {
         //Deploy ERC20 and ERC720, mint some and assign them
         provider = yield getProvider();
-        demoEnvironment = yield setupDemo(TESTRPC_ACCOUNTS[1].address, TESTRPC_ACCOUNTS);
+        demoEnvironment = yield setupTest(TESTRPC_ACCOUNTS[1].address, TESTRPC_ACCOUNTS);
         dealRoomHubAddress = demoEnvironment.deployedEnvironment.DealRoomHub.address;
         sellerOriginalCoinBalance = yield demoEnvironment.deployedEnvironment.erc20.balanceOf(ROOM_1.seller);
         buyerOriginalAssetBalance = yield demoEnvironment.deployedEnvironment.erc721.balanceOf(ROOM_1.buyer);
