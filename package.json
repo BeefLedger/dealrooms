@@ -14,6 +14,7 @@
   "prepublish": "yarn build",
   "scripts": {
     "test": "jest --runInBand",
+    "test:sigtree": "jest sigTree_test.ts --runInBand",
     "contracts:type": "yarn typechain --target ./node_modules/@typechain/ethers-v4 --outDir ./ethereum/types './ethereum/abi/**/*.json'",
     "contracts:clear": "rm -rf ./ethereum/abi && rm -rf ./ethereum/types",
     "contracts:build": "yarn contracts:clear && yarn contracts:compile && yarn contracts:type",

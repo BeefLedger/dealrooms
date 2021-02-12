@@ -1,0 +1,89 @@
+{
+    "name": "Beef Deal",
+    "nodes": [
+        {
+            "id": "person.buyer",
+            "__type": "Person",
+            "address": "0xAd6ed15133884D83d3A6b93006fd34a13d9E5A7E"
+        },
+        {
+            "id": "person.arbitrator",
+            "__type": "Person",
+            "address": "0xB051764B2da6Aa16b9Bc439BcAd1c309Ad7a32CA"
+        },
+        {
+            "id": "person.seller",
+            "__type": "Person",
+            "address": "0x205742d1d3C6249cb382bA2142eD197d436B326b"
+        },
+        {
+            "id": "person.author1",
+            "__type": "Person",
+            "address": "0xe2724151E5C905A82aF7AB4476748655E22d72D6"
+        },
+        {
+            "id": "person.author2",
+            "__type": "Person",
+            "address": "0x0Ad0a7Aa5395B09435b7cd42Eb254a163a4a5cf9"
+        },
+        {
+            "id": "device.temperature",
+            "__type": "Device",
+            "address": "0x89CFC4E15C4b2fAb2b3029eae40B137B91C2129e"
+        },
+        {
+            "id": "multisig.agents",
+            "__type": "MultiSig",
+            "members": [
+                "person.buyer",
+                "person.arbitrator",
+                "person.seller"
+            ],
+            "requiredSignatures": 2,
+            "transaction": {
+                "destination": "multisig.escrow"
+            }
+        },
+        {
+            "id": "multisig.documents",
+            "__type": "MultiSig",
+            "members": [
+                "person.author1",
+                "person.author2"
+            ],
+            "requiredSignatures": 2,
+            "transaction": {
+                "destination": "multisig.escrow"
+            }
+        },
+        {
+            "id": "multisig.sensors",
+            "__type": "MultiSig",
+            "members": [
+                "device.temperature",
+                "person.buyer"
+            ],
+            "requiredSignatures": 2,
+            "transaction": {
+                "destination": "multisig.escrow"
+            }
+        },
+        {
+            "id": "multisig.escrow",
+            "__type": "MultiSig",
+            "members": [
+                "multisig.agents",
+                "multisig.documents",
+                "multisig.sensors"
+            ],
+            "requiredSignatures": 3,
+            "transaction": {
+                "destination": "escrow",
+                "method": "doSomethingInt",
+                "params": [
+                    "23"
+                ]
+            }
+        }
+    ]
+}
