@@ -17,11 +17,11 @@ export type DealRoomDetails = {
     addr: string
     buyer: string
     seller: string
-    arbitrator: string
-    docApprover: string
-    sensorApprover: string
+    arbitrator?: string
+    docApprover?: string
+    sensorApprover?: string
     dealMultiSig: string
-    agentMultiSig: string
+    agentMultiSig?: string
 }
 
 export type Deal = {

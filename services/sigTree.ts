@@ -2,6 +2,10 @@ import { deployMultisig } from "../ethereum/deploy/deploy"
 import { ethers, Signer } from "ethers"
 import { Provider } from "ethers/providers"
 import * as MultiSigCompiled from "../ethereum/abi/MultiSigHashed.json"
+import { MultiSigController } from "./multiSigController"
+import { getMultiSigContract } from "./chain/prefabContractFactory"
+import { MultiSigHashed } from "ethereum/types/MultiSigHashed"
+import { BigNumber, hashMessage } from "ethers/utils"
 
 export type SigTreeTemplate = {
     name: string
@@ -24,11 +28,13 @@ type SigTreePerson = SigTreeNodeBase
 type SigTreeDevice = SigTreeNodeBase
 type SigTreeContract = SigTreeNodeBase & {
     abi: any
+    contract?: MultiSigHashed
 }
 export type SigTreeMultiSig = SigTreeNodeBase & {
     members: string[]
     requiredSignatures: number
-    transaction: MultiSigTransaction
+    transaction: MultiSigTransaction //The transaction that will be sent to another contact
+    contract?: MultiSigHashed //The instance of the underlying contract
 }
 
 type SigTreeNode = SigTreeContract | SigTreeMultiSig | SigTreePerson | SigTreeDevice
@@ -38,6 +44,8 @@ type MultiSigTransaction = {
     method?: string
     params?: string[]
     encodedData?: string
+    destinationNode: SigTreeNode
+    hash?: string
 }
 export class SigTree {
 
@@ -60,19 +68,19 @@ export class SigTree {
     }
 
     // Load JSON configuration
-    public loadJSON(s: string): Error | undefined {
+    public async loadJSON(s: string):Promise<Error | undefined> {
         const data = JSON.parse(s);
-        return this.load(data);
+        return await this.load(data);
     }
 
-    public load(data: any): Error | undefined {
+    public async load(data: any): Promise<Error | undefined> {
         const oldName = this.name;
         const oldNodes = this._nodes;
         try {
             const { name, nodes } = data
             this.name = name;
             this._nodes = nodes;
-            const err = this.validate()
+            const err = await this.validate()
             if (err) {
                 throw err
             }
@@ -126,12 +134,19 @@ export class SigTree {
 
     // Check for references to undefined nodes
     // Check that there is just one Contract node, with a valid path to it
-    private validate(): Error | null {
+    private async validate(): Promise<Error | null> {
         const multiSigNodes = this.multiSigNodes()
         for (const node of multiSigNodes) {
             if (!node.id) {
                 return new Error(`Missing id for node`)
             }
+            
+            let destinationNode = this.getNode(node.transaction.destination)
+            if (!destinationNode) {
+                return new Error(`Missing destination for node ${node.id}`)
+            }
+            node.transaction.destinationNode = destinationNode
+
             if (!node.members) {
                 return new Error(`Missing members for node ${node.id}`)
             }
@@ -166,12 +181,47 @@ export class SigTree {
         return this._nodes.find((item=>item.id === id))
     }
 
-    public getSigTreeNode(id: string): SigTreeMultiSig | undefined {
+    public getMultiSigNode(id: string): SigTreeMultiSig | undefined {
         const node = this.getNode(id);
+        if (!node) {
+            throw new Error("Node not found")
+        }
+
         if (node.__type === SigTreeNodeType.MultiSig) {
             return node as SigTreeMultiSig
         } else {
             return undefined
+        }
+    }
+
+    // Person or device signs a multisig
+    public async signMultiSig(signer: Signer, id: string): Promise<string> {
+        console.log("** signMultiSig()")
+        const node = this.getMultiSigNode(id)
+        if (!node) {
+            throw new Error("Node not found")
+        }
+        console.log(`signing ${id}`)
+
+        //const { hash, encodedData } = await this._calculateNodeApprovalTransaction(node.transaction.destinationNode)
+        const transaction = await node.contract.submitTransaction(node.transaction.destinationNode.address, 0, node.transaction.encodedData, {gasLimit: new BigNumber("5999999")})
+        const receipt = await transaction.wait() 
+        //Obtain the transaction ID created in the multisig
+        try {
+            if (receipt.events) {
+                const result = await MultiSigController.getSubmissionHash(receipt)
+                /*if (result !== hash) {
+                    console.info(`NODE ${node.id}: Mismatched hashes`)
+                    console.info(`Input: ${node.transaction.destinationNode.address} ${node.transaction.encodedData}`)
+                    console.info(`Result: ${result}`)
+                    console.info(`Expecting: ${hash}`)
+                }*/
+                return result
+            }
+            throw `No submission events`      
+        }
+        catch (e) {
+            throw `Error getting submission results: ${e}`
         }
     }
 
@@ -180,8 +230,8 @@ export class SigTree {
         const memberAddresses = (node.members.map((member)=> {
             return this.getNode(member).address
         }))
-        const contract = await deployMultisig(memberAddresses, node.requiredSignatures, this._signer);
-        node.address = contract.address
+        node.contract = await deployMultisig(memberAddresses, node.requiredSignatures, this._signer);
+        node.address = node.contract.address
     }
 
     private _getContractNode(): SigTreeContract | undefined {
@@ -194,7 +244,7 @@ export class SigTree {
         return this.multiSigNodes().filter(node => node.transaction.destination === nodeId)
     }
 
-    public calculateTransactions() {
+    public async calculateTransactions() {
         const contractNode = this._getContractNode()
         if (!contractNode) {
             throw new Error("Missing contract node")
@@ -208,48 +258,56 @@ export class SigTree {
         const triggerMultiSig = triggerMultiSigs[0]
 
         // Calculate transaction for contract node
-
         triggerMultiSig.transaction.encodedData = new ethers.utils.Interface(contractNode.abi).functions[triggerMultiSig.transaction.method].encode(triggerMultiSig.transaction.params)
 
         // Traverse the tree depth-first calculating the encoded transaction data to call "submitTransaction" for each multisig node
-        this._calculateMemberNodeTransactions(triggerMultiSig)
+        await this._calculateMemberNodeTransactions(triggerMultiSig)
     }
 
     // Recursive function to calculate the transaction data for all nodes above this one
-    private _calculateMemberNodeTransactions(node: SigTreeMultiSig) {
+    private async _calculateMemberNodeTransactions(node: SigTreeMultiSig): Promise<void> {
         //Find MultiSig nodes that need to sign this one
         const memberMultiSigs = this._getMemberNodes(node.id)
         if (memberMultiSigs.length === 0) {
             return
         }
-        const encodedData = this._calculateNodeApprovalTransaction(node)
+        const { encodedData, hash } = await this._calculateNodeApprovalTransaction(node)
+        
         //Calculate transaction for members to sign and call this function recursively
+        // For each member,
         for (const memberMultiSig of memberMultiSigs) {
+            // Pass it the transaction data. All the member nodes will be calling that
             memberMultiSig.transaction.encodedData = encodedData
-            this._calculateMemberNodeTransactions(memberMultiSig)
+            memberMultiSig.transaction.hash = hash
+
+            await this._calculateMemberNodeTransactions(memberMultiSig)
         }
     }
 
-    // Calculate the transaction that others must call to approve me
-    private _calculateNodeApprovalTransaction(node: SigTreeMultiSig): string {
-        return new ethers.utils.Interface(MultiSigCompiled.abi).functions["submitTransaction"].encode([node.address, 0, node.transaction.encodedData])
+    // Calculate the encoded transaction that others must call to approve me
+    // TODO: Check this logic
+    private async _calculateNodeApprovalTransaction(node: SigTreeMultiSig): Promise<{ encodedData: string, hash: string }> {
+        const encodedData = new ethers.utils.Interface(MultiSigCompiled.abi).functions["submitTransaction"].encode([node.transaction.destinationNode.address, 0, node.transaction.encodedData])
+        const hash = await node.contract.makeHash(node.transaction.destinationNode.address, 0, node.transaction.encodedData)
+
+        return {
+            encodedData,
+            hash
+        }
     }
 
-    // Look up node and sign it, triggering a transaction
-    public async signNode(nodeId: string, signer: Signer): Promise<void> {
-
-        const node = this.getNode(nodeId);
-        // Calculate the transaction to send
-
-        throw new Error("Not implemented")
+    public async signatureCount(nodeId: string): Promise<BigNumber> {
+        const node = this.getMultiSigNode(nodeId)
+        return await node.contract.getConfirmationCount(node.transaction.hash)
     }
+
+    /*public async myRequiredSignatures(signer: Signer): Promise<SigTreeMultiSig[]> {
+        // Return all the nodes I need to sign that I haven't signed
+    }*/
 
     // Deploy multisig nodes in workable order, skipping nodes until their member multisigs have been deployed
     public async deploy(signer: Signer, provider: Provider): Promise<void> {
-        console.log("Deploying tree")
-        console.log(`Undeployed: ${this.undeployedMultiSigNodes().length}`)
         while (this.undeployedMultiSigNodes().length > 0) {
-            console.log(`Undeployed: ${this.undeployedMultiSigNodes().length}`)
             for (const node of this.undeployedMultiSigNodes()) {
                 let readyToDeploy = true
                 for (const member of node.members) {              
@@ -261,7 +319,6 @@ export class SigTree {
                 }
                 if (readyToDeploy) {
                     //Deploy node
-                    console.log(`Deploying ${node.id}...`)
                     await this._deployMultiSigNode(node);
                 }
             }
