@@ -36,6 +36,23 @@ contract DealRoomHub {
         address addr
     );
 
+    function makeBasicRoom(address buyer, address seller) public returns (address) {
+        DealRoom room = new DealRoom(buyer, seller);
+        require(buyer != address(0), "BUYER_MISSING");
+        require(seller != address(0), "SELLER_MISSING");   
+
+        //Make a Main multisig, 2/2 with Agents
+        address[] memory mainSignatories = new address[](2);
+        mainSignatories[0] = buyer;
+        mainSignatories[1] = seller; 
+        MultiSigHashed dealMultiSig = new MultiSigHashed(mainSignatories, 2);   
+
+        //Give the room to the Multisig
+        room.changeOwner(address(dealMultiSig));
+
+        emit NewRoomEvent(address(room));
+    }
+
     function makeRoom(MakeRoomParams memory params) public returns (address) {
         DealRoom room = new DealRoom(params.buyer, params.seller);
         require(params.buyer != address(0), "BUYER_MISSING");

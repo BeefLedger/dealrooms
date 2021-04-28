@@ -1,0 +1,402 @@
+import { BigNumber, BigNumberish, randomBytes } from "ethers/utils"
+import { Signer } from "ethers"
+import { ContractReceipt } from "ethers/contract"
+import { AssetStatus, Deal, DealRoomDetails, ERROR_ROOM_NOT_LOADED } from "./dealRoomController"
+import { Ierc20 } from "../ethereum/types/Ierc20"
+import { DealRoom } from "../ethereum/types/DealRoom"
+import { Ierc721 } from "../ethereum/types/Ierc721"
+import * as DealRoomCompiled from "../ethereum/abi/DealRoom.json"
+import * as Deployer from "../ethereum/deploy/deploy"
+import { DealRoomHub } from "../ethereum/types/DealRoomHub"
+import { MultiSigController, MultiSigTransaction } from "./multiSigController"
+import * as ContractFactory from "./chain/prefabContractFactory"
+
+//export const ERROR_ROOM_NOT_LOADED = "ROOM_NOT_LOADED"
+
+
+/*export type Deal = {
+    id?: BigNumberish
+    erc20?: string
+    erc721?: string
+    price?: BigNumber
+    assetItems?: BigNumberish[]
+    dealConfirmations?: number
+    dealTransaction?: MultiSigTransaction
+    status?: number
+}
+
+export type AssetStatus = {
+    assetId: BigNumber,
+    owner: string
+}
+
+export const DealStatus = {
+    Unknown: 0,
+    Open: 1,
+    Cancelled: 2,
+    Settled: 3       
+}
+*/
+export class BasicDealRoomController {
+    private _signer: Signer
+    private _dealRoomAddress?: string
+    public dealRoomContract?: DealRoom
+    public details: DealRoomDetails
+
+    constructor(dealRoomAddress: string, signer: Signer) {
+        this._signer = signer
+        this._dealRoomAddress = dealRoomAddress
+    }
+
+    //--- Public methods ------------------------------------- //
+
+    //--- Static methods
+
+
+    // Deploy a room contract
+    public static async deployRoom(buyer: string, seller: string, signer: Signer): Promise<string> {
+        try {
+            const owner = await signer.getAddress()
+            const dr = await Deployer.deployBasicDealRoom(buyer, seller, signer)
+            return dr.addr
+        }
+        catch (e) {
+            throw Error(`_deployDealRoom: ${e}`)
+        }
+    }
+
+    // Get a list of rooms from a hub
+    public static async getRooms(hubAddress: string, signer: Signer): Promise<string[]> {
+        const hubContract = await ContractFactory.getDealRoomHubContract(hubAddress, signer)
+        return hubContract.getUserRooms(await signer.getAddress())
+    }
+
+    //--- Instance methods
+    
+    // Fetch resources
+    public async init() {
+        // If instantiating with just a dealroom address,
+        if (this._dealRoomAddress) {
+            this.dealRoomContract = await this.getDealRoomContract()
+        } 
+        if (this.dealRoomContract) {
+            this.details = await this.getRoomDetails()
+        }
+    }
+
+    public async depositDealCoins(id: BigNumberish, amount: BigNumberish): Promise<ContractReceipt> {
+        const tokenContract = await this._getDealTokenContract(id)
+        const roomContract = await this._getDealRoomContract()
+        return (await tokenContract.transfer(roomContract.address, amount)).wait()
+    }
+
+    public async depositDealAssets(id: BigNumberish, items: BigNumberish[]): Promise<ContractReceipt[]> {
+        const assetContract = await this._getDealAssetContract(id)
+        const roomContract = await this._getDealRoomContract()
+        const receipts: ContractReceipt[] = []
+        for (const item of items) {
+            receipts.push(await (await assetContract.transferFrom(await this._signer.getAddress(), roomContract.address, item)).wait())
+        }
+        return receipts  
+    }
+
+    private async getRoomDetails(): Promise<DealRoomDetails> {
+        const dealRoomContract = await this.getDealRoomContract()
+        const buyer = await dealRoomContract.buyer()
+        const seller = await dealRoomContract.seller()
+        const dealMultiSig = await dealRoomContract.owner()
+        
+        const addr = dealRoomContract.address
+        const result: DealRoomDetails = {
+            addr,
+            buyer,
+            seller,
+            dealMultiSig
+        }
+        return result
+    }
+
+    public async getMyTokenBalance(id: BigNumberish): Promise<BigNumberish> {
+        const tokenContract = await this._getDealTokenContract(id)
+        return tokenContract.balanceOf(await this._signer.getAddress())
+    }
+
+    public async getMyAssetBalance(id: BigNumberish): Promise<BigNumberish> {
+        const assetContract = await this._getDealAssetContract(id)
+        return assetContract.balanceOf(await this._signer.getAddress())
+    }
+
+    public async getAssetOwner(dealId: BigNumberish, assetId: BigNumberish): Promise<string> {
+        const assetContract = await this._getDealAssetContract(dealId)
+        return assetContract.ownerOf(assetId)
+    }
+
+    public async getDealRoomContract(): Promise<DealRoom> {
+        return this._getDealRoomContract()
+    }
+
+    public async getBuyer(): Promise<string> {
+        const contract: DealRoom = await this._getDealRoomContract()
+        return await contract.getBuyer()
+    }
+
+    public async getSeller(): Promise<string> {
+        const contract: DealRoom = await this._getDealRoomContract()
+        return await contract.getSeller()
+    }
+
+    public async getAddress(): Promise<string> {
+        //If already cached, return it
+        if (this._dealRoomAddress) {
+            return this._dealRoomAddress
+        } 
+        //Otherwise, fetch it (which will cache it for next time)
+        else {
+            const contract = await this._getDealRoomContract()
+            return contract.address
+        }
+    }
+
+    public async makeDeal(deal: Deal): Promise<Deal> {
+        const nextDealId = await this.getDealCount()
+        const contract = await this._getDealRoomContract()
+        const tx = await contract.makeDeal(deal.erc20, deal.erc721, deal.price, deal.assetItems)
+        const receipt = await tx.wait()
+        
+        return this.getDeal(nextDealId)
+    }
+
+    public async getDeal(dealId: BigNumberish): Promise<Deal> {
+        try {
+            // Get deal from contract
+            const contract = await this._getDealRoomContract()
+            let dealStruct: any
+            try {
+                dealStruct = await contract.getDeal(dealId)
+                
+            } catch (e) {
+                throw new Error("Deal not found")
+            }
+            
+            // Get multisig from Room
+            const dealMultiSig: MultiSigController = await this._getDealMultiSig();
+            
+            // Get deal transaction and confirmations (if any) from main multisig
+            const dealTransaction = await this._getDealSettleTransaction(dealId)
+            let dealConfirmations: number = 0
+            if (dealTransaction) {
+                dealConfirmations = (await dealMultiSig.getConfirmations(dealTransaction.hash)).length
+            }
+            
+            // Return the Deal
+            return {
+                id: dealId,
+                erc20: dealStruct.erc20,
+                erc721: dealStruct.erc721,
+                price: dealStruct.price,
+                assetItems: dealStruct.assetItems.map(item=>item.toNumber()),
+                dealTransaction,
+                dealConfirmations,
+                status: dealStruct.status,
+            } as Deal
+        }
+        catch (e) {
+            console.error(e)
+            return null
+        }
+    }
+
+    public async getDealCount(): Promise<number> {
+        const contract = await this._getDealRoomContract()
+        return (await contract.getDealCount()).toNumber()
+    }
+
+    public async getDeals(): Promise<Deal[]> {
+        try {
+            // const contract = await this._getDealRoomContract()
+            const dealCount = await this.getDealCount()
+            const result: Deal[] = []
+            for (let i = 0; i < dealCount ; i ++) {
+                result.push(await this.getDeal(i))
+            }
+            return result
+        }
+        catch (e) {
+            throw Error(`getDeals(): ${e}`)
+        }
+    }
+    public async getDealMissingAssets(id: BigNumberish): Promise<number> {
+        const contract = await this._getDealRoomContract()
+        return (await contract.missingDealAssets(id)).toNumber()
+    }
+
+    public async getDealAssetStatus(dealId: BigNumberish): Promise<AssetStatus[]> {
+        const deal = await this.getDeal(dealId)
+        
+        const results: AssetStatus[] = []
+        for (const assetId of deal.assetItems) {
+            try {
+                const owner = await this.getAssetOwner(dealId, assetId)
+                results.push({
+                    assetId: new BigNumber(assetId),
+                    owner
+                })
+            } catch (e) {
+                console.warn(`Error getting asset status for ${assetId}: ${e}`)
+            }
+
+        }
+        return results
+    }
+
+    public async getDealMissingCoins(id: BigNumberish): Promise<number> {
+        const contract = await this._getDealRoomContract()
+        return (await contract.missingDealCoins(id)).toNumber()
+    }
+
+    public async proposeSettleDeal(dealId: BigNumberish): Promise<string> {
+        if ([this.details.buyer, this.details.seller].includes(await this.signerAddress())) {
+            return this._proposeAgentsSettleDeal(dealId)
+        } else {
+            return this._proposeMainSettleDeal(dealId) 
+        }
+    }
+
+    public async withdrawDealCoins(dealId: BigNumberish): Promise<ContractReceipt> {
+        const contract = await this._getDealRoomContract()
+        const transaction = await contract.withdrawDealCoins(dealId)
+        const receipt = await transaction.wait() 
+        return receipt      
+    }
+
+    public async withdrawDealAssets(dealId: BigNumberish): Promise<ContractReceipt> {
+        const contract = await this._getDealRoomContract()
+        const deal = await this.getDeal(dealId)
+        const transaction = await contract.withdrawDealAssets(dealId, deal.assetItems.length)
+        const receipt = await transaction.wait() 
+        return receipt      
+    }
+
+    public getAgentMultiSigContractAddress(): string {
+        return this.details.agentMultiSig
+    }
+
+    public getDealMultiSigContractAddress(): string {
+        return this.details.dealMultiSig
+    }
+
+    //--- Private methods ------------------------------------- //
+
+    private async signerAddress(): Promise<string> {
+        return this._signer.getAddress();
+    }
+    
+    // TODO: Cache the contract
+    private async _getDealRoomContract(): Promise<DealRoom> {
+        try {
+            //Connect to the contract with my signer
+            const contract = await ContractFactory.getDealRoomContract(this._dealRoomAddress, this._signer)
+            return contract
+        }
+        catch (e) {
+            throw Error(`Failed to get DealRoom contract: ${e}`)
+        }
+    }
+
+    private async _getDealTokenContract(id: BigNumberish): Promise<Ierc20> {
+        const deal = await this.getDeal(id)
+        return ContractFactory.getErc20Contract(deal.erc20, this._signer)
+    }
+
+    private async _getDealAssetContract(id: BigNumberish): Promise<Ierc721> {
+        const deal = await this.getDeal(id)
+        return ContractFactory.getErc721Contract(deal.erc721, this._signer)
+    }
+
+    public async _getDealMultiSig(): Promise<MultiSigController> {
+        if (!this.details) {
+            throw new Error(ERROR_ROOM_NOT_LOADED)
+        }
+        const msController: MultiSigController = new MultiSigController(this.details.dealMultiSig, this._signer)
+        await msController.init()
+        return msController
+    }
+
+    private async _getAgentMultiSig(): Promise<MultiSigController> {
+        if (!this.details) {
+            throw new Error(ERROR_ROOM_NOT_LOADED)
+        }
+        const msController: MultiSigController = new MultiSigController(this.details.agentMultiSig, this._signer)
+        await msController.init()
+        return msController
+    }
+
+    private async _getDealSettleTransaction(dealId: BigNumberish): Promise<MultiSigTransaction | null> {
+        let result: MultiSigTransaction = null
+        const multiSigContract = await this._getDealMultiSig()
+        // Find transaction that corresponds to settle(dealId)
+        const transactions = await multiSigContract.getTransactions()
+        if (transactions.length) {
+            result = transactions.find((transaction: MultiSigTransaction) => {
+                const decodedTransaction = MultiSigController.decodeDealRoomTransaction(transaction.data)
+                if (decodedTransaction.name === "settle" && Number(decodedTransaction.params[0].value) === dealId) 
+                return true
+            })        
+            return result ?? null
+        } else {
+            return null
+        }    
+    }
+
+    private async _getAgentDealSettleTransaction(dealId: BigNumberish): Promise<MultiSigTransaction | null> {
+        let result: MultiSigTransaction = null
+        const multiSigContract = await this._getAgentMultiSig()
+        const transactions = await multiSigContract.getTransactions()
+        if (transactions.length) {
+            result = transactions.find((transaction: MultiSigTransaction) => {
+                const decodedTransaction = MultiSigController.decodeMultiSigTransaction(transaction.data)
+                if (decodedTransaction.name === "submitTransaction") { //TODO: Also check encoded params are "settle", [dealId]
+                    return true
+                } 
+            })
+            return result
+        } else {
+            return null
+        }       
+    }
+
+    // Send a new transaction to the main multisig to settle the deal
+    private async _proposeMainSettleDeal(dealId: BigNumberish): Promise<string> {
+
+        const dealRoomContract: DealRoom = await this.getDealRoomContract()
+        const dealMultiSig: MultiSigController = await this._getDealMultiSig();
+
+        const hash = await dealMultiSig.submitMultiSigTransaction(
+            dealRoomContract.address,
+            DealRoomCompiled.abi,
+            "settle",
+            [dealId]
+        )
+        return hash
+    }
+
+    // Send a new transaction to the agents multisig to "approve" the deal in the main multisig
+    private async _proposeAgentsSettleDeal(dealId: BigNumberish): Promise<string> {
+
+        const deal: Deal = await this.getDeal(dealId)
+        const agentMultiSig: MultiSigController = await this._getAgentMultiSig();
+        
+        //Submit a transaction to approve a transaction
+        const roomContract = await this._getDealRoomContract()
+
+        // Make a new agent proposal to approve deal settlement proposal
+        const hash = await agentMultiSig.submitDuplexMultiSigProposal(
+            this.getDealMultiSigContractAddress(),
+            roomContract.address,
+            DealRoomCompiled.abi,
+            "settle",
+            [dealId],
+        )
+        return hash
+    }
+}

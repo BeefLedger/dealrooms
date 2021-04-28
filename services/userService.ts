@@ -1,6 +1,6 @@
 import { Magic, MagicUserMetadata } from 'magic-sdk';
 import { ethers } from 'ethers';
-
+/*
 export async function getUser(): Promise<MagicUserMetadata | null> {
     const magic = getMagicLink();
     const isLoggedIn = await magic.user.isLoggedIn();
@@ -35,3 +35,4 @@ export function getMagicLink() {
 export function getMagicProvider() {
     return new ethers.providers.Web3Provider(getMagicLink().rpcProvider)
 }
+*/

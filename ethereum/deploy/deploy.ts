@@ -16,6 +16,7 @@ import { TestContract } from "../types/TestContract"
 import { Signer } from "ethers"
 import { getDealRoomHubContract } from "../../services/chain/prefabContractFactory"
 import { DealRoomDetails } from "../../services/dealRoomController"
+import { DealRoom } from "ethereum/types/DealRoom"
 
 export type DeployedEnvironment = {
     DealRoomHub?: DealRoomHub
@@ -45,9 +46,7 @@ export async function deployTestContract(signer: Signer): Promise<TestContract> 
     } catch (e) {
         throw `deployTestContract(): ${e}`
     }
-
 }
-
 
 export async function deployMultisig(owners: string[], approvalsRequired: number, signer: Signer): Promise<MultiSigHashed>  {
     try {
@@ -56,7 +55,17 @@ export async function deployMultisig(owners: string[], approvalsRequired: number
     } catch (e) {
         throw `deployMultisig(): ${e}`
     }
+}
 
+export async function deployBasicDealRoom(buyer: string, seller: string, signer: Signer): Promise<DealRoom>  {
+    try {
+        const multisig = await deployContract<MultiSigHashed>(signer, artifactMultisig, [buyer, seller], 2)
+        const dealRoom = await deployContract<DealRoom>(signer, buyer, seller)
+        await dealRoom.changeOwner(multisig.address)
+        return dealRoom
+    } catch (e) {
+        throw `deployMultisig(): ${e}`
+    }
 }
 
 export async function deployDealRoomHub(signer: Signer): Promise<DealRoomHub>  {
@@ -72,8 +81,6 @@ export type DealRoomCreateParams = {
     docApprover: string
     sensorApprover: string
 }
-
-
 
 export async function deployDealRoom(params: DealRoomCreateParams, owner: string, signer: Signer): Promise<DealRoomDetails>  {
     try {
