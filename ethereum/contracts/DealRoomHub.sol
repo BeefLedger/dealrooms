@@ -50,6 +50,19 @@ contract DealRoomHub {
         //Give the room to the Multisig
         room.changeOwner(address(dealMultiSig));
 
+        //===Record room details (without upsetting the compiler)
+        //Add to list
+        rooms.push(address(room));
+        //Index by buyer and seller
+        roomsByUser[buyer].push(address(room));
+        roomsByUser[seller].push(address(room));
+
+        //Index by address
+        roomDetailsByAddress[address(room)].addr = address(room);
+        roomDetailsByAddress[address(room)].buyer = buyer;
+        roomDetailsByAddress[address(room)].seller = seller;
+        roomDetailsByAddress[address(room)].dealMultiSig = address(dealMultiSig);
+
         emit NewRoomEvent(address(room));
     }
 

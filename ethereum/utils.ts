@@ -1,7 +1,9 @@
 import { Signer } from "ethers";
 import { BigNumberish, parseEther } from "ethers/utils";
+export const NULL_ADDRESS = "0x0000000000000000000000000000000000000000"
 
 export async function sendEth(to: string, amount: BigNumberish, signer: Signer) {
+    console.log(`Sending ETH to ${to}`)
     let transaction = {
         to,
         value: parseEther(amount.toString())

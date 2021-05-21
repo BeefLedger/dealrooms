@@ -21,7 +21,7 @@ export const TESTRPC_ACCOUNTS = [
     },
     {
         address: "0x0Ad0a7Aa5395B09435b7cd42Eb254a163a4a5cf9",
-        name: "Ella Ernshaw"
+        name: "Ella Ernshaw (Doc approver)"
     },
     {
         address: "0xAd6ed15133884D83d3A6b93006fd34a13d9E5A7E",

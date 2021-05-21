@@ -25,5 +25,11 @@ export declare type DealRoomCreateParams = {
     docApprover: string;
     sensorApprover: string;
 };
+export declare type DealRoomBasicCreateParams = {
+    dealRoomHubAddress: string;
+    buyer: string;
+    seller: string;
+};
 export declare function deployDealRoom(params: DealRoomCreateParams, owner: string, signer: Signer): Promise<DealRoomDetails>;
+export declare function deployBasicDealRoom(params: DealRoomBasicCreateParams, owner: string, signer: Signer): Promise<DealRoomDetails>;
 export declare function deployAll(signer: Signer): Promise<DeployedEnvironment>;

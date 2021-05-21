@@ -16,7 +16,8 @@ import { TestContract } from "../types/TestContract"
 import { Signer } from "ethers"
 import { getDealRoomHubContract } from "../../services/chain/prefabContractFactory"
 import { DealRoomDetails } from "../../services/dealRoomController"
-import { DealRoom } from "ethereum/types/DealRoom"
+import { DealRoom } from "../../ethereum/types/DealRoom"
+// import { DealRoom } from "ethereum/types/DealRoom"
 
 export type DeployedEnvironment = {
     DealRoomHub?: DealRoomHub
@@ -57,17 +58,6 @@ export async function deployMultisig(owners: string[], approvalsRequired: number
     }
 }
 
-export async function deployBasicDealRoom(buyer: string, seller: string, signer: Signer): Promise<DealRoom>  {
-    try {
-        const multisig = await deployContract<MultiSigHashed>(signer, artifactMultisig, [buyer, seller], 2)
-        const dealRoom = await deployContract<DealRoom>(signer, buyer, seller)
-        await dealRoom.changeOwner(multisig.address)
-        return dealRoom
-    } catch (e) {
-        throw `deployMultisig(): ${e}`
-    }
-}
-
 export async function deployDealRoomHub(signer: Signer): Promise<DealRoomHub>  {
     const contract = await deployContract<DealRoomHub>(signer, artifactDealRoomHub)  
     return contract
@@ -80,6 +70,13 @@ export type DealRoomCreateParams = {
     arbitrator: string
     docApprover: string
     sensorApprover: string
+}
+
+
+export type DealRoomBasicCreateParams = {
+    dealRoomHubAddress: string
+    buyer: string
+    seller: string
 }
 
 export async function deployDealRoom(params: DealRoomCreateParams, owner: string, signer: Signer): Promise<DealRoomDetails>  {
@@ -109,8 +106,37 @@ export async function deployDealRoom(params: DealRoomCreateParams, owner: string
     catch (e) {
         console.error("deployDealRoom()", e)
     }
-
 }
+
+export async function deployBasicDealRoom(params: DealRoomBasicCreateParams, owner: string, signer: Signer): Promise<DealRoomDetails>  {
+    try {
+        let roomAddress: string
+        const DealRoomHubContract = await getDealRoomHubContract(params.dealRoomHubAddress, signer)
+        const tx = await DealRoomHubContract.functions.makeBasicRoom(params.buyer, params.seller)
+        const receipt = await tx.wait()
+
+        //TODO: Make this a generic event finder
+        const newRoomEvents = receipt.events?.filter(evt => evt.event === 'NewRoomEvent')
+        if (newRoomEvents) { 
+            if (newRoomEvents.length > 0) {
+                if (newRoomEvents.length === 1) {
+                    roomAddress = (newRoomEvents[0]?.args as any).addr
+                } else {
+                    throw new Error(ERROR_MULTIPLE_EVENTS)
+                }
+            }
+        } else {
+            throw new Error(ERROR_NO_EVENT_FOUND)
+        } 
+
+        const dealRoomDetails = await DealRoomHubContract.functions.getRoom(roomAddress)
+        return dealRoomDetails;
+    }
+    catch (e) {
+        console.error("deployDealRoom()", e)
+    }
+}
+
 
 export async function deployAll(signer: Signer): Promise<DeployedEnvironment> {
     const result: DeployedEnvironment = {

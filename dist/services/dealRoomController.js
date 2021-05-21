@@ -13,6 +13,8 @@ import * as Deployer from "../ethereum/deploy/deploy";
 import { MultiSigController } from "./multiSigController";
 import * as ContractFactory from "./chain/prefabContractFactory";
 export const ERROR_ROOM_NOT_LOADED = "ROOM_NOT_LOADED";
+export const ERROR_NO_AGENT_MULTISIG = "NO_AGENT_MULTISIG";
+export const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const DealStatus = {
     Unknown: 0,
     Open: 1,
@@ -46,6 +48,17 @@ export class DealRoomController {
             }
         });
     }
+    static deployBasicRoom(params, signer) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const dr = yield Deployer.deployBasicDealRoom(params, yield signer.getAddress(), signer);
+                return dr.addr;
+            }
+            catch (e) {
+                throw Error(`_deployDealRoom: ${e}`);
+            }
+        });
+    }
     // Get a list of rooms from a hub
     static getRooms(hubAddress, signer) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -64,6 +77,9 @@ export class DealRoomController {
             this.dealRoomHubContract = yield this._getDealRoomHubContract();
             this.details = yield this._getRoomDetails();
         });
+    }
+    isBasic() {
+        return this.details.agentMultiSig === NULL_ADDRESS;
     }
     depositDealCoins(id, amount) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -109,7 +125,8 @@ export class DealRoomController {
     getBuyer() {
         return __awaiter(this, void 0, void 0, function* () {
             const contract = yield this._getDealRoomContract();
-            return yield contract.getBuyer();
+            const buyer = yield contract.getBuyer();
+            return buyer;
         });
     }
     getSeller() {
@@ -133,11 +150,14 @@ export class DealRoomController {
     }
     makeDeal(deal) {
         return __awaiter(this, void 0, void 0, function* () {
-            const nextDealId = yield this.getDealCount(); //randomInt(2^32)
+            const dealId = yield this.getDealCount(); //randomInt(2^32)
             const contract = yield this._getDealRoomContract();
             const tx = yield contract.makeDeal(deal.erc20, deal.erc721, deal.price, deal.assetItems);
             const receipt = yield tx.wait();
-            return this.getDeal(nextDealId);
+            console.log("Made deal");
+            const result = yield this.getDeal(dealId);
+            console.log(`Fetched deal ${JSON.stringify(result)}`);
+            return result;
         });
     }
     getDeal(dealId) {
@@ -162,10 +182,15 @@ export class DealRoomController {
                     dealConfirmations = (yield dealMultiSig.getConfirmations(dealTransaction.hash)).length;
                 }
                 // Get agent transaction and confirmations (if any) from agent multisig
-                const agentTransaction = yield this._getAgentDealSettleTransaction(dealId); //TODO: Optimise this
+                let agentTransaction = null;
                 let agentConfirmations = 0;
-                if (agentTransaction) {
-                    agentConfirmations = (yield agentMultiSig.getConfirmations(agentTransaction.hash)).length;
+                if (this.details.agentMultiSig !== NULL_ADDRESS) {
+                    if (agentMultiSig) {
+                        const agentTransaction = yield this._getAgentDealSettleTransaction(dealId); //TODO: Optimise this
+                        if (agentTransaction) {
+                            agentConfirmations = (yield agentMultiSig.getConfirmations(agentTransaction.hash)).length;
+                        }
+                    }
                 }
                 // Return the Deal
                 return {
@@ -242,7 +267,7 @@ export class DealRoomController {
     }
     proposeSettleDeal(dealId) {
         return __awaiter(this, void 0, void 0, function* () {
-            if ([this.details.arbitrator, this.details.buyer, this.details.seller].includes(yield this.signerAddress())) {
+            if (!this.isBasic() && [this.details.arbitrator, this.details.buyer, this.details.seller].includes(yield this.signerAddress())) {
                 return this._proposeAgentsSettleDeal(dealId);
             }
             else {
@@ -335,6 +360,9 @@ export class DealRoomController {
             if (!this.details) {
                 throw new Error(ERROR_ROOM_NOT_LOADED);
             }
+            if (!this.details.agentMultiSig) {
+                throw new Error(ERROR_NO_AGENT_MULTISIG);
+            }
             const msController = new MultiSigController(this.details.agentMultiSig, this._signer);
             yield msController.init();
             return msController;
@@ -372,7 +400,7 @@ export class DealRoomController {
             if (transactions.length) {
                 result = transactions.find((transaction) => {
                     const decodedTransaction = MultiSigController.decodeMultiSigTransaction(transaction.data);
-                    if (decodedTransaction.name === "submitTransaction") { //TODO: Also ceck encoded params are "settle", [dealId]
+                    if (decodedTransaction.name === "submitTransaction") { //TODO: Also check encoded params are "settle", [dealId]
                         return true;
                     }
                 });

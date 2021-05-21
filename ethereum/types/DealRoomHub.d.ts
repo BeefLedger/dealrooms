@@ -12,6 +12,10 @@ import {
 
 interface DealRoomHubInterface extends Interface {
   functions: {
+    makeBasicRoom: TypedFunctionDescription<{
+      encode([buyer, seller]: [string, string]): string;
+    }>;
+
     makeRoom: TypedFunctionDescription<{
       encode([params]: [
         {
@@ -60,6 +64,18 @@ export class DealRoomHub extends Contract {
   interface: DealRoomHubInterface;
 
   functions: {
+    makeBasicRoom(
+      buyer: string,
+      seller: string,
+      overrides?: TransactionOverrides
+    ): Promise<ContractTransaction>;
+
+    "makeBasicRoom(address,address)"(
+      buyer: string,
+      seller: string,
+      overrides?: TransactionOverrides
+    ): Promise<ContractTransaction>;
+
     makeRoom(
       params: {
         buyer: string;
@@ -154,6 +170,18 @@ export class DealRoomHub extends Contract {
       overrides?: TransactionOverrides
     ): Promise<ContractTransaction>;
   };
+
+  makeBasicRoom(
+    buyer: string,
+    seller: string,
+    overrides?: TransactionOverrides
+  ): Promise<ContractTransaction>;
+
+  "makeBasicRoom(address,address)"(
+    buyer: string,
+    seller: string,
+    overrides?: TransactionOverrides
+  ): Promise<ContractTransaction>;
 
   makeRoom(
     params: {
@@ -254,6 +282,18 @@ export class DealRoomHub extends Contract {
   };
 
   estimate: {
+    makeBasicRoom(
+      buyer: string,
+      seller: string,
+      overrides?: TransactionOverrides
+    ): Promise<BigNumber>;
+
+    "makeBasicRoom(address,address)"(
+      buyer: string,
+      seller: string,
+      overrides?: TransactionOverrides
+    ): Promise<BigNumber>;
+
     makeRoom(
       params: {
         buyer: string;

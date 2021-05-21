@@ -6,6 +6,8 @@ import * as Deployer from "../ethereum/deploy/deploy";
 import { DealRoomHub } from "../ethereum/types/DealRoomHub";
 import { MultiSigController, MultiSigTransaction } from "./multiSigController";
 export declare const ERROR_ROOM_NOT_LOADED = "ROOM_NOT_LOADED";
+export declare const ERROR_NO_AGENT_MULTISIG = "NO_AGENT_MULTISIG";
+export declare const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 export declare type DealRoomDetails = {
     addr: string;
     buyer: string;
@@ -47,9 +49,11 @@ export declare class DealRoomController {
     details?: DealRoomDetails;
     static deployHub(signer: Signer): Promise<DealRoomHub>;
     static deployRoom(params: Deployer.DealRoomCreateParams, signer: Signer): Promise<string>;
+    static deployBasicRoom(params: Deployer.DealRoomBasicCreateParams, signer: Signer): Promise<string>;
     static getRooms(hubAddress: string, signer: Signer): Promise<string[]>;
     constructor(hubAddress: string, dealRoomAddress: string, signer: Signer);
     init(): Promise<void>;
+    isBasic(): boolean;
     depositDealCoins(id: BigNumberish, amount: BigNumberish): Promise<ContractReceipt>;
     depositDealAssets(id: BigNumberish, items: BigNumberish[]): Promise<ContractReceipt[]>;
     getMyTokenBalance(id: BigNumberish): Promise<BigNumberish>;

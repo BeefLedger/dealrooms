@@ -87,6 +87,37 @@ export function deployDealRoom(params, owner, signer) {
         }
     });
 }
+export function deployBasicDealRoom(params, owner, signer) {
+    var _a, _b;
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            let roomAddress;
+            const DealRoomHubContract = yield getDealRoomHubContract(params.dealRoomHubAddress, signer);
+            const tx = yield DealRoomHubContract.functions.makeBasicRoom(params.buyer, params.seller);
+            const receipt = yield tx.wait();
+            //TODO: Make this a generic event finder
+            const newRoomEvents = (_a = receipt.events) === null || _a === void 0 ? void 0 : _a.filter(evt => evt.event === 'NewRoomEvent');
+            if (newRoomEvents) {
+                if (newRoomEvents.length > 0) {
+                    if (newRoomEvents.length === 1) {
+                        roomAddress = ((_b = newRoomEvents[0]) === null || _b === void 0 ? void 0 : _b.args).addr;
+                    }
+                    else {
+                        throw new Error(ERROR_MULTIPLE_EVENTS);
+                    }
+                }
+            }
+            else {
+                throw new Error(ERROR_NO_EVENT_FOUND);
+            }
+            const dealRoomDetails = yield DealRoomHubContract.functions.getRoom(roomAddress);
+            return dealRoomDetails;
+        }
+        catch (e) {
+            console.error("deployDealRoom()", e);
+        }
+    });
+}
 export function deployAll(signer) {
     return __awaiter(this, void 0, void 0, function* () {
         const result = {

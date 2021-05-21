@@ -8,8 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { parseEther } from "ethers/utils";
+export const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 export function sendEth(to, amount, signer) {
     return __awaiter(this, void 0, void 0, function* () {
+        console.log(`Sending ETH to ${to}`);
         let transaction = {
             to,
             value: parseEther(amount.toString())

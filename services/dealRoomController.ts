@@ -2,6 +2,7 @@ import { BigNumber, BigNumberish, randomBytes } from "ethers/utils"
 import { Signer } from "ethers"
 import { ContractReceipt } from "ethers/contract"
 
+
 import { Ierc20 } from "../ethereum/types/Ierc20"
 import { DealRoom } from "../ethereum/types/DealRoom"
 import { Ierc721 } from "../ethereum/types/Ierc721"
@@ -12,6 +13,8 @@ import { MultiSigController, MultiSigTransaction } from "./multiSigController"
 import * as ContractFactory from "./chain/prefabContractFactory"
 
 export const ERROR_ROOM_NOT_LOADED = "ROOM_NOT_LOADED"
+export const ERROR_NO_AGENT_MULTISIG = "NO_AGENT_MULTISIG"
+export const NULL_ADDRESS = "0x0000000000000000000000000000000000000000"
 
 export type DealRoomDetails = {
     addr: string
@@ -57,7 +60,6 @@ export class DealRoomController {
     public dealRoomHubContract?: DealRoomHub
     public details?: DealRoomDetails
 
-
     //--- Public methods ------------------------------------- //
 
     //--- Static methods
@@ -71,6 +73,17 @@ export class DealRoomController {
     public static async deployRoom(params: Deployer.DealRoomCreateParams, signer: Signer): Promise<string> {
         try {
             const dr = await Deployer.deployDealRoom(params, await signer.getAddress(), signer)
+            return dr.addr;
+        }
+        catch (e) {
+            throw Error(`_deployDealRoom: ${e}`)
+        }
+    }
+
+
+    public static async deployBasicRoom(params: Deployer.DealRoomBasicCreateParams, signer: Signer): Promise<string> {
+        try {
+            const dr = await Deployer.deployBasicDealRoom(params, await signer.getAddress(), signer)
             return dr.addr;
         }
         catch (e) {
@@ -102,6 +115,10 @@ export class DealRoomController {
         // Ask the deal room hub for all the details
         this.dealRoomHubContract = await this._getDealRoomHubContract();
         this.details = await this._getRoomDetails()
+    }
+
+    public isBasic(): boolean {
+        return this.details.agentMultiSig === NULL_ADDRESS
     }
 
     public async depositDealCoins(id: BigNumberish, amount: BigNumberish): Promise<ContractReceipt> {
@@ -141,7 +158,9 @@ export class DealRoomController {
 
     public async getBuyer(): Promise<string> {
         const contract: DealRoom = await this._getDealRoomContract()
-        return await contract.getBuyer()
+
+        const buyer = await contract.getBuyer()
+        return buyer
     }
 
     public async getSeller(): Promise<string> {
@@ -162,12 +181,15 @@ export class DealRoomController {
     }
 
     public async makeDeal(deal: Deal): Promise<Deal> {
-        const nextDealId = await this.getDealCount() //randomInt(2^32)
+        const dealId = await this.getDealCount() //randomInt(2^32)
         const contract = await this._getDealRoomContract()
         const tx = await contract.makeDeal(deal.erc20, deal.erc721, deal.price, deal.assetItems)
         const receipt = await tx.wait()
+        console.log("Made deal")
         
-        return this.getDeal(nextDealId)
+        const result = await this.getDeal(dealId)
+        console.log(`Fetched deal ${JSON.stringify(result)}`)
+        return result
     }
 
     public async getDeal(dealId: BigNumberish): Promise<Deal> {
@@ -192,12 +214,16 @@ export class DealRoomController {
             if (dealTransaction) {
                 dealConfirmations = (await dealMultiSig.getConfirmations(dealTransaction.hash)).length
             }
-            
             // Get agent transaction and confirmations (if any) from agent multisig
-            const agentTransaction = await this._getAgentDealSettleTransaction(dealId) //TODO: Optimise this
+            let agentTransaction: MultiSigTransaction | null = null
             let agentConfirmations: number = 0
-            if (agentTransaction) {
-                agentConfirmations = (await agentMultiSig.getConfirmations(agentTransaction.hash)).length
+            if (this.details.agentMultiSig !== NULL_ADDRESS) {
+                if (agentMultiSig) {
+                    const agentTransaction = await this._getAgentDealSettleTransaction(dealId) //TODO: Optimise this
+                    if (agentTransaction) {
+                        agentConfirmations = (await agentMultiSig.getConfirmations(agentTransaction.hash)).length
+                    }
+                }
             }
 
             // Return the Deal
@@ -270,7 +296,7 @@ export class DealRoomController {
 
     public async proposeSettleDeal(dealId: BigNumberish): Promise<string> {
         
-        if ([this.details.arbitrator, this.details.buyer, this.details.seller].includes(await this.signerAddress())) {
+        if (!this.isBasic() && [this.details.arbitrator, this.details.buyer, this.details.seller].includes(await this.signerAddress())) {
             return this._proposeAgentsSettleDeal(dealId)
         } else {
             return this._proposeMainSettleDeal(dealId) 
@@ -356,6 +382,9 @@ export class DealRoomController {
     private async _getAgentMultiSig(): Promise<MultiSigController> {
         if (!this.details) {
             throw new Error(ERROR_ROOM_NOT_LOADED)
+        }
+        if (!this.details.agentMultiSig) {
+            throw new Error(ERROR_NO_AGENT_MULTISIG)
         }
         const msController: MultiSigController = new MultiSigController(this.details.agentMultiSig, this._signer)
         await msController.init()

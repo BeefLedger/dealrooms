@@ -123,32 +123,15 @@ export class SigTree {
     }
     // Given an id, return a SigTreeNode
     getNode(id) {
-        const node = this._nodes.find((item => item.id === id));
-        if (!node) {
-            return undefined;
-        }
-        switch (node.__type) {
-            case SigTreeNodeType.Contract: {
-                return node;
-            }
-            case SigTreeNodeType.MultiSig: {
-                return node;
-            }
-            case SigTreeNodeType.Person: {
-                return node;
-            }
-            case SigTreeNodeType.Device: {
-                return node;
-            }
-            default: {
-                return node;
-            }
-        }
+        return this._nodes.find((item => item.id === id));
     }
     getSigTreeNode(id) {
         const node = this.getNode(id);
         if (node.__type === SigTreeNodeType.MultiSig) {
             return node;
+        }
+        else {
+            return undefined;
         }
     }
     // Deploy multisig contact
