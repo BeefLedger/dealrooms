@@ -100,7 +100,7 @@ export async function deployDealRoom(params: DealRoomCreateParams, owner: string
             throw new Error(ERROR_NO_EVENT_FOUND)
         } 
 
-        const dealRoomDetails = await DealRoomHubContract.functions.getRoom(roomAddress)
+        const dealRoomDetails = await DealRoomHubContract.getRoom(roomAddress)
         return dealRoomDetails;
     }
     catch (e) {
@@ -129,7 +129,7 @@ export async function deployBasicDealRoom(params: DealRoomBasicCreateParams, own
             throw new Error(ERROR_NO_EVENT_FOUND)
         } 
 
-        const dealRoomDetails = await DealRoomHubContract.functions.getRoom(roomAddress)
+        const dealRoomDetails = await DealRoomHubContract.getRoom(roomAddress)//functions.getRoom(roomAddress)
         return dealRoomDetails;
     }
     catch (e) {

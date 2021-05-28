@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { BigNumber } from "ethers/utils";
+import { BigNumber } from "ethers";
 import * as DealRoomCompiled from "../ethereum/abi/DealRoom.json";
 import * as Deployer from "../ethereum/deploy/deploy";
 import { MultiSigController } from "./multiSigController";
@@ -248,7 +248,7 @@ export class DealRoomController {
                 try {
                     const owner = yield this.getAssetOwner(dealId, assetId);
                     results.push({
-                        assetId: new BigNumber(assetId),
+                        assetId: BigNumber.from(assetId),
                         owner
                     });
                 }

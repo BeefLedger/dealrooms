@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { parseEther } from "ethers/utils";
+import { parseEther } from "@ethersproject/units";
 export const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
 export function sendEth(to, amount, signer) {
     return __awaiter(this, void 0, void 0, function* () {

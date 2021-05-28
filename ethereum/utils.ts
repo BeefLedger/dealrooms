@@ -1,5 +1,6 @@
-import { Signer } from "ethers";
-import { BigNumberish, parseEther } from "ethers/utils";
+import { parseEther } from "@ethersproject/units";
+import { BigNumberish, Signer } from "ethers";
+
 export const NULL_ADDRESS = "0x0000000000000000000000000000000000000000"
 
 export async function sendEth(to: string, amount: BigNumberish, signer: Signer) {

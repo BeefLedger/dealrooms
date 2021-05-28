@@ -1,26 +1,24 @@
-import { BigNumber } from "ethers/utils"
-import { JsonRpcProvider, JsonRpcSigner } from "ethers/providers"
-
 import { deployMultisig, deployTestContract } from "../../ethereum/deploy/deploy"
 import { TESTRPC_ACCOUNTS } from "../../lib/settings"
 import { MultiSigController } from "../multiSigController"
 import { getProvider } from "../../services/chain/providerFactory"
+import { BigNumber, ethers } from "ethers"
 import { getContract } from "../../services/chain/contractFactory"
 
 import { MultiSigHashed } from "../../ethereum/types/MultiSigHashed"
 import { TestContract } from "../../ethereum/types/TestContract"
 import * as TestContractCompiled from "../../ethereum/abi/TestContract.json"
 
-let provider: JsonRpcProvider
-let signer1: JsonRpcSigner
-let signer2: JsonRpcSigner
+let provider: ethers.providers.JsonRpcProvider
+let signer1: ethers.providers.JsonRpcProvider
+let signer2: ethers.providers.JsonRpcProvider
 let multiSig: MultiSigHashed
 let testContract: TestContract
 let hash: string
 let multiSigAddress: string
-let signer3: JsonRpcSigner
-let signer4: JsonRpcSigner
-let signer5: JsonRpcSigner
+let signer3: ethers.providers.JsonRpcSigner
+let signer4: ethers.providers.JsonRpcSigner
+let signer5: ethers.providers.JsonRpcSigner
 let signer1MultiSig: MultiSigController
 let signer2MultiSig: MultiSigController
 let signer3MultiSig1: MultiSigController
@@ -77,7 +75,7 @@ describe("Double-layer Multisig", () => {
             testContract.address,
             TestContractCompiled.abi,
             "doSomethingInt",
-            [new BigNumber(500)],
+            [BigNumber.from(500)],
         )        
         expect(hash).toBeDefined()
 
@@ -98,7 +96,7 @@ describe("Double-layer Multisig", () => {
             testContract.address,
             TestContractCompiled.abi,
             "doSomethingInt",
-            [new BigNumber(500)],
+            [BigNumber.from(500)],
         )        
         expect(hash).toBeDefined()
         let confirmations = await signer4MultiSig1.getConfirmations(hash)
@@ -111,7 +109,7 @@ describe("Double-layer Multisig", () => {
             testContract.address,
             TestContractCompiled.abi,
             "doSomethingInt",
-            [new BigNumber(500)]
+            [BigNumber.from(500)],
         )
         let confirmations = await signer5MultiSig2.getConfirmations(expectedHash)
         expect(confirmations).toHaveLength(1)
@@ -120,7 +118,7 @@ describe("Double-layer Multisig", () => {
             testContract.address,
             TestContractCompiled.abi,
             "doSomethingInt",
-            [new BigNumber(500)],
+            [BigNumber.from(500)],
         )  
         expect(hash).toEqual(expectedHash)      
         confirmations = await signer5MultiSig2.getConfirmations(expectedHash)

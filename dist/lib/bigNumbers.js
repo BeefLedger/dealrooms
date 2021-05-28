@@ -1,7 +1,7 @@
-import { utils } from "ethers";
+import { BigNumber } from "ethers";
 export function bnEquals(first, other) {
-    return (utils.bigNumberify(first).toHexString() == utils.bigNumberify(other).toHexString());
+    return (BigNumber.from(first).toHexString() == BigNumber.from(other).toHexString());
 }
 export function bnToNumber(bn) {
-    return utils.bigNumberify(bn).toNumber();
+    return BigNumber.from(bn).toNumber();
 }

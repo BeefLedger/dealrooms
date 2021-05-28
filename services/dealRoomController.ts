@@ -1,6 +1,4 @@
-import { BigNumber, BigNumberish, randomBytes } from "ethers/utils"
-import { Signer } from "ethers"
-import { ContractReceipt } from "ethers/contract"
+import { BigNumber, BigNumberish, ContractReceipt, Signer } from "ethers"
 
 
 import { Ierc20 } from "../ethereum/types/Ierc20"
@@ -278,7 +276,7 @@ export class DealRoomController {
             try {
                 const owner = await this.getAssetOwner(dealId, assetId)
                 results.push({
-                    assetId: new BigNumber(assetId),
+                    assetId: BigNumber.from(assetId),
                     owner
                 })
             } catch (e) {

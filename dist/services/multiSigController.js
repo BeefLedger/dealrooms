@@ -7,8 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { ethers } from "ethers";
-import { BigNumber } from "ethers/utils";
+import { BigNumber, ethers } from "ethers";
 import abiDecoder from "abi-decoder";
 import * as MultiSigCompiled from "../ethereum/abi/MultiSigHashed.json";
 import * as DealRoomCompiled from "../ethereum/abi/DealRoom.json";
@@ -37,7 +36,8 @@ export class MultiSigController {
     }
     makeHash(destinationAddress, abi, fnName, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            const encodedData = new ethers.utils.Interface(abi).functions[fnName].encode(params);
+            const encodedData = new ethers.utils.Interface(abi).encodeFunctionData(fnName, params);
+            //const encodedData = new ethers.utils.Interface(abi).functions[fnName].encode(params) 
             return this._contract.makeHash(destinationAddress, 0, encodedData);
         });
     }
@@ -48,8 +48,9 @@ export class MultiSigController {
                 throw new Error(ERROR_NOT_MULTISIG_OWNER);
             }
             //Make the transaction 
-            const encodedData = new ethers.utils.Interface(abi).functions[fnName].encode(params);
-            const transaction = yield this._contract.submitTransaction(destinationAddress, 0, encodedData, { gasLimit: new BigNumber("5999999") });
+            const encodedData = new ethers.utils.Interface(abi).encodeFunctionData(fnName, params);
+            //const encodedData = new ethers.utils.Interface(abi).functions[fnName].encode(params)
+            const transaction = yield this._contract.submitTransaction(destinationAddress, 0, encodedData, { gasLimit: BigNumber.from("5999999") });
             const receipt = yield transaction.wait();
             //Obtain the transaction ID created in the multisig
             try {
@@ -71,7 +72,8 @@ export class MultiSigController {
             if (!(yield this.isaMemberOfMultiSig(this._signerAddress))) {
                 throw new Error(ERROR_NOT_MULTISIG_OWNER);
             }
-            const encodedData = new ethers.utils.Interface(destinationAbi).functions[destinationFnName].encode(destinationParams);
+            const encodedData = new ethers.utils.Interface(destinationAbi).encodeFunctionData(destinationFnName, destinationParams);
+            //const encodedData = new ethers.utils.Interface(destinationAbi).functions[destinationFnName].encode(destinationParams)
             return this.submitMultiSigTransaction(secondaryMultiSigContract, MultiSigCompiled.abi, "submitTransaction", [destinationAddress, 0, encodedData]);
         });
     }

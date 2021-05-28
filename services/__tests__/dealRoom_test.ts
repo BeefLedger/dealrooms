@@ -1,19 +1,19 @@
 
-import { JsonRpcProvider } from "ethers/providers"
+import * as ethers from "ethers"
 
 import { ADMIN, TESTRPC_ACCOUNTS } from "../../lib/settings"
 import { getProvider } from "../../services/chain/providerFactory"
 import { Deal, DealRoomController, DealStatus } from "../../services/dealRoomController"
 import { DealRoomCreateParams } from "../../ethereum/deploy/deploy"
 import { DemoEnvironment, setupTest } from "../../lib/testSetup"
-import { BigNumber } from "ethers/utils"
+
 
 let dealRoomController: DealRoomController
 let demoEnvironment: DemoEnvironment
 let dealRoomHubAddress: string
-let provider: JsonRpcProvider
-let sellerOriginalCoinBalance: BigNumber
-let buyerOriginalAssetBalance: BigNumber
+let provider: ethers.providers.JsonRpcProvider
+let sellerOriginalCoinBalance: ethers.BigNumber
+let buyerOriginalAssetBalance: ethers.BigNumber
 
 const MINUTE_MS = 60 * 1000
 
@@ -63,7 +63,7 @@ describe("Deploy dealroom", () => {
         deal1 = {
             erc20: demoEnvironment.deployedEnvironment.erc20.address,
             erc721: demoEnvironment.deployedEnvironment.erc721.address,
-            price: new BigNumber(100),
+            price: ethers.BigNumber.from(100),
             assetItems: demoEnvironment.erc721Allocations[ROOM_1.seller]
         }
         deal1 = await dealRoomController.makeDeal(deal1)
@@ -78,7 +78,7 @@ describe("Deploy dealroom", () => {
     it("Sensor: propose dummy settlement without effect", async() => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.sensorApprover))
         await dealRoomController.init()
-        await dealRoomController.proposeSettleDeal(new BigNumber(1000))
+        await dealRoomController.proposeSettleDeal( ethers.BigNumber.from(1000)),
         deal1 = await dealRoomController.getDeal(deal1.id)
         const ms = await dealRoomController._getDealMultiSig()
         const transactions = await ms.getTransactions()

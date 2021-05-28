@@ -7,11 +7,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { BigNumber } from "ethers/utils";
 import { deployMultisig, deployTestContract } from "../../ethereum/deploy/deploy";
 import { TESTRPC_ACCOUNTS } from "../../lib/settings";
 import { MultiSigController } from "../multiSigController";
 import { getProvider } from "../../services/chain/providerFactory";
+import { BigNumber } from "ethers";
 import * as TestContractCompiled from "../../ethereum/abi/TestContract.json";
 let provider;
 let signer1;
@@ -57,7 +57,7 @@ describe("Double-layer Multisig", () => {
         yield signer5MultiSig2.init();
     }), 10000);
     it("Submit duplex transaction to multisig 1", () => __awaiter(void 0, void 0, void 0, function* () {
-        hash = yield signer3MultiSig1.submitDuplexMultiSigProposal(multiSig2.address, testContract.address, TestContractCompiled.abi, "doSomethingInt", [new BigNumber(500)]);
+        hash = yield signer3MultiSig1.submitDuplexMultiSigProposal(multiSig2.address, testContract.address, TestContractCompiled.abi, "doSomethingInt", [BigNumber.from(500)]);
         expect(hash).toBeDefined();
         let retrievedTransaction = yield signer3MultiSig1.getTransaction(hash);
         let fnCall = MultiSigController.decodeMultiSigTransaction(retrievedTransaction.data);
@@ -67,17 +67,17 @@ describe("Double-layer Multisig", () => {
         expect(confirmations).toHaveLength(1);
     }));
     it("Second signature on multisig 1", () => __awaiter(void 0, void 0, void 0, function* () {
-        hash = yield signer4MultiSig1.submitDuplexMultiSigProposal(multiSig2.address, testContract.address, TestContractCompiled.abi, "doSomethingInt", [new BigNumber(500)]);
+        hash = yield signer4MultiSig1.submitDuplexMultiSigProposal(multiSig2.address, testContract.address, TestContractCompiled.abi, "doSomethingInt", [BigNumber.from(500)]);
         expect(hash).toBeDefined();
         let confirmations = yield signer4MultiSig1.getConfirmations(hash);
         expect(confirmations).toHaveLength(2);
     }));
     it("Final signature on contract 2", () => __awaiter(void 0, void 0, void 0, function* () {
         //Find out what the hash on contract 2 should be
-        let expectedHash = yield signer5MultiSig2.makeHash(testContract.address, TestContractCompiled.abi, "doSomethingInt", [new BigNumber(500)]);
+        let expectedHash = yield signer5MultiSig2.makeHash(testContract.address, TestContractCompiled.abi, "doSomethingInt", [BigNumber.from(500)]);
         let confirmations = yield signer5MultiSig2.getConfirmations(expectedHash);
         expect(confirmations).toHaveLength(1);
-        hash = yield signer5MultiSig2.submitMultiSigTransaction(testContract.address, TestContractCompiled.abi, "doSomethingInt", [new BigNumber(500)]);
+        hash = yield signer5MultiSig2.submitMultiSigTransaction(testContract.address, TestContractCompiled.abi, "doSomethingInt", [BigNumber.from(500)]);
         expect(hash).toEqual(expectedHash);
         confirmations = yield signer5MultiSig2.getConfirmations(expectedHash);
         expect(confirmations).toHaveLength(2);

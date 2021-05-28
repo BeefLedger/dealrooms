@@ -79,7 +79,7 @@ export function deployDealRoom(params, owner, signer) {
             else {
                 throw new Error(ERROR_NO_EVENT_FOUND);
             }
-            const dealRoomDetails = yield DealRoomHubContract.functions.getRoom(roomAddress);
+            const dealRoomDetails = yield DealRoomHubContract.getRoom(roomAddress);
             return dealRoomDetails;
         }
         catch (e) {
@@ -110,7 +110,7 @@ export function deployBasicDealRoom(params, owner, signer) {
             else {
                 throw new Error(ERROR_NO_EVENT_FOUND);
             }
-            const dealRoomDetails = yield DealRoomHubContract.functions.getRoom(roomAddress);
+            const dealRoomDetails = yield DealRoomHubContract.getRoom(roomAddress); //functions.getRoom(roomAddress)
             return dealRoomDetails;
         }
         catch (e) {

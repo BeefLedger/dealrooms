@@ -1,1 +1,1 @@
-export declare function getSigner(addressOrIndex?: string | number): Promise<import("ethers/providers").JsonRpcSigner>;
+export declare function getSigner(addressOrIndex?: string | number): Promise<import("@ethersproject/providers").JsonRpcSigner>;

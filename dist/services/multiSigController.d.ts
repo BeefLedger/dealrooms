@@ -1,5 +1,4 @@
-import { ethers, Signer } from "ethers";
-import { ContractReceipt } from "ethers/contract";
+import { BigNumber, ContractReceipt, Signer } from "ethers";
 export declare const ERROR_MULTIPLE_SUBMISSION_EVENTS = "MULTIPLE_SUBMISSION_EVENTS";
 export declare const ERROR_NO_SUBMISSION_FOUND = "NO_SUBMISSION_FOUND";
 export declare const ERROR_NO_SUBMISSION_HASH_FOUND = "ERROR_NO_SUBMISSION_HASH_FOUND";
@@ -9,7 +8,7 @@ export declare type MultiSigTransaction = {
     data: string;
     destination: string;
     executed: boolean;
-    timestamp: ethers.utils.BigNumber;
+    timestamp: BigNumber;
 };
 export declare class MultiSigController {
     private _signer;

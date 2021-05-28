@@ -1,6 +1,5 @@
 import { deployMultisig } from "../ethereum/deploy/deploy"
-import { ethers, Signer } from "ethers"
-import { Provider } from "ethers/providers"
+import { ethers, providers, Signer } from "ethers"
 import * as MultiSigCompiled from "../ethereum/abi/MultiSigHashed.json"
 
 export type SigTreeTemplate = {
@@ -208,8 +207,8 @@ export class SigTree {
         const triggerMultiSig = triggerMultiSigs[0]
 
         // Calculate transaction for contract node
-
-        triggerMultiSig.transaction.encodedData = new ethers.utils.Interface(contractNode.abi).functions[triggerMultiSig.transaction.method].encode(triggerMultiSig.transaction.params)
+        triggerMultiSig.transaction.encodedData = new ethers.utils.Interface(contractNode.abi).encodeFunctionData(triggerMultiSig.transaction.method, triggerMultiSig.transaction.params)
+        //triggerMultiSig.transaction.encodedData = new ethers.utils.Interface(contractNode.abi).functions[triggerMultiSig.transaction.method].encode(triggerMultiSig.transaction.params)
 
         // Traverse the tree depth-first calculating the encoded transaction data to call "submitTransaction" for each multisig node
         this._calculateMemberNodeTransactions(triggerMultiSig)
@@ -232,7 +231,8 @@ export class SigTree {
 
     // Calculate the transaction that others must call to approve me
     private _calculateNodeApprovalTransaction(node: SigTreeMultiSig): string {
-        return new ethers.utils.Interface(MultiSigCompiled.abi).functions["submitTransaction"].encode([node.address, 0, node.transaction.encodedData])
+        return new ethers.utils.Interface(MultiSigCompiled.abi).encodeFunctionData("submitTransaction", [node.address, 0, node.transaction.encodedData])
+        //return new ethers.utils.Interface(MultiSigCompiled.abi).functions["submitTransaction"].encode([node.address, 0, node.transaction.encodedData])
     }
 
     // Look up node and sign it, triggering a transaction
@@ -245,7 +245,7 @@ export class SigTree {
     }
 
     // Deploy multisig nodes in workable order, skipping nodes until their member multisigs have been deployed
-    public async deploy(signer: Signer, provider: Provider): Promise<void> {
+    public async deploy(signer: Signer, provider: providers.Provider): Promise<void> {
         console.log("Deploying tree")
         console.log(`Undeployed: ${this.undeployedMultiSigNodes().length}`)
         while (this.undeployedMultiSigNodes().length > 0) {

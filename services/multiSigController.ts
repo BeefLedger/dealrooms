@@ -1,7 +1,5 @@
 
-import { ethers, Signer } from "ethers"
-import { ContractReceipt } from "ethers/contract"
-import { BigNumber, BigNumberish } from "ethers/utils"
+import { BigNumber, ContractReceipt, ethers, Signer } from "ethers"
 import abiDecoder from "abi-decoder"
 
 import { MultiSigHashed } from "../ethereum/types/MultiSigHashed"
@@ -19,7 +17,7 @@ export type MultiSigTransaction = {
     data: string;
     destination: string;
     executed: boolean;
-    timestamp: ethers.utils.BigNumber;
+    timestamp: BigNumber;
 }
 
 export class MultiSigController {
@@ -52,7 +50,8 @@ export class MultiSigController {
         fnName: string,
         params: any[]): Promise<string>
     {
-    const encodedData = new ethers.utils.Interface(abi).functions[fnName].encode(params) 
+        const encodedData = new ethers.utils.Interface(abi).encodeFunctionData(fnName, params) 
+        //const encodedData = new ethers.utils.Interface(abi).functions[fnName].encode(params) 
         return this._contract.makeHash(destinationAddress, 0, encodedData)
     }
 
@@ -69,9 +68,10 @@ export class MultiSigController {
         
         //Make the transaction 
 
-        const encodedData = new ethers.utils.Interface(abi).functions[fnName].encode(params)
+        const encodedData = new ethers.utils.Interface(abi).encodeFunctionData(fnName, params)
+        //const encodedData = new ethers.utils.Interface(abi).functions[fnName].encode(params)
 
-        const transaction = await this._contract.submitTransaction(destinationAddress, 0, encodedData, {gasLimit: new BigNumber("5999999")})
+        const transaction = await this._contract.submitTransaction(destinationAddress, 0, encodedData, {gasLimit: BigNumber.from("5999999")})
         const receipt = await transaction.wait() 
                     
         //Obtain the transaction ID created in the multisig
@@ -100,7 +100,8 @@ export class MultiSigController {
         if (!(await this.isaMemberOfMultiSig(this._signerAddress))) {
             throw new Error(ERROR_NOT_MULTISIG_OWNER)
         }
-        const encodedData = new ethers.utils.Interface(destinationAbi).functions[destinationFnName].encode(destinationParams)
+        const encodedData = new ethers.utils.Interface(destinationAbi).encodeFunctionData(destinationFnName, destinationParams)
+        //const encodedData = new ethers.utils.Interface(destinationAbi).functions[destinationFnName].encode(destinationParams)
         return this.submitMultiSigTransaction(
             secondaryMultiSigContract,
             MultiSigCompiled.abi,
@@ -119,7 +120,7 @@ export class MultiSigController {
         throw new Error(ERROR_NO_SUBMISSION_FOUND)
     }
     
-    private static _makeMultiSigTransaction(rawInput: { 0: string, 1: string; 2: string; 3: boolean; 4: ethers.utils.BigNumber }): MultiSigTransaction {
+    private static _makeMultiSigTransaction(rawInput: { 0: string, 1: string; 2: string; 3: boolean; 4: BigNumber }): MultiSigTransaction {
         return {
             hash: rawInput[0],
             data: rawInput[1],

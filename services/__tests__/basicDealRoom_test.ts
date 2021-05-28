@@ -1,17 +1,21 @@
 
-import { JsonRpcProvider } from "ethers/providers"
+//import { JsonRpcProvider } from "ethers/providers"
 
 import { ADMIN, TESTRPC_ACCOUNTS } from "../../lib/settings"
-import { getProvider } from "../../services/chain/providerFactory"
+//import { getProvider } from "../../services/chain/providerFactory"
 import { Deal, DealRoomController, DealStatus } from "../../services/dealRoomController"
 import { DealRoomCreateParams } from "../../ethereum/deploy/deploy"
 import { DemoEnvironment, setupTest } from "../../lib/testSetup"
-import { BigNumber } from "ethers/utils"
+import { BigNumber } from "@ethersproject/bignumber"
+import { ethers } from "ethers"
+import { getProvider } from "../../services/chain/providerFactory"
+
+// { BigNumber } from "ethers/utils"
 
 let dealRoomController: DealRoomController
 let demoEnvironment: DemoEnvironment
 let dealRoomHubAddress: string
-let provider: JsonRpcProvider
+let provider: ethers.providers.JsonRpcProvider
 let sellerOriginalCoinBalance: BigNumber
 let buyerOriginalAssetBalance: BigNumber
 
@@ -32,7 +36,7 @@ describe("Deploy basic dealroom", () => {
 
     beforeAll(async () => {
         //Deploy ERC20 and ERC720, mint some and assign them
-        provider = await getProvider()
+        provider = getProvider()
         demoEnvironment = await setupTest(TESTRPC_ACCOUNTS[1].address, TESTRPC_ACCOUNTS)
         dealRoomHubAddress = demoEnvironment.deployedEnvironment.DealRoomHub.address
         sellerOriginalCoinBalance = await demoEnvironment.deployedEnvironment.erc20.balanceOf(ROOM_1.seller)
@@ -61,7 +65,7 @@ describe("Deploy basic dealroom", () => {
         deal1 = {
             erc20: demoEnvironment.deployedEnvironment.erc20.address,
             erc721: demoEnvironment.deployedEnvironment.erc721.address,
-            price: new BigNumber(100),
+            price: BigNumber.from(100),
             assetItems: demoEnvironment.erc721Allocations[ROOM_1.seller]
         }
         deal1 = await dealRoomController.makeDeal(deal1)

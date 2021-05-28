@@ -164,7 +164,8 @@ export class SigTree {
         // There can be only one trigger for the contract node
         const triggerMultiSig = triggerMultiSigs[0];
         // Calculate transaction for contract node
-        triggerMultiSig.transaction.encodedData = new ethers.utils.Interface(contractNode.abi).functions[triggerMultiSig.transaction.method].encode(triggerMultiSig.transaction.params);
+        triggerMultiSig.transaction.encodedData = new ethers.utils.Interface(contractNode.abi).encodeFunctionData(triggerMultiSig.transaction.method, triggerMultiSig.transaction.params);
+        //triggerMultiSig.transaction.encodedData = new ethers.utils.Interface(contractNode.abi).functions[triggerMultiSig.transaction.method].encode(triggerMultiSig.transaction.params)
         // Traverse the tree depth-first calculating the encoded transaction data to call "submitTransaction" for each multisig node
         this._calculateMemberNodeTransactions(triggerMultiSig);
     }
@@ -184,7 +185,8 @@ export class SigTree {
     }
     // Calculate the transaction that others must call to approve me
     _calculateNodeApprovalTransaction(node) {
-        return new ethers.utils.Interface(MultiSigCompiled.abi).functions["submitTransaction"].encode([node.address, 0, node.transaction.encodedData]);
+        return new ethers.utils.Interface(MultiSigCompiled.abi).encodeFunctionData("submitTransaction", [node.address, 0, node.transaction.encodedData]);
+        //return new ethers.utils.Interface(MultiSigCompiled.abi).functions["submitTransaction"].encode([node.address, 0, node.transaction.encodedData])
     }
     // Look up node and sign it, triggering a transaction
     signNode(nodeId, signer) {

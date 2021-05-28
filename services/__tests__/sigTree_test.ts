@@ -1,25 +1,23 @@
 
-import { JsonRpcProvider, JsonRpcSigner } from "ethers/providers"
-
 import { deployTestContract } from "../../ethereum/deploy/deploy"
 import { TESTRPC_ACCOUNTS } from "../../lib/settings"
-import { getProvider } from "../../services/chain/providerFactory"
 
 
 import { TestContract } from "../../ethereum/types/TestContract"
 import * as TestContractCompiled from "../../ethereum/abi/TestContract.json"
 import { SigTree } from "../../services/sigTree"
 import * as fs from "fs"
+import { ethers } from "ethers"
 
-let provider: JsonRpcProvider
-let signer1: JsonRpcSigner
+let provider: ethers.providers.JsonRpcProvider
+let signer1: ethers.providers.JsonRpcSigner
 let testContract: TestContract
 let sigTree: SigTree
 let configJson: any
 
 describe("SigTree", () => {
     beforeAll(async ()=> {       
-        provider = getProvider()
+        provider = new ethers.providers.JsonRpcProvider()//"https://beefledgerwallet.com:8544");
         signer1 = provider.getSigner(TESTRPC_ACCOUNTS[0].address)
         testContract = await deployTestContract(signer1)
         configJson = fs.readFileSync("./services/__tests__/sigTree.json", {encoding: "utf-8"})

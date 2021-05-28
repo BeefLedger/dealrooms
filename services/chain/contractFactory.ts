@@ -32,7 +32,7 @@ export async function getContract <T extends Contract>(
         }
         return new Contract(address, abi, signer) as T
     } else {
-        const provider = getProvider();
+        const provider = getProvider()
         return new Contract(address, abi, provider) as T
     }
 }

@@ -1,6 +1,4 @@
-import { BigNumber, BigNumberish } from "ethers/utils";
-import { Signer } from "ethers";
-import { ContractReceipt } from "ethers/contract";
+import { BigNumber, BigNumberish, ContractReceipt, Signer } from "ethers";
 import { DealRoom } from "../ethereum/types/DealRoom";
 import * as Deployer from "../ethereum/deploy/deploy";
 import { DealRoomHub } from "../ethereum/types/DealRoomHub";

@@ -1,10 +1,9 @@
-import { utils } from "ethers";
-import { BigNumberish } from "ethers/utils";
+import { BigNumber, BigNumberish, utils } from "ethers";
 
 export function bnEquals(first: BigNumberish, other: BigNumberish): boolean {
-    return (utils.bigNumberify(first).toHexString() == utils.bigNumberify(other).toHexString())
+    return (BigNumber.from(first).toHexString() == BigNumber.from(other).toHexString())
 }
 
 export function bnToNumber(bn: BigNumberish): number {
-    return utils.bigNumberify(bn).toNumber()
+    return BigNumber.from(bn).toNumber()
 }

@@ -7,11 +7,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import * as ethers from "ethers";
 import { ADMIN, TESTRPC_ACCOUNTS } from "../../lib/settings";
 import { getProvider } from "../../services/chain/providerFactory";
 import { DealRoomController, DealStatus } from "../../services/dealRoomController";
 import { setupTest } from "../../lib/testSetup";
-import { BigNumber } from "ethers/utils";
 let dealRoomController;
 let demoEnvironment;
 let dealRoomHubAddress;
@@ -54,7 +54,7 @@ describe("Deploy dealroom", () => {
         deal1 = {
             erc20: demoEnvironment.deployedEnvironment.erc20.address,
             erc721: demoEnvironment.deployedEnvironment.erc721.address,
-            price: new BigNumber(100),
+            price: ethers.BigNumber.from(100),
             assetItems: demoEnvironment.erc721Allocations[ROOM_1.seller]
         };
         deal1 = yield dealRoomController.makeDeal(deal1);
@@ -67,8 +67,8 @@ describe("Deploy dealroom", () => {
     it("Sensor: propose dummy settlement without effect", () => __awaiter(void 0, void 0, void 0, function* () {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.sensorApprover));
         yield dealRoomController.init();
-        yield dealRoomController.proposeSettleDeal(new BigNumber(1000));
-        deal1 = yield dealRoomController.getDeal(deal1.id);
+        yield dealRoomController.proposeSettleDeal(ethers.BigNumber.from(1000)),
+            deal1 = yield dealRoomController.getDeal(deal1.id);
         const ms = yield dealRoomController._getDealMultiSig();
         const transactions = yield ms.getTransactions();
         expect(deal1.dealConfirmations).toEqual(0);
