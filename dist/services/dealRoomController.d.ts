@@ -47,8 +47,14 @@ export declare class DealRoomController {
     details?: DealRoomDetails;
     static deployHub(signer: Signer): Promise<DealRoomHub>;
     static deployRoom(params: Deployer.DealRoomCreateParams, signer: Signer): Promise<string>;
+    static deployRoomAndDeal(roomParams: Deployer.DealRoomBasicCreateParams, deal: Deal, signer: Signer): Promise<{
+        roomAddress: string;
+        dealId: number;
+    }>;
     static deployBasicRoom(params: Deployer.DealRoomBasicCreateParams, signer: Signer): Promise<string>;
-    static getRooms(hubAddress: string, signer: Signer): Promise<string[]>;
+    static getRooms(hubAddress: string, signer: Signer, userAddress?: string): Promise<string[]>;
+    static getRoomDetails(hubAddress: string, roomAddress: string, signer: Signer): Promise<DealRoomDetails>;
+    static makeRoomDeal(room: DealRoom, deal: Deal, signer: Signer): Promise<number>;
     constructor(hubAddress: string, dealRoomAddress: string, signer: Signer);
     init(): Promise<void>;
     isBasic(): boolean;

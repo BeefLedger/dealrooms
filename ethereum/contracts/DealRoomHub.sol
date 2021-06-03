@@ -66,6 +66,22 @@ contract DealRoomHub {
         emit NewRoomEvent(address(room));
     }
 
+    // Combine two transactions into one
+    // Make a basic room, then create a deal
+    function makeBasicRoomAndDeal(
+        address buyer,
+        address seller,
+        IERC20 _erc20,
+        IERC721 _erc721,
+        uint256 _price,
+        uint256[] memory _assetItems
+    ) public returns (address) {
+        address addr = makeBasicRoom(buyer, seller);
+        DealRoom room = DealRoom(addr);
+        room.makeDeal(_erc20, _erc721, _price, _assetItems);
+        return addr;
+    }
+
     function makeRoom(MakeRoomParams memory params) public returns (address) {
         DealRoom room = new DealRoom(params.buyer, params.seller);
         require(params.buyer != address(0), "BUYER_MISSING");

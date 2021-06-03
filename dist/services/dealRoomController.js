@@ -22,7 +22,7 @@ export const DealStatus = {
     Settled: 3
 };
 export class DealRoomController {
-    //--- Instance methods
+    //--- Instance methods, for use with a Controller constructed with a specific instance of a Room
     constructor(hubAddress, dealRoomAddress, signer) {
         this._signer = signer;
         this._dealRoomHubAddress = hubAddress;
@@ -48,6 +48,32 @@ export class DealRoomController {
             }
         });
     }
+    // Make a deal: Fetch or deploy the room contract, then create the deal
+    static deployRoomAndDeal(roomParams, deal, signer) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // See if there is already a room for this buyer and seller
+            let deployedRoom;
+            const roomAddresses = yield DealRoomController.getRooms(roomParams.dealRoomHubAddress, signer);
+            for (const roomAddress of roomAddresses) {
+                const room = yield DealRoomController.getRoomDetails(roomParams.dealRoomHubAddress, roomAddress, signer);
+                if (room.seller === roomParams.seller) {
+                    deployedRoom = room;
+                    break;
+                }
+            }
+            // If no pre-existing room, create one
+            if (!deployedRoom) {
+                const roomAddress = yield DealRoomController.deployBasicRoom(roomParams, signer);
+                deployedRoom = yield DealRoomController.getRoomDetails(roomParams.dealRoomHubAddress, roomAddress, signer);
+            }
+            const roomContract = yield ContractFactory.getDealRoomContract(deployedRoom.addr, signer);
+            const dealId = yield DealRoomController.makeRoomDeal(roomContract, deal, signer);
+            return {
+                roomAddress: deployedRoom.addr,
+                dealId
+            };
+        });
+    }
     static deployBasicRoom(params, signer) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -60,10 +86,25 @@ export class DealRoomController {
         });
     }
     // Get a list of rooms from a hub
-    static getRooms(hubAddress, signer) {
+    static getRooms(hubAddress, signer, userAddress) {
         return __awaiter(this, void 0, void 0, function* () {
             const hubContract = yield ContractFactory.getDealRoomHubContract(hubAddress, signer);
-            return hubContract.getUserRooms(yield signer.getAddress());
+            return hubContract.getUserRooms(userAddress !== null && userAddress !== void 0 ? userAddress : yield signer.getAddress());
+        });
+    }
+    static getRoomDetails(hubAddress, roomAddress, signer) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const hubContract = yield ContractFactory.getDealRoomHubContract(hubAddress, signer);
+            const result = yield hubContract.getRoom(roomAddress);
+            return result;
+        });
+    }
+    static makeRoomDeal(room, deal, signer) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const dealId = (yield room.getDealCount()).toNumber();
+            const tx = yield room.makeDeal(deal.erc20, deal.erc721, deal.price, deal.assetItems);
+            const receipt = yield tx.wait();
+            return dealId;
         });
     }
     // Fetch resources
@@ -150,10 +191,8 @@ export class DealRoomController {
     }
     makeDeal(deal) {
         return __awaiter(this, void 0, void 0, function* () {
-            const dealId = yield this.getDealCount(); //randomInt(2^32)
-            const contract = yield this._getDealRoomContract();
-            const tx = yield contract.makeDeal(deal.erc20, deal.erc721, deal.price, deal.assetItems);
-            const receipt = yield tx.wait();
+            const dealRoom = yield this._getDealRoomContract();
+            const dealId = yield DealRoomController.makeRoomDeal(dealRoom, deal, this._signer);
             console.log("Made deal");
             const result = yield this.getDeal(dealId);
             console.log(`Fetched deal ${JSON.stringify(result)}`);

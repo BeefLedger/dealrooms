@@ -78,6 +78,30 @@ export class DealRoomController {
         }
     }
 
+    // Make a deal: Fetch or deploy the room contract, then create the deal
+    public static async deployRoomAndDeal(roomParams: Deployer.DealRoomBasicCreateParams, deal: Deal, signer: Signer): Promise<{roomAddress: string, dealId: number}> {
+        // See if there is already a room for this buyer and seller
+        let deployedRoom: DealRoomDetails
+        const roomAddresses = await DealRoomController.getRooms(roomParams.dealRoomHubAddress, signer)
+        for (const roomAddress of roomAddresses) {
+            const room = await DealRoomController.getRoomDetails(roomParams.dealRoomHubAddress, roomAddress, signer)
+            if (room.seller === roomParams.seller) {
+                deployedRoom = room
+                break
+            }
+        }
+        // If no pre-existing room, create one
+        if (!deployedRoom) {
+            const roomAddress = await DealRoomController.deployBasicRoom(roomParams, signer)
+            deployedRoom = await DealRoomController.getRoomDetails(roomParams.dealRoomHubAddress, roomAddress, signer)
+        }
+        const roomContract = await ContractFactory.getDealRoomContract(deployedRoom.addr, signer)
+        const dealId = await DealRoomController.makeRoomDeal(roomContract, deal, signer)
+        return {
+            roomAddress: deployedRoom.addr,
+            dealId
+        }
+    }
 
     public static async deployBasicRoom(params: Deployer.DealRoomBasicCreateParams, signer: Signer): Promise<string> {
         try {
@@ -90,12 +114,25 @@ export class DealRoomController {
     }
 
     // Get a list of rooms from a hub
-    public static async getRooms(hubAddress: string, signer: Signer): Promise<string[]> {
+    public static async getRooms(hubAddress: string, signer: Signer, userAddress?: string): Promise<string[]> {
         const hubContract = await ContractFactory.getDealRoomHubContract(hubAddress, signer)
-        return hubContract.getUserRooms(await signer.getAddress())
+        return hubContract.getUserRooms(userAddress ?? await signer.getAddress())
     }
 
-    //--- Instance methods
+    public static async getRoomDetails(hubAddress: string, roomAddress: string, signer: Signer): Promise<DealRoomDetails> {
+        const hubContract: DealRoomHub = await ContractFactory.getDealRoomHubContract(hubAddress, signer)  
+        const result: DealRoomDetails = await hubContract.getRoom(roomAddress)
+        return result
+    }
+
+    public static async makeRoomDeal(room: DealRoom, deal: Deal, signer: Signer): Promise<number> {
+        const dealId = (await room.getDealCount()).toNumber()
+        const tx = await room.makeDeal(deal.erc20, deal.erc721, deal.price, deal.assetItems)
+        const receipt = await tx.wait()
+        return dealId
+    }
+
+    //--- Instance methods, for use with a Controller constructed with a specific instance of a Room
 
     constructor(hubAddress: string, dealRoomAddress: string, signer: Signer) {
         this._signer = signer
@@ -179,12 +216,9 @@ export class DealRoomController {
     }
 
     public async makeDeal(deal: Deal): Promise<Deal> {
-        const dealId = await this.getDealCount() //randomInt(2^32)
-        const contract = await this._getDealRoomContract()
-        const tx = await contract.makeDeal(deal.erc20, deal.erc721, deal.price, deal.assetItems)
-        const receipt = await tx.wait()
-        console.log("Made deal")
-        
+        const dealRoom = await this._getDealRoomContract()      
+        const dealId = await DealRoomController.makeRoomDeal(dealRoom, deal, this._signer)
+        console.log("Made deal") 
         const result = await this.getDeal(dealId)
         console.log(`Fetched deal ${JSON.stringify(result)}`)
         return result

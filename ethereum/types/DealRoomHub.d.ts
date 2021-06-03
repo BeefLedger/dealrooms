@@ -22,6 +22,7 @@ import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 interface DealRoomHubInterface extends ethers.utils.Interface {
   functions: {
     "makeBasicRoom(address,address)": FunctionFragment;
+    "makeBasicRoomAndDeal(address,address,address,address,uint256,uint256[])": FunctionFragment;
     "makeRoom(tuple)": FunctionFragment;
     "getUserRooms(address)": FunctionFragment;
     "getAllRooms()": FunctionFragment;
@@ -33,6 +34,10 @@ interface DealRoomHubInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "makeBasicRoom",
     values: [string, string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "makeBasicRoomAndDeal",
+    values: [string, string, string, string, BigNumberish, BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "makeRoom",
@@ -60,6 +65,10 @@ interface DealRoomHubInterface extends ethers.utils.Interface {
 
   decodeFunctionResult(
     functionFragment: "makeBasicRoom",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "makeBasicRoomAndDeal",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "makeRoom", data: BytesLike): Result;
@@ -108,6 +117,26 @@ export class DealRoomHub extends Contract {
     "makeBasicRoom(address,address)"(
       buyer: string,
       seller: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    makeBasicRoomAndDeal(
+      buyer: string,
+      seller: string,
+      _erc20: string,
+      _erc721: string,
+      _price: BigNumberish,
+      _assetItems: BigNumberish[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "makeBasicRoomAndDeal(address,address,address,address,uint256,uint256[])"(
+      buyer: string,
+      seller: string,
+      _erc20: string,
+      _erc721: string,
+      _price: BigNumberish,
+      _assetItems: BigNumberish[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
@@ -242,6 +271,26 @@ export class DealRoomHub extends Contract {
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
+  makeBasicRoomAndDeal(
+    buyer: string,
+    seller: string,
+    _erc20: string,
+    _erc721: string,
+    _price: BigNumberish,
+    _assetItems: BigNumberish[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "makeBasicRoomAndDeal(address,address,address,address,uint256,uint256[])"(
+    buyer: string,
+    seller: string,
+    _erc20: string,
+    _erc721: string,
+    _price: BigNumberish,
+    _assetItems: BigNumberish[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
   makeRoom(
     params: {
       buyer: string;
@@ -343,6 +392,26 @@ export class DealRoomHub extends Contract {
     "makeBasicRoom(address,address)"(
       buyer: string,
       seller: string,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    makeBasicRoomAndDeal(
+      buyer: string,
+      seller: string,
+      _erc20: string,
+      _erc721: string,
+      _price: BigNumberish,
+      _assetItems: BigNumberish[],
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    "makeBasicRoomAndDeal(address,address,address,address,uint256,uint256[])"(
+      buyer: string,
+      seller: string,
+      _erc20: string,
+      _erc721: string,
+      _price: BigNumberish,
+      _assetItems: BigNumberish[],
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -452,6 +521,26 @@ export class DealRoomHub extends Contract {
       overrides?: Overrides
     ): Promise<BigNumber>;
 
+    makeBasicRoomAndDeal(
+      buyer: string,
+      seller: string,
+      _erc20: string,
+      _erc721: string,
+      _price: BigNumberish,
+      _assetItems: BigNumberish[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "makeBasicRoomAndDeal(address,address,address,address,uint256,uint256[])"(
+      buyer: string,
+      seller: string,
+      _erc20: string,
+      _erc721: string,
+      _price: BigNumberish,
+      _assetItems: BigNumberish[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
     makeRoom(
       params: {
         buyer: string;
@@ -514,6 +603,26 @@ export class DealRoomHub extends Contract {
     "makeBasicRoom(address,address)"(
       buyer: string,
       seller: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    makeBasicRoomAndDeal(
+      buyer: string,
+      seller: string,
+      _erc20: string,
+      _erc721: string,
+      _price: BigNumberish,
+      _assetItems: BigNumberish[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "makeBasicRoomAndDeal(address,address,address,address,uint256,uint256[])"(
+      buyer: string,
+      seller: string,
+      _erc20: string,
+      _erc721: string,
+      _price: BigNumberish,
+      _assetItems: BigNumberish[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
