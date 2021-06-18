@@ -121,7 +121,7 @@ describe("Deploy dealroom", () => {
         await dealRoomController.init()
         await dealRoomController.withdrawDealCoins(deal1.id)
         let missingCoins = await dealRoomController.getDealMissingCoins(deal1.id)
-        expect(missingCoins).toEqual(deal1.price.toNumber())
+        expect(missingCoins).toEqual(deal1.price)
 
         //Now put them back
         await dealRoomController.depositDealCoins(deal1.id, deal1.price)
@@ -210,7 +210,7 @@ describe("Deploy dealroom", () => {
         }
         expect(failed).toBeFalsy()
         const newBalance = await demoEnvironment.deployedEnvironment.erc20.balanceOf(ROOM_1.seller)
-        expect(newBalance.toNumber() - sellerOriginalCoinBalance.toNumber()).toEqual(deal1.price.toNumber())
+        expect(newBalance.toNumber() - sellerOriginalCoinBalance.toNumber()).toEqual(deal1.price)
     }, 1 * MINUTE_MS)
 
     it("Agent: buyer can withdraw assets after settlement", async() => {

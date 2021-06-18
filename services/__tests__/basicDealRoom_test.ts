@@ -6,8 +6,7 @@ import { ADMIN, TESTRPC_ACCOUNTS } from "../../lib/settings"
 import { Deal, DealRoomController, DealStatus } from "../../services/dealRoomController"
 import { DealRoomCreateParams } from "../../ethereum/deploy/deploy"
 import { DemoEnvironment, setupTest } from "../../lib/testSetup"
-import { BigNumber } from "@ethersproject/bignumber"
-import { ethers } from "ethers"
+import { BigNumber, ethers } from "ethers"
 import { getProvider } from "../../services/chain/providerFactory"
 
 // { BigNumber } from "ethers/utils"
@@ -76,6 +75,16 @@ describe("Deploy basic dealroom", () => {
         expect(deal1.id).toBeDefined()
     }, 10 * MINUTE_MS)
 
+    it("Gets a deal", async () => {
+        dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.seller))
+        expect(dealRoomController).toBeDefined()
+        await dealRoomController.init()
+        deal1 = await dealRoomController.getDeal(deal1.id)
+        expect(deal1).toBeDefined()
+        expect(deal1.dealConfirmations).toEqual(0)
+        expect(deal1.status).toBe(DealStatus.Open)
+        expect(deal1.id).toBeDefined()
+    }, 10 * MINUTE_MS)
 
     it("Agent: seller deposit assets", async() => {
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.seller))
@@ -111,7 +120,7 @@ describe("Deploy basic dealroom", () => {
         await dealRoomController.init()
         await dealRoomController.withdrawDealCoins(deal1.id)
         let missingCoins = await dealRoomController.getDealMissingCoins(deal1.id)
-        expect(missingCoins).toEqual(deal1.price.toNumber())
+        expect(missingCoins).toEqual(BigNumber.from(deal1.price).toNumber())
 
         //Now put them back
         await dealRoomController.depositDealCoins(deal1.id, deal1.price)
@@ -177,7 +186,7 @@ describe("Deploy basic dealroom", () => {
         }
         expect(failed).toBeFalsy()
         const newBalance = await demoEnvironment.deployedEnvironment.erc20.balanceOf(ROOM_1.seller)
-        expect(newBalance.toNumber() - sellerOriginalCoinBalance.toNumber()).toEqual(deal1.price.toNumber())
+        expect(newBalance.toNumber() - sellerOriginalCoinBalance.toNumber()).toEqual(BigNumber.from(deal1.price).toNumber())
     }, 1 * MINUTE_MS)
 
     it("Agent: buyer can withdraw assets after settlement", async() => {

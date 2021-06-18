@@ -15,8 +15,9 @@ import { TestContract } from "../types/TestContract"
 
 import { Signer } from "ethers"
 import { getDealRoomHubContract } from "../../services/chain/prefabContractFactory"
-import { DealRoomDetails } from "../../services/dealRoomController"
+import { Deal, DealRoomDetails } from "../../services/dealRoomController"
 import { DealRoom } from "../../ethereum/types/DealRoom"
+import { BigNumber } from "ethers"
 // import { DealRoom } from "ethereum/types/DealRoom"
 
 export type DeployedEnvironment = {
@@ -137,6 +138,41 @@ export async function deployBasicDealRoom(params: DealRoomBasicCreateParams, own
     }
 }
 
+export async function deployRoomAndDeal(roomParams: DealRoomBasicCreateParams, deal: Deal, signer: Signer): Promise<{roomAddress: string, dealId: number}> {
+    debugger
+    console.log(`deployRoomAndDeal ${1}`)
+    let roomAddress: string
+    const DealRoomHubContract = await getDealRoomHubContract(roomParams.dealRoomHubAddress, signer)
+    console.log(`deployRoomAndDeal ${2}`)
+    debugger
+    const tx = await DealRoomHubContract.functions.makeBasicRoomAndDeal(roomParams.buyer, roomParams.seller, deal.erc20, deal.erc721, BigNumber.from(deal.price), deal.assetItems)  
+    console.log(`deployRoomAndDeal ${3}`)
+    const receipt = await tx.wait()
+    console.log(`deployRoomAndDeal ${4}`)
+    
+    //TODO: Make this a generic event finder
+    const newRoomEvents = receipt.events?.filter(evt => evt.event === 'NewRoomEvent')
+    if (newRoomEvents) { 
+        console.log(`deployRoomAndDeal ${4.1}`)
+        if (newRoomEvents.length > 0) {
+            if (newRoomEvents.length === 1) {
+                console.log(`deployRoomAndDeal ${4.2}`)
+                roomAddress = (newRoomEvents[0]?.args as any).addr
+            } else {
+                console.log(`deployRoomAndDeal ${4.3}`)
+                throw new Error(ERROR_MULTIPLE_EVENTS)
+            }
+        }
+    } else {
+        console.log(`deployRoomAndDeal ${4.4}`)
+        throw new Error(ERROR_NO_EVENT_FOUND)
+    } 
+    console.log(`deployRoomAndDeal ${5}`)
+    return {
+        roomAddress,
+        dealId: 0
+    }
+}
 
 export async function deployAll(signer: Signer): Promise<DeployedEnvironment> {
     const result: DeployedEnvironment = {

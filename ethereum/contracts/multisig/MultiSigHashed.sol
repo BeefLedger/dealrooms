@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPLv3
-pragma solidity >=0.5.0 <0.7.0;
+pragma solidity ^0.8.0;
 
 /// @title Multisignature wallet - Allows multiple parties to agree on transactions before execution.
 /// @author Stefan George - <stefan.george@consensys.net>
@@ -113,7 +113,7 @@ contract MultiSigHashed {
     /// @dev Contract constructor sets initial owners and required number of confirmations.
     /// @param _owners List of initial owners.
     /// @param _required Number of required confirmations.
-    constructor(address[] memory _owners, uint256 _required) public validRequirement(_owners.length, _required) {
+    constructor(address[] memory _owners, uint256 _required) validRequirement(_owners.length, _required) {
         for (uint256 i = 0; i < _owners.length; i++) {
             require(!isOwner[_owners[i]], "is already owner");
             require(_owners[i] != address(0), "is null address");
@@ -278,7 +278,7 @@ contract MultiSigHashed {
                 value: value,
                 data: data,
                 executed: false,
-                timestamp: now
+                timestamp: block.timestamp
             });
             hashes[transactionCount] = hash;
             transactionCount += 1;
@@ -355,7 +355,7 @@ contract MultiSigHashed {
         return keccak256(abi.encodePacked(destination, value, data));
     }
 
-    function _transactionExists(bytes32 hash) internal view returns (bool) {
+    function _transactionExists(bytes32 hash) internal view returns (bool exists) {
         return (transactions[hash].destination != address(0));
     }
 

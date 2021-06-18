@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma experimental ABIEncoderV2;
-pragma solidity ^0.6.0;
+pragma solidity ^0.8.0;
 
 import "./DealRoom.sol";
 import "./multisig/MultiSigHashed.sol";
@@ -64,6 +64,8 @@ contract DealRoomHub {
         roomDetailsByAddress[address(room)].dealMultiSig = address(dealMultiSig);
 
         emit NewRoomEvent(address(room));
+
+        return address(room);
     }
 
     // Combine two transactions into one

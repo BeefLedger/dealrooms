@@ -1,6 +1,5 @@
 import { BigNumber, BigNumberish, ContractReceipt, Signer } from "ethers"
 
-
 import { Ierc20 } from "../ethereum/types/Ierc20"
 import { DealRoom } from "../ethereum/types/DealRoom"
 import { Ierc721 } from "../ethereum/types/Ierc721"
@@ -29,7 +28,7 @@ export type Deal = {
     id?: BigNumberish
     erc20?: string
     erc721?: string
-    price?: BigNumber
+    price?: BigNumberish
     assetItems?: BigNumberish[]
     agentConfirmations?: number
     dealConfirmations?: number
@@ -81,6 +80,7 @@ export class DealRoomController {
     // Make a deal: Fetch or deploy the room contract, then create the deal
     public static async deployRoomAndDeal(roomParams: Deployer.DealRoomBasicCreateParams, deal: Deal, signer: Signer): Promise<{roomAddress: string, dealId: number}> {
         // See if there is already a room for this buyer and seller
+        debugger
         let deployedRoom: DealRoomDetails
         const roomAddresses = await DealRoomController.getRooms(roomParams.dealRoomHubAddress, signer)
         for (const roomAddress of roomAddresses) {
@@ -90,13 +90,14 @@ export class DealRoomController {
                 break
             }
         }
-        // If no pre-existing room, create one
+        // If no pre-existing room, create a room and deal in the same transaction
         if (!deployedRoom) {
-            const roomAddress = await DealRoomController.deployBasicRoom(roomParams, signer)
-            deployedRoom = await DealRoomController.getRoomDetails(roomParams.dealRoomHubAddress, roomAddress, signer)
+            return Deployer.deployRoomAndDeal(roomParams, deal, signer)          
         }
+
         const roomContract = await ContractFactory.getDealRoomContract(deployedRoom.addr, signer)
         const dealId = await DealRoomController.makeRoomDeal(roomContract, deal, signer)
+
         return {
             roomAddress: deployedRoom.addr,
             dealId
@@ -112,6 +113,8 @@ export class DealRoomController {
             throw Error(`_deployDealRoom: ${e}`)
         }
     }
+
+
 
     // Get a list of rooms from a hub
     public static async getRooms(hubAddress: string, signer: Signer, userAddress?: string): Promise<string[]> {

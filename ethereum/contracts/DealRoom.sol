@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.0;
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -39,7 +39,7 @@ contract DealRoom {
         Settled
     }
 
-    constructor (address _buyer, address _seller) public {
+    constructor (address _buyer, address _seller) {
         buyer = _buyer;
         seller = _seller;
         dealCount = 0;
@@ -56,8 +56,8 @@ contract DealRoom {
 
         deals.push(Deal({
             id: dealCount,
-            erc721: _erc721,
             erc20: _erc20,
+            erc721: _erc721,
             price: _price,
             assetItems: _assetItems,
             status: DealStatus.Open,
