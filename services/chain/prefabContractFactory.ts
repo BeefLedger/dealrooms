@@ -6,8 +6,8 @@ import * as MultiSigHashedCompiled from "../../ethereum/abi/MultiSigHashed.json"
 
 import { DealRoomHub } from "../../ethereum/types/DealRoomHub"
 import { DealRoom } from "../../ethereum/types/DealRoom"
-import { Ierc20 } from "../../ethereum/types/Ierc20"
-import { Ierc721 } from "../../ethereum/types/Ierc721"
+import { IERC20 } from "../../ethereum/types/IERC20"
+import { IERC721 } from "../../ethereum/types/IERC721"
 import { MultiSigHashed } from "../../ethereum/types/MultiSigHashed"
 
 import { getContract } from "./contractFactory"
@@ -21,11 +21,11 @@ export async function getDealRoomContract(address: string, signerIdxOrAddressOrS
     return getContract<DealRoom>(address, DealRoomCompiled.abi, signerIdxOrAddressOrSigner) as Promise<DealRoom>
 }
 
-export async function getErc20Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<Ierc20> {
+export async function getErc20Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<IERC20> {
     return getContract(address, Erc20DetailedCompiled.abi, signerIdxOrAddressOrSigner)
 }
 
-export async function getErc721Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<Ierc721> {
+export async function getErc721Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<IERC721> {
     return getContract(address, Erc721DetailedCompiled.abi, signerIdxOrAddressOrSigner)
 }
 
