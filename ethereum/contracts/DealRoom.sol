@@ -11,8 +11,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract DealRoom {
     address public creator;
     address public owner;
-    IERC721 public erc721;
-    IERC20 public erc20;
+    //IERC721 public erc721;
+    //IERC20 public erc20;
     uint256 public dealCount;
     Deal[] public deals;
     //mapping(uint256 => Deal) private deals;
@@ -67,6 +67,11 @@ contract DealRoom {
         // dealIds.push(_id);
     }
 
+    function dealAssetCount(uint256 id) public view dealExists(id, true) returns (uint256) {
+        Deal memory deal = getDeal(id);
+        return deal.assetItems.length;
+    }
+
     function missingDealAssets(
         uint256 id
     ) public view dealExists(id, true) returns (uint256) {
@@ -83,6 +88,31 @@ contract DealRoom {
             }
         }
         return (deal.assetItems.length - assetDeposits);
+    }
+
+    function assetOwner(
+        uint256 dealId, uint256 assetId
+    ) public view dealExists(dealId, true) returns (address) {
+        Deal memory deal = getDeal(dealId);
+        return deal.erc721.ownerOf(assetId);
+    }
+
+    function dealAssetsDeposited(
+        uint256 id
+    ) public view dealExists(id, true) returns (uint256) {
+        //Check that all the assets have been deposited, and return the quantity missing    
+        Deal memory deal = getDeal(id);
+        if (deal.status == DealStatus.Settled) {
+            return 777;
+        }
+        uint256 assetDeposits = 0;
+        for (uint i = 0; i < deal.assetItems.length; i ++) {
+            // Check that I (the dealroom contract) own this asset
+            if (deal.erc721.ownerOf(deal.assetItems[i]) == address(this)) {
+                assetDeposits ++;
+            }
+        }
+        return assetDeposits;
     }
 
     function missingDealCoins(

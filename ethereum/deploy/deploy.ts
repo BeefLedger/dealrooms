@@ -139,12 +139,10 @@ export async function deployBasicDealRoom(params: DealRoomBasicCreateParams, own
 }
 
 export async function deployRoomAndDeal(roomParams: DealRoomBasicCreateParams, deal: Deal, signer: Signer): Promise<{roomAddress: string, dealId: number}> {
-    debugger
     console.log(`deployRoomAndDeal ${1}`)
     let roomAddress: string
     const DealRoomHubContract = await getDealRoomHubContract(roomParams.dealRoomHubAddress, signer)
     console.log(`deployRoomAndDeal ${2}`)
-    debugger
     const tx = await DealRoomHubContract.functions.makeBasicRoomAndDeal(roomParams.buyer, roomParams.seller, deal.erc20, deal.erc721, BigNumber.from(deal.price), deal.assetItems)  
     console.log(`deployRoomAndDeal ${3}`)
     const receipt = await tx.wait()

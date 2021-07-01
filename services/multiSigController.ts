@@ -70,7 +70,6 @@ export class MultiSigController {
 
         const encodedData = new ethers.utils.Interface(abi).encodeFunctionData(fnName, params)
         //const encodedData = new ethers.utils.Interface(abi).functions[fnName].encode(params)
-
         const transaction = await this._contract.submitTransaction(destinationAddress, 0, encodedData, {gasLimit: BigNumber.from("5999999")})
         const receipt = await transaction.wait() 
                     

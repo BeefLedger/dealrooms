@@ -5,7 +5,7 @@ export function setItem(name, value) {
     localStorage.setItem(name, value);
 }
 export function push(name, value) {
-    let arrValue;
+    var arrValue;
     try {
         arrValue = getJson(name);
         if (arrValue.constructor !== Array) {

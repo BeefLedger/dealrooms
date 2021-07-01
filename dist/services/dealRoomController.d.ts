@@ -20,7 +20,7 @@ export declare type Deal = {
     id?: BigNumberish;
     erc20?: string;
     erc721?: string;
-    price?: BigNumber;
+    price?: BigNumberish;
     assetItems?: BigNumberish[];
     agentConfirmations?: number;
     dealConfirmations?: number;

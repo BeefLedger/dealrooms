@@ -244,6 +244,7 @@ export class DealRoomController {
             const agentMultiSig: MultiSigController = await this._getAgentMultiSig();
             
             // Get deal transaction and confirmations (if any) from main multisig
+
             const dealTransaction = await this._getDealSettleTransaction(dealId)
             let dealConfirmations: number = 0
             if (dealTransaction) {
@@ -303,8 +304,8 @@ export class DealRoomController {
     public async getDealMissingAssets(id: BigNumberish): Promise<number> {
         console.log(`getDealMissingAssets(${id})`)
         const contract = await this._getDealRoomContract()
-        debugger
-        console.log(`contract: ${JSON.stringify(contract)}`)
+        //debugger
+        //console.log(`contract: ${JSON.stringify(contract)}`)
         return (await contract.missingDealAssets(id)).toNumber()
     }
 
@@ -333,7 +334,6 @@ export class DealRoomController {
     }
 
     public async proposeSettleDeal(dealId: BigNumberish): Promise<string> {
-        
         if (!this.isBasic() && [this.details.arbitrator, this.details.buyer, this.details.seller].includes(await this.signerAddress())) {
             return this._proposeAgentsSettleDeal(dealId)
         } else {
@@ -438,10 +438,11 @@ export class DealRoomController {
         const multiSigContract = await this._getDealMultiSig()
         // Find transaction that corresponds to settle(dealId)
         const transactions = await multiSigContract.getTransactions()
+        debugger
         if (transactions.length) {
             result = transactions.find((transaction: MultiSigTransaction) => {
                 const decodedTransaction = MultiSigController.decodeDealRoomTransaction(transaction.data)
-                if (decodedTransaction.name === "settle" && Number(decodedTransaction.params[0].value) === dealId) 
+                if (decodedTransaction.name === "settle" && Number(decodedTransaction.params[0].value) === Number(dealId)) 
                 return true
             })        
             return result ?? null
@@ -479,6 +480,7 @@ export class DealRoomController {
             "settle",
             [dealId]
         )
+        console.log(`Settle transaction hash for ${dealId} is ${hash}`)
         return hash
     }
 

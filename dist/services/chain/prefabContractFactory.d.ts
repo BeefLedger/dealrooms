@@ -1,11 +1,11 @@
 import { DealRoomHub } from "../../ethereum/types/DealRoomHub";
 import { DealRoom } from "../../ethereum/types/DealRoom";
-import { Ierc20 } from "../../ethereum/types/Ierc20";
-import { Ierc721 } from "../../ethereum/types/Ierc721";
+import { IERC20 } from "../../ethereum/types/IERC20";
+import { IERC721 } from "../../ethereum/types/IERC721";
 import { MultiSigHashed } from "../../ethereum/types/MultiSigHashed";
 import { Signer } from "ethers";
 export declare function getDealRoomHubContract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<DealRoomHub>;
 export declare function getDealRoomContract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<DealRoom>;
-export declare function getErc20Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<Ierc20>;
-export declare function getErc721Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<Ierc721>;
+export declare function getErc20Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<IERC20>;
+export declare function getErc721Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<IERC721>;
 export declare function getMultiSigContract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<MultiSigHashed>;

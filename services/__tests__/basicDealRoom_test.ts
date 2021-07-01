@@ -4,7 +4,7 @@
 import { ADMIN, TESTRPC_ACCOUNTS } from "../../lib/settings"
 //import { getProvider } from "../../services/chain/providerFactory"
 import { Deal, DealRoomController, DealStatus } from "../../services/dealRoomController"
-import { DealRoomCreateParams } from "../../ethereum/deploy/deploy"
+import { DealRoomBasicCreateParams, DealRoomCreateParams } from "../../ethereum/deploy/deploy"
 import { DemoEnvironment, setupTest } from "../../lib/testSetup"
 import { BigNumber, ethers } from "ethers"
 import { getProvider } from "../../services/chain/providerFactory"
@@ -23,13 +23,14 @@ const MINUTE_MS = 60 * 1000
 const ROOM_1 = {
     buyer: TESTRPC_ACCOUNTS[5].address,
     seller: TESTRPC_ACCOUNTS[6].address,
-    arbitrator: TESTRPC_ACCOUNTS[1].address,
-    docApprover: TESTRPC_ACCOUNTS[3].address,
-    sensorApprover: TESTRPC_ACCOUNTS[2].address,
+    //arbitrator: TESTRPC_ACCOUNTS[1].address,
+    //docApprover: TESTRPC_ACCOUNTS[3].address,
+    //sensorApprover: TESTRPC_ACCOUNTS[2].address,
 }
 
 let deal1: Deal
 let roomAddress: string
+let dealId: string
 
 describe("Deploy basic dealroom", () => {
 
@@ -46,18 +47,20 @@ describe("Deploy basic dealroom", () => {
         expect(demoEnvironment.deployedEnvironment.DealRoomHub).toBeDefined()
     }, 1 * MINUTE_MS)
 
-    it("Makes a room", async (): Promise<any> => {
+    /*it("Makes a room", async (): Promise<any> => {
 
-        const dealRoomCreateParams: DealRoomCreateParams = {
+        const dealRoomCreateParams: DealRoomBasicCreateParams = {
             dealRoomHubAddress,
             ...ROOM_1
         }
+        //@ts-ignore
         roomAddress = await DealRoomController.deployBasicRoom(dealRoomCreateParams, provider.getSigner(ADMIN))
         expect(roomAddress).toBeDefined()
         expect(roomAddress.length).toEqual(42)
     }, 10 * MINUTE_MS)
 
     it("Makes a deal", async () => {
+        //@ts-ignore
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.seller))
         expect(dealRoomController).toBeDefined()
         await dealRoomController.init()
@@ -73,9 +76,41 @@ describe("Deploy basic dealroom", () => {
         expect(deal1.dealConfirmations).toEqual(0)
         expect(deal1.status).toBe(DealStatus.Open)
         expect(deal1.id).toBeDefined()
-    }, 10 * MINUTE_MS)
+    }, 10 * MINUTE_MS)*/
+
+    it("Makes a room and deal in a single transaction", async () => {
+        const dealRoomCreateParams: DealRoomBasicCreateParams = {
+            dealRoomHubAddress,
+            ...ROOM_1
+        }
+        deal1 = {
+            erc20: demoEnvironment.deployedEnvironment.erc20.address,
+            erc721: demoEnvironment.deployedEnvironment.erc721.address,
+            price: BigNumber.from(100),
+            assetItems: demoEnvironment.erc721Allocations[ROOM_1.seller]
+        }
+        //@ts-ignore
+        const result = (await DealRoomController.deployRoomAndDeal(dealRoomCreateParams, deal1, provider.getSigner(ROOM_1.buyer)))
+        roomAddress = result.roomAddress
+        deal1.id = result.dealId 
+
+        //@ts-ignore
+        dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.seller))
+        expect(dealRoomController).toBeDefined()
+        await dealRoomController.init()
+
+        deal1 = await dealRoomController.getDeal(deal1.id)
+
+        expect(roomAddress).toBeDefined()
+        expect(roomAddress.length).toEqual(42)  
+
+        expect(deal1.dealConfirmations).toEqual(0)
+        expect(deal1.status).toBe(DealStatus.Open)
+        expect(deal1.id).toBeDefined()
+    })
 
     it("Gets a deal", async () => {
+        //@ts-ignore
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.seller))
         expect(dealRoomController).toBeDefined()
         await dealRoomController.init()
@@ -84,9 +119,14 @@ describe("Deploy basic dealroom", () => {
         expect(deal1.dealConfirmations).toEqual(0)
         expect(deal1.status).toBe(DealStatus.Open)
         expect(deal1.id).toBeDefined()
+        const missingAssets = await dealRoomController.getDealMissingAssets(deal1.id)
+        const missingCoins = await dealRoomController.getDealMissingCoins(deal1.id)
+        expect(missingAssets).toEqual(deal1.assetItems.length)
+        expect(missingCoins).toEqual(BigNumber.from(deal1.price).toNumber())
     }, 10 * MINUTE_MS)
 
     it("Agent: seller deposit assets", async() => {
+        //@ts-ignore
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.seller))
         await dealRoomController.init()
         await dealRoomController.depositDealAssets(deal1.id, deal1.assetItems)
@@ -95,6 +135,7 @@ describe("Deploy basic dealroom", () => {
     }, 1 * MINUTE_MS)
 
     it("Agent: seller withdraw assets before settlement", async() => {
+        //@ts-ignore
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.seller))
         await dealRoomController.init()
         await dealRoomController.withdrawDealAssets(deal1.id)
@@ -108,6 +149,7 @@ describe("Deploy basic dealroom", () => {
     }, 1 * MINUTE_MS)
 
     it("Agent: buyer deposit coins", async() => {
+        //@ts-ignore
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.buyer))
         await dealRoomController.init()
         await dealRoomController.depositDealCoins(deal1.id, deal1.price)
@@ -116,6 +158,7 @@ describe("Deploy basic dealroom", () => {
     }, 1 * MINUTE_MS)
 
     it("Agent: buyer withdraw coins before settlement", async() => {
+        //@ts-ignore
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.buyer))
         await dealRoomController.init()
         await dealRoomController.withdrawDealCoins(deal1.id)
@@ -129,6 +172,7 @@ describe("Deploy basic dealroom", () => {
     }, 1 * MINUTE_MS)
 
     it("Agent: seller signature", async() => {
+        //@ts-ignore
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.seller))
         await dealRoomController.init()
         await dealRoomController.proposeSettleDeal(deal1.id)
@@ -138,6 +182,7 @@ describe("Deploy basic dealroom", () => {
     }, 1 * MINUTE_MS)
 
     it("Agent: buyer signature", async() => {
+        //@ts-ignore
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.buyer))
         await dealRoomController.init()
         await dealRoomController.proposeSettleDeal(deal1.id)
@@ -149,6 +194,7 @@ describe("Deploy basic dealroom", () => {
 
     it("Agent: seller cannot withdraw assets after settlement", async() => {
         let failed = false
+        //@ts-ignore
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.seller))
         await dealRoomController.init()
         try {
@@ -163,6 +209,7 @@ describe("Deploy basic dealroom", () => {
 
     it("Agent: buyer cannot withdraw coins after settlement", async() => {
         let failed = false
+        //@ts-ignore
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.buyer))
         await dealRoomController.init()
         try {
@@ -177,6 +224,7 @@ describe("Deploy basic dealroom", () => {
 
     it("Agent: seller can withdraw coins after settlement", async() => {
         let failed = false
+        //@ts-ignore
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.seller))
         await dealRoomController.init()
         try {
@@ -191,6 +239,7 @@ describe("Deploy basic dealroom", () => {
 
     it("Agent: buyer can withdraw assets after settlement", async() => {
         let failed = false
+        //@ts-ignore
         dealRoomController = new DealRoomController(dealRoomHubAddress, roomAddress, provider.getSigner(ROOM_1.buyer))
         await dealRoomController.init()
         try {

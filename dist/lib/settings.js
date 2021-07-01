@@ -1,8 +1,8 @@
 // Admin account for default provider (local chain only)
-export const ADMIN = "0xB051764B2da6Aa16b9Bc439BcAd1c309Ad7a32CA";
+export var ADMIN = "0xB051764B2da6Aa16b9Bc439BcAd1c309Ad7a32CA";
 //These accounts are unlocked accounts in testrpc with the following seed:
 //abuse forget cool step task knife bargain vacant lemon manual various pride
-export const TESTRPC_ACCOUNTS = [
+export var TESTRPC_ACCOUNTS = [
     {
         address: "0xB051764B2da6Aa16b9Bc439BcAd1c309Ad7a32CA",
         name: "Alice Ardoyne (Arbitrator)"

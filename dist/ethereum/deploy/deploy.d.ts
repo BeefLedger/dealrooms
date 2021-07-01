@@ -4,7 +4,7 @@ import { DealRoomHub } from "../types/DealRoomHub";
 import { MultiSigHashed } from "../types/MultiSigHashed";
 import { TestContract } from "../types/TestContract";
 import { Signer } from "ethers";
-import { DealRoomDetails } from "../../services/dealRoomController";
+import { Deal, DealRoomDetails } from "../../services/dealRoomController";
 export declare type DeployedEnvironment = {
     DealRoomHub?: DealRoomHub;
     erc20?: TestCoin;
@@ -32,4 +32,8 @@ export declare type DealRoomBasicCreateParams = {
 };
 export declare function deployDealRoom(params: DealRoomCreateParams, owner: string, signer: Signer): Promise<DealRoomDetails>;
 export declare function deployBasicDealRoom(params: DealRoomBasicCreateParams, owner: string, signer: Signer): Promise<DealRoomDetails>;
+export declare function deployRoomAndDeal(roomParams: DealRoomBasicCreateParams, deal: Deal, signer: Signer): Promise<{
+    roomAddress: string;
+    dealId: number;
+}>;
 export declare function deployAll(signer: Signer): Promise<DeployedEnvironment>;
