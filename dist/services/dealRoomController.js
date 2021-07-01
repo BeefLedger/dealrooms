@@ -94,10 +94,7 @@ var DealRoomController = /** @class */ (function () {
             var deployedRoom, roomAddresses, _i, roomAddresses_1, roomAddress, room, roomContract, dealId;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        // See if there is already a room for this buyer and seller
-                        debugger;
-                        return [4 /*yield*/, DealRoomController.getRooms(roomParams.dealRoomHubAddress, signer)];
+                    case 0: return [4 /*yield*/, DealRoomController.getRooms(roomParams.dealRoomHubAddress, signer)];
                     case 1:
                         roomAddresses = _a.sent();
                         _i = 0, roomAddresses_1 = roomAddresses;
@@ -542,17 +539,11 @@ var DealRoomController = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         console.log("getDealMissingAssets(" + id + ")");
-                        return [4 /*yield*/, this._getDealRoomContract()
-                            //debugger
-                            //console.log(`contract: ${JSON.stringify(contract)}`)
-                        ];
+                        return [4 /*yield*/, this._getDealRoomContract()];
                     case 1:
                         contract = _a.sent();
                         return [4 /*yield*/, contract.missingDealAssets(id)];
-                    case 2: 
-                    //debugger
-                    //console.log(`contract: ${JSON.stringify(contract)}`)
-                    return [2 /*return*/, (_a.sent()).toNumber()];
+                    case 2: return [2 /*return*/, (_a.sent()).toNumber()];
                 }
             });
         });
@@ -818,7 +809,6 @@ var DealRoomController = /** @class */ (function () {
                         return [4 /*yield*/, multiSigContract.getTransactions()];
                     case 2:
                         transactions = _a.sent();
-                        debugger;
                         if (transactions.length) {
                             result = transactions.find(function (transaction) {
                                 var decodedTransaction = MultiSigController.decodeDealRoomTransaction(transaction.data);

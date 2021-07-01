@@ -80,7 +80,6 @@ export class DealRoomController {
     // Make a deal: Fetch or deploy the room contract, then create the deal
     public static async deployRoomAndDeal(roomParams: Deployer.DealRoomBasicCreateParams, deal: Deal, signer: Signer): Promise<{roomAddress: string, dealId: number}> {
         // See if there is already a room for this buyer and seller
-        debugger
         let deployedRoom: DealRoomDetails
         const roomAddresses = await DealRoomController.getRooms(roomParams.dealRoomHubAddress, signer)
         for (const roomAddress of roomAddresses) {
@@ -304,8 +303,6 @@ export class DealRoomController {
     public async getDealMissingAssets(id: BigNumberish): Promise<number> {
         console.log(`getDealMissingAssets(${id})`)
         const contract = await this._getDealRoomContract()
-        //debugger
-        //console.log(`contract: ${JSON.stringify(contract)}`)
         return (await contract.missingDealAssets(id)).toNumber()
     }
 
@@ -438,7 +435,6 @@ export class DealRoomController {
         const multiSigContract = await this._getDealMultiSig()
         // Find transaction that corresponds to settle(dealId)
         const transactions = await multiSigContract.getTransactions()
-        debugger
         if (transactions.length) {
             result = transactions.find((transaction: MultiSigTransaction) => {
                 const decodedTransaction = MultiSigController.decodeDealRoomTransaction(transaction.data)
