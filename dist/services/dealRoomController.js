@@ -401,6 +401,7 @@ var DealRoomController = /** @class */ (function () {
                     case 2:
                         dealId = _a.sent();
                         console.log("Made deal");
+                        debugger;
                         return [4 /*yield*/, this.getDeal(dealId)];
                     case 3:
                         result = _a.sent();

@@ -221,6 +221,7 @@ export class DealRoomController {
         const dealRoom = await this._getDealRoomContract()      
         const dealId = await DealRoomController.makeRoomDeal(dealRoom, deal, this._signer)
         console.log("Made deal") 
+        debugger
         const result = await this.getDeal(dealId)
         console.log(`Fetched deal ${JSON.stringify(result)}`)
         return result
