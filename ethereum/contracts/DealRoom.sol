@@ -11,16 +11,18 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract DealRoom {
     address public creator;
     address public owner;
-    //IERC721 public erc721;
-    //IERC20 public erc20;
     uint256 public dealCount;
     Deal[] public deals;
-    //mapping(uint256 => Deal) private deals;
     bool private settled;
     address public buyer;
     address public seller;
 
     event Debug(bytes32 message, uint num);
+    event DealSettled(uint256 dealId);
+    event DealCanceled(uint256 dealId);
+    event DealCreated(uint256 dealId);
+    event DealAssetsWithdrawn(uint256 dealId, uint256 amount);
+    event DealCoinsWithdrawn(uint256 dealId);
 
     struct Deal {
         uint256 id;
@@ -53,7 +55,6 @@ contract DealRoom {
         uint256 _price,
         uint256[] memory _assetItems
     ) public  {
-
         deals.push(Deal({
             id: dealCount,
             erc20: _erc20,
@@ -64,7 +65,7 @@ contract DealRoom {
             valid: true
         }));
         dealCount ++;
-        // dealIds.push(_id);
+        emit DealCreated(dealCount);
     }
 
     function dealAssetCount(uint256 id) public view dealExists(id, true) returns (uint256) {
@@ -77,9 +78,6 @@ contract DealRoom {
     ) public view dealExists(id, true) returns (uint256) {
         //Check that all the assets have been deposited, and return the quantity missing    
         Deal memory deal = getDeal(id);
-        /*if (deal.status == DealStatus.Settled) {
-            return 0;
-        }*/
         uint256 assetDeposits = 0;
         for (uint i = 0; i < deal.assetItems.length; i ++) {
             // Check that I (the dealroom contract) own this asset
@@ -120,9 +118,6 @@ contract DealRoom {
     ) public view dealExists(id, true) returns (uint256) {
         //Check that all the coins have been deposited, and return the amount missing
         Deal memory deal = getDeal(id);
-        /*if (deal.status == DealStatus.Settled) {
-            return 0;
-        }*/
         uint256 balance = deal.erc20.balanceOf(address(this));
         if (balance >= deal.price) {
             return 0;
@@ -130,18 +125,15 @@ contract DealRoom {
         return deal.price - balance;
     }
 
+    // Change the status to Settled, which will allow the buyer to withdraw the tokens, and the seller to withdraw the assets
     function settle(
         uint256 id
     ) public dealOpen(id) isOwner() {
-        //Deal deal = getDeal(id)
-        //emit Debug("Deal ID", deal.id);
-        //emit Debug("Deal ID", deal.id);
-
-        //uint missing = missingDealAssets(id);
         require(missingDealAssets(id) == 0, "DEAL_ASSETS_MISSING");
         require(missingDealCoins(id) == 0, "DEAL_TOKENS_MISSING");
-        //emit Debug("Missing deal assets", missing);
+
         _setDealStatus(id, DealStatus.Settled);
+        emit DealSettled(id);
     }
 
     function _setDealStatus(
@@ -168,18 +160,22 @@ contract DealRoom {
                 transferred ++;
             }
         }
+        emit DealAssetsWithdrawn(dealId, count);
     }
 
-    function withdrawDealCoins(uint256 dealId) public dealExists(dealId, true) {
+    //Anyone can cancel the deal
+    function cancelDeal(uint256 dealId) public isMember() dealOpen(dealId) {
         Deal memory deal = getDeal(dealId);
+        deal.status = DealStatus.Cancelled;
+        deal.erc20.transfer(buyer, deal.price);
+        emit DealCanceled(dealId);
+    }      
 
-        if (deal.status == DealStatus.Settled) {
-            require(msg.sender == seller, "SELLER_ONLY");
-        } else {
-            require(msg.sender == buyer, "BUYER_ONLY");
-        }
-        //TODO: Only allow the withdrawal once
-        deal.erc20.transfer(msg.sender, deal.price);
+    //The seller withdraws the coins after the deal is settled
+    function withdrawDealCoins(uint256 dealId) public isSeller() dealSettled(dealId) {
+        Deal memory deal = getDeal(dealId);
+        deal.erc20.transfer(seller, deal.price);
+        emit DealCoinsWithdrawn(dealId);
     }
 
     function getOwner() public view returns (address) {
@@ -240,8 +236,31 @@ contract DealRoom {
         _;
     }
 
+    modifier dealSettled(
+        uint256 id
+    ) {
+        Deal memory deal = getDeal(id);
+        require(deal.status == DealStatus.Settled, "DEAL_NOT_SETTLED");
+        _;
+    }
+
     modifier isOwner() {
         require(msg.sender == owner, "ONLY_OWNER");
+        _;
+    }
+
+    modifier isBuyer() {
+        require(msg.sender == buyer, "ONLY_BUYER");
+        _;
+    }
+
+    modifier isSeller() {
+        require(msg.sender == seller, "ONLY_SELLER");
+        _;
+    }
+
+    modifier isMember() {
+        require(msg.sender == buyer || msg.sender == seller, "NOT_MEMBER");
         _;
     }
 }

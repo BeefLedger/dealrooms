@@ -220,10 +220,7 @@ export class DealRoomController {
     public async makeDeal(deal: Deal): Promise<Deal> {
         const dealRoom = await this._getDealRoomContract()      
         const dealId = await DealRoomController.makeRoomDeal(dealRoom, deal, this._signer)
-        console.log("Made deal") 
-        debugger
         const result = await this.getDeal(dealId)
-        console.log(`Fetched deal ${JSON.stringify(result)}`)
         return result
     }
 
@@ -337,6 +334,13 @@ export class DealRoomController {
         } else {
             return this._proposeMainSettleDeal(dealId) 
         }
+    }
+
+    public async cancelDeal(dealId: BigNumberish): Promise<ContractReceipt> {
+        const contract = await this._getDealRoomContract()
+        const transaction = await contract.cancelDeal(dealId)
+        const receipt = await transaction.wait()
+        return receipt
     }
 
     public async withdrawDealCoins(dealId: BigNumberish): Promise<ContractReceipt> {

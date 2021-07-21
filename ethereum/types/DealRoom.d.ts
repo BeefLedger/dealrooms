@@ -35,6 +35,7 @@ interface DealRoomInterface extends ethers.utils.Interface {
     "missingDealCoins(uint256)": FunctionFragment;
     "settle(uint256)": FunctionFragment;
     "withdrawDealAssets(uint256,uint256)": FunctionFragment;
+    "cancelDeal(uint256)": FunctionFragment;
     "withdrawDealCoins(uint256)": FunctionFragment;
     "getOwner()": FunctionFragment;
     "getBuyer()": FunctionFragment;
@@ -82,6 +83,10 @@ interface DealRoomInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "withdrawDealAssets",
     values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "cancelDeal",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "withdrawDealCoins",
@@ -133,6 +138,7 @@ interface DealRoomInterface extends ethers.utils.Interface {
     functionFragment: "withdrawDealAssets",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "cancelDeal", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "withdrawDealCoins",
     data: BytesLike
@@ -155,9 +161,19 @@ interface DealRoomInterface extends ethers.utils.Interface {
   ): Result;
 
   events: {
+    "DealAssetsWithdrawn(uint256,uint256)": EventFragment;
+    "DealCanceled(uint256)": EventFragment;
+    "DealCoinsWithdrawn(uint256)": EventFragment;
+    "DealCreated(uint256)": EventFragment;
+    "DealSettled(uint256)": EventFragment;
     "Debug(bytes32,uint256)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "DealAssetsWithdrawn"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "DealCanceled"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "DealCoinsWithdrawn"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "DealCreated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "DealSettled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Debug"): EventFragment;
 }
 
@@ -274,6 +290,11 @@ export class DealRoom extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    cancelDeal(
+      dealId: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     withdrawDealCoins(
       dealId: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -384,6 +405,11 @@ export class DealRoom extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  cancelDeal(
+    dealId: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   withdrawDealCoins(
     dealId: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -486,6 +512,8 @@ export class DealRoom extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    cancelDeal(dealId: BigNumberish, overrides?: CallOverrides): Promise<void>;
+
     withdrawDealCoins(
       dealId: BigNumberish,
       overrides?: CallOverrides
@@ -520,6 +548,30 @@ export class DealRoom extends BaseContract {
   };
 
   filters: {
+    DealAssetsWithdrawn(
+      dealId?: null,
+      amount?: null
+    ): TypedEventFilter<
+      [BigNumber, BigNumber],
+      { dealId: BigNumber; amount: BigNumber }
+    >;
+
+    DealCanceled(
+      dealId?: null
+    ): TypedEventFilter<[BigNumber], { dealId: BigNumber }>;
+
+    DealCoinsWithdrawn(
+      dealId?: null
+    ): TypedEventFilter<[BigNumber], { dealId: BigNumber }>;
+
+    DealCreated(
+      dealId?: null
+    ): TypedEventFilter<[BigNumber], { dealId: BigNumber }>;
+
+    DealSettled(
+      dealId?: null
+    ): TypedEventFilter<[BigNumber], { dealId: BigNumber }>;
+
     Debug(
       message?: null,
       num?: null
@@ -584,6 +636,11 @@ export class DealRoom extends BaseContract {
     withdrawDealAssets(
       dealId: BigNumberish,
       count: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    cancelDeal(
+      dealId: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -671,6 +728,11 @@ export class DealRoom extends BaseContract {
     withdrawDealAssets(
       dealId: BigNumberish,
       count: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    cancelDeal(
+      dealId: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

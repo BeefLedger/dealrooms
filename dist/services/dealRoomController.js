@@ -400,12 +400,9 @@ var DealRoomController = /** @class */ (function () {
                         return [4 /*yield*/, DealRoomController.makeRoomDeal(dealRoom, deal, this._signer)];
                     case 2:
                         dealId = _a.sent();
-                        console.log("Made deal");
-                        debugger;
                         return [4 /*yield*/, this.getDeal(dealId)];
                     case 3:
                         result = _a.sent();
-                        console.log("Fetched deal " + JSON.stringify(result));
                         return [2 /*return*/, result];
                 }
             });
@@ -621,6 +618,25 @@ var DealRoomController = /** @class */ (function () {
                             return [2 /*return*/, this._proposeMainSettleDeal(dealId)];
                         }
                         return [2 /*return*/];
+                }
+            });
+        });
+    };
+    DealRoomController.prototype.cancelDeal = function (dealId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var contract, transaction, receipt;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this._getDealRoomContract()];
+                    case 1:
+                        contract = _a.sent();
+                        return [4 /*yield*/, contract.cancelDeal(dealId)];
+                    case 2:
+                        transaction = _a.sent();
+                        return [4 /*yield*/, transaction.wait()];
+                    case 3:
+                        receipt = _a.sent();
+                        return [2 /*return*/, receipt];
                 }
             });
         });

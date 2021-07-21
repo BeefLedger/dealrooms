@@ -75,6 +75,7 @@ export declare class DealRoomController {
     getDealAssetStatus(dealId: BigNumberish): Promise<AssetStatus[]>;
     getDealMissingCoins(id: BigNumberish): Promise<number>;
     proposeSettleDeal(dealId: BigNumberish): Promise<string>;
+    cancelDeal(dealId: BigNumberish): Promise<ContractReceipt>;
     withdrawDealCoins(dealId: BigNumberish): Promise<ContractReceipt>;
     withdrawDealAssets(dealId: BigNumberish): Promise<ContractReceipt>;
     getAgentMultiSigContractAddress(): string;
