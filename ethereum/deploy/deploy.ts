@@ -1,29 +1,44 @@
 
 import * as artifactDealRoomHub from "../abi/DealRoomHub.json"
+import * as artifactDealHub from "../abi/DealHub.json"
+import * as artifactDeal from "../abi/Deal.json"
 import * as artifactTestCoin from "../abi/TestCoin.json"
 import * as artifactTestAsset from "../abi/TestAsset.json"
 import * as artifactMultisig from "../abi/MultiSigHashed.json"
 import * as artifactTestContract from "../abi/TestContract.json"
 
+
 import { deployContract } from "../../services/chain/contractFactory"
 import { TestCoin } from "../types/TestCoin"
 import { TestAsset } from "../types/TestAsset"
 
-import { DealRoomHub } from "../types/DealRoomHub"
+import { DealHub } from "../types/DealHub"
+//import { Deal as DealContract } from "../types/Deal"
 import { MultiSigHashed } from "../types/MultiSigHashed"
 import { TestContract } from "../types/TestContract"
 
-import { Signer } from "ethers"
-import { getDealRoomHubContract } from "../../services/chain/prefabContractFactory"
-import { Deal, DealRoomDetails } from "../../services/dealRoomController"
-import { DealRoom } from "../../ethereum/types/DealRoom"
-import { BigNumber } from "ethers"
-// import { DealRoom } from "ethereum/types/DealRoom"
+import { BigNumberish, Signer } from "ethers"
+import { getDealHubContract } from "../../services/chain/prefabContractFactory"
+//import { Deal, DealRoomDetails } from "../../services/dealRoomController"
+
+//import { BigNumber } from "ethers"
+//import { DealListing } from "services/chain/dealController"
+
 
 export type DeployedEnvironment = {
-    DealRoomHub?: DealRoomHub
+    DealHub?: DealHub
     erc20?: TestCoin
     erc721?: TestAsset 
+}
+
+export type DeployDealParams = {
+    dealHubAddress: string
+    buyer: string
+    seller: string
+    erc20: string
+    erc721: string
+    price: BigNumberish
+    assetItems: BigNumberish[]
 }
 
 export const ERROR_NO_EVENT_FOUND = "NO_EVENT_FOUND"
@@ -59,40 +74,32 @@ export async function deployMultisig(owners: string[], approvalsRequired: number
     }
 }
 
-export async function deployDealRoomHub(signer: Signer): Promise<DealRoomHub>  {
-    const contract = await deployContract<DealRoomHub>(signer, artifactDealRoomHub)  
+export async function deployDealHub(signer: Signer): Promise<DealHub>  {
+    const contract = await deployContract<DealHub>(signer, artifactDealHub)  
     return contract
 }
 
-export type DealRoomCreateParams = {
-    dealRoomHubAddress: string
-    buyer: string
-    seller: string
-    arbitrator: string
-    docApprover: string
-    sensorApprover: string
-}
-
-
+/*
 export type DealRoomBasicCreateParams = {
     dealRoomHubAddress: string
     buyer: string
     seller: string
 }
+*/
 
-export async function deployDealRoom(params: DealRoomCreateParams, owner: string, signer: Signer): Promise<DealRoomDetails>  {
+export async function deployDeal(params: DeployDealParams, owner: string, signer: Signer): Promise<string>  {
     try {
-        let roomAddress: string
-        const DealRoomHubContract = await getDealRoomHubContract(params.dealRoomHubAddress, signer)
-        const tx = await DealRoomHubContract.functions.makeRoom(params)
+        let dealAddress: string
+        const dealHubContract = await getDealHubContract(params.dealHubAddress, signer)
+        const tx = await dealHubContract.functions.makeDeal(params.buyer, params.seller, params.erc20, params.erc721, params.price, params.assetItems)
         const receipt = await tx.wait()
 
         //TODO: Make this a generic event finder
-        const newRoomEvents = receipt.events?.filter(evt => evt.event === 'NewRoomEvent')
-        if (newRoomEvents) { 
-            if (newRoomEvents.length > 0) {
-                if (newRoomEvents.length === 1) {
-                    roomAddress = (newRoomEvents[0]?.args as any).addr
+        const dealCreatedEvents = receipt.events?.filter(evt => evt.event === 'DealCreated')
+        if (dealCreatedEvents) { 
+            if (dealCreatedEvents.length > 0) {
+                if (dealCreatedEvents.length === 1) {
+                    dealAddress = (dealCreatedEvents[0]?.args as any).addr
                 } else {
                     throw new Error(ERROR_MULTIPLE_EVENTS)
                 }
@@ -101,14 +108,13 @@ export async function deployDealRoom(params: DealRoomCreateParams, owner: string
             throw new Error(ERROR_NO_EVENT_FOUND)
         } 
 
-        const dealRoomDetails = await DealRoomHubContract.getRoom(roomAddress)
-        return dealRoomDetails;
+        return dealAddress
     }
     catch (e) {
-        console.error("deployDealRoom()", e)
+        console.error("deployDeal()", e)
     }
 }
-
+/*
 export async function deployBasicDealRoom(params: DealRoomBasicCreateParams, owner: string, signer: Signer): Promise<DealRoomDetails>  {
     try {
         let roomAddress: string
@@ -171,12 +177,12 @@ export async function deployRoomAndDeal(roomParams: DealRoomBasicCreateParams, d
         dealId: 0
     }
 }
-
+*/
 export async function deployAll(signer: Signer): Promise<DeployedEnvironment> {
     const result: DeployedEnvironment = {
         erc20: await deployTestCoin(signer),
         erc721: await deployTestAsset(signer),
-        DealRoomHub: await deployDealRoomHub(signer),
+        DealHub: await deployDealHub(signer),
     }
     return result
 }

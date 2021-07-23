@@ -1,11 +1,11 @@
 import * as Erc20DetailedCompiled  from "../../ethereum/abi/IERC20.json"
 import * as Erc721DetailedCompiled from "../../ethereum/abi/IERC721.json"
-import * as DealRoomHubCompiled from "../../ethereum/abi/DealRoomHub.json"
-import * as DealRoomCompiled from "../../ethereum/abi/DealRoom.json"
+import * as DealHubCompiled from "../../ethereum/abi/DealHub.json"
+import * as DealCompiled from "../../ethereum/abi/Deal.json"
 import * as MultiSigHashedCompiled from "../../ethereum/abi/MultiSigHashed.json"
 
-import { DealRoomHub } from "../../ethereum/types/DealRoomHub"
-import { DealRoom } from "../../ethereum/types/DealRoom"
+import { DealHub } from "../../ethereum/types/DealHub"
+import { Deal } from "../../ethereum/types/Deal"
 import { IERC20 } from "../../ethereum/types/IERC20"
 import { IERC721 } from "../../ethereum/types/IERC721"
 import { MultiSigHashed } from "../../ethereum/types/MultiSigHashed"
@@ -13,12 +13,12 @@ import { MultiSigHashed } from "../../ethereum/types/MultiSigHashed"
 import { getContract } from "./contractFactory"
 import { Signer } from "ethers"
 
-export async function getDealRoomHubContract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<DealRoomHub> {
-    return getContract<DealRoomHub>(address, DealRoomHubCompiled.abi, signerIdxOrAddressOrSigner) as Promise<DealRoomHub>
+export async function getDealContract(address: string, signer: Signer): Promise<Deal> {
+    return getContract<Deal>(address, DealCompiled.abi, signer)
 }
 
-export async function getDealRoomContract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<DealRoom> {
-    return getContract<DealRoom>(address, DealRoomCompiled.abi, signerIdxOrAddressOrSigner) as Promise<DealRoom>
+export async function getDealHubContract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<DealHub> {
+    return getContract<DealHub>(address, DealHubCompiled.abi, signerIdxOrAddressOrSigner) as Promise<DealHub>
 }
 
 export async function getErc20Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<IERC20> {

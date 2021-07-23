@@ -26,8 +26,8 @@ export async function setupTest(adminAddress: string, accounts: any[] ): Promise
     let assetId = 0
     for (const acct of accounts) {
         demoEnvironment.erc721Allocations[acct.address] = []
-        await sendEth(acct.address, 0.1, provider.getSigner())
-        demoEnvironment.deployedEnvironment.erc20.mint(acct.address, ERC20_DEMO_AMOUNT)
+        await sendEth(acct.address, 0.1, provider.getSigner(adminAddress))
+        await demoEnvironment.deployedEnvironment.erc20.mint(acct.address, ERC20_DEMO_AMOUNT)
         demoEnvironment.erc20Allocations[acct.address] = ERC20_DEMO_AMOUNT
         for (let i=0; i<5; i++) {
             assetId++

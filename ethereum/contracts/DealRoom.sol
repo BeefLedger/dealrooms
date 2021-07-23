@@ -95,6 +95,12 @@ contract DealRoom {
         return deal.erc721.ownerOf(assetId);
     }
 
+    /*function depositDealCoins(uint256 dealId) public view dealExists(dealId, true) returns (uint256) {
+        Deal memory deal = getDeal(dealId);
+        if (deal.erc20.isValid()) {
+            deal.erc20.transferFrom(sender, address(this), deal.price)
+    */
+
     function dealAssetsDeposited(
         uint256 id
     ) public view dealExists(id, true) returns (uint256) {
