@@ -127,7 +127,7 @@ export class DealController {
     //Create a new deal and initialise
     public async initWithNewDeal(deal: Deal): Promise<void> 
     {
-        debugger
+
         this.dealHubContract = await ContractFactory.getDealHubContract(this._dealHubAddress, this._signer)
         this._dealAddress = await DealController.makeDeal(this.dealHubContract, deal, this._signer)
         return this.initWithDeal(this._dealAddress)
@@ -191,18 +191,15 @@ export class DealController {
         }
     }
     public async getDeal(): Promise<Deal> {
-        if (this.deal) {
-            return this.deal;
-        }
         if (!this.dealContract) {
             this.dealContract = await this._getDealContract()
-        
+        }
         try {
             let dealStruct: any
             try {
                 dealStruct = await this.dealContract.getDeal()       
             } catch (e) {
-                throw new Error("Deal not found:", e)
+                throw new Error(`Deal not found: ${e}`)
             }
             
             // Get multisig from Room
@@ -210,9 +207,9 @@ export class DealController {
             
             // Get deal transaction and confirmations (if any) from main multisig
             const dealTransaction = await this._getDealSettleTransaction()
-            let dealConfirmations: number = 0
+            let multisigConfirmations: number = 0
             if (dealTransaction) {
-                dealConfirmations = (await dealMultiSig.getConfirmations(dealTransaction.hash)).length
+                multisigConfirmations = (await dealMultiSig.getConfirmations(dealTransaction.hash)).length
             }
 
             // Return the Deal
@@ -225,32 +222,15 @@ export class DealController {
                 price: dealStruct.price,
                 assetItems: dealStruct.assetItems.map(item=>item.toNumber()),
                 dealTransaction,
-                dealConfirmations,
+                multisigConfirmations,
                 status: dealStruct.status,
             } as Deal
         }
         catch (e) {
-
-            console.error(`Failed to find deal:`, e)
-            return null
+            throw new Error(`Failed to find deal: ${e}`)
         }
     }
 
-    /*public async getDeals(): Promise<Deal[]> {
-        try {
-            const contract = await this._getDealHubContract()
-            const dealAddresses: string[] = await contract.getUserDeals(await this._signer.getAddress())
-
-            const result: Deal[] = []
-            for(const dealAddress of dealAddresses) {
-                result.push(await this.getDeal(dealAddress))
-            }
-            return result
-        }
-        catch (e) {
-            throw Error(`getDeals(): ${e}`)
-        }
-    }*/
     public async getDealMissingAssets(): Promise<number> {
         const contract = await this.dealContract
         return (await contract.missingDealAssets()).toNumber()
@@ -298,6 +278,22 @@ export class DealController {
 
     /*public getAgentMultiSigContractAddress(): string {
         return this.details.agentMultiSig
+    }*/
+
+    /*public async getDeals(): Promise<Deal[]> {
+        try {
+            const contract = await this._getDealHubContract()
+            const dealAddresses: string[] = await contract.getUserDeals(await this._signer.getAddress())
+
+            const result: Deal[] = []
+            for(const dealAddress of dealAddresses) {
+                result.push(await this.getDeal(dealAddress))
+            }
+            return result
+        }
+        catch (e) {
+            throw Error(`getDeals(): ${e}`)
+        }
     }*/
 
     public getDealMultiSigContractAddress(): string {

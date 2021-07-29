@@ -4,7 +4,7 @@ import abiDecoder from "abi-decoder"
 
 import { MultiSigHashed } from "../ethereum/types/MultiSigHashed"
 import * as MultiSigCompiled from "../ethereum/abi/MultiSigHashed.json"
-import * as DealRoomCompiled from "../ethereum/abi/DealRoom.json"
+import * as DealCompiled from "../ethereum/abi/Deal.json"
 import { getMultiSigContract } from "./chain/prefabContractFactory"
 
 export const ERROR_MULTIPLE_SUBMISSION_EVENTS = "MULTIPLE_SUBMISSION_EVENTS"
@@ -165,7 +165,7 @@ export class MultiSigController {
     //TODO: Move this out
     public static  decodeDealRoomTransaction(encoded: string): any {
         //Identify the method and parameters
-        return MultiSigController.decodeParams(encoded, DealRoomCompiled.abi)   
+        return MultiSigController.decodeParams(encoded, DealCompiled.abi)   
     }
     
     //TODO: Move this out

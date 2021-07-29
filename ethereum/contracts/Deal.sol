@@ -140,11 +140,11 @@ contract Deal {
         emit DealAssetsWithdrawn(count);
     }
 
-    function withdrawDealCoins() public isSeller() dealSettled() {
+    function withdrawDealCoins() public isMember() {
         if (status == DealStatus.Settled) {
-            require(msg.sender == seller, "SELLER_ONLY");
+            require(msg.sender == seller, "ONLY_SELLER_AFTER_SETTLEMENT");
         } else {
-            require(msg.sender == buyer, "BUYER_ONLY");
+            require(msg.sender == buyer, "ONLY_BUYER_BEFORE_SETTLEMENT");
         }
         erc20.transfer(msg.sender, price);
         emit DealCoinsWithdrawn();

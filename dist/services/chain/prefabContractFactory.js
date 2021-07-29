@@ -36,21 +36,21 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 import * as Erc20DetailedCompiled from "../../ethereum/abi/IERC20.json";
 import * as Erc721DetailedCompiled from "../../ethereum/abi/IERC721.json";
-import * as DealRoomHubCompiled from "../../ethereum/abi/DealRoomHub.json";
-import * as DealRoomCompiled from "../../ethereum/abi/DealRoom.json";
+import * as DealHubCompiled from "../../ethereum/abi/DealHub.json";
+import * as DealCompiled from "../../ethereum/abi/Deal.json";
 import * as MultiSigHashedCompiled from "../../ethereum/abi/MultiSigHashed.json";
 import { getContract } from "./contractFactory";
-export function getDealRoomHubContract(address, signerIdxOrAddressOrSigner) {
+export function getDealContract(address, signer) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            return [2 /*return*/, getContract(address, DealRoomHubCompiled.abi, signerIdxOrAddressOrSigner)];
+            return [2 /*return*/, getContract(address, DealCompiled.abi, signer)];
         });
     });
 }
-export function getDealRoomContract(address, signerIdxOrAddressOrSigner) {
+export function getDealHubContract(address, signerIdxOrAddressOrSigner) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            return [2 /*return*/, getContract(address, DealRoomCompiled.abi, signerIdxOrAddressOrSigner)];
+            return [2 /*return*/, getContract(address, DealHubCompiled.abi, signerIdxOrAddressOrSigner)];
         });
     });
 }

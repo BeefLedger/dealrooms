@@ -34,14 +34,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-import * as artifactDealRoomHub from "../abi/DealRoomHub.json";
+import * as artifactDealHub from "../abi/DealHub.json";
 import * as artifactTestCoin from "../abi/TestCoin.json";
 import * as artifactTestAsset from "../abi/TestAsset.json";
 import * as artifactMultisig from "../abi/MultiSigHashed.json";
 import * as artifactTestContract from "../abi/TestContract.json";
 import { deployContract } from "../../services/chain/contractFactory";
-import { getDealRoomHubContract } from "../../services/chain/prefabContractFactory";
-import { BigNumber } from "ethers";
+import { getDealHubContract } from "../../services/chain/prefabContractFactory";
 export var ERROR_NO_EVENT_FOUND = "NO_EVENT_FOUND";
 export var ERROR_MULTIPLE_EVENTS = "ERROR_MULTIPLE_EVENTS";
 export function deployTestCoin(signer) {
@@ -108,12 +107,12 @@ export function deployMultisig(owners, approvalsRequired, signer) {
         });
     });
 }
-export function deployDealRoomHub(signer) {
+export function deployDealHub(signer) {
     return __awaiter(this, void 0, void 0, function () {
         var contract;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, deployContract(signer, artifactDealRoomHub)];
+                case 0: return [4 /*yield*/, deployContract(signer, artifactDealHub)];
                 case 1:
                     contract = _a.sent();
                     return [2 /*return*/, contract];
@@ -121,19 +120,26 @@ export function deployDealRoomHub(signer) {
         });
     });
 }
-export function deployDealRoom(params, owner, signer) {
+/*
+export type DealRoomBasicCreateParams = {
+    dealRoomHubAddress: string
+    buyer: string
+    seller: string
+}
+*/
+export function deployDeal(params, owner, signer) {
     var _a, _b;
     return __awaiter(this, void 0, void 0, function () {
-        var roomAddress, DealRoomHubContract, tx, receipt, newRoomEvents, dealRoomDetails, e_3;
+        var dealAddress, dealHubContract, tx, receipt, dealCreatedEvents, e_3;
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
-                    _c.trys.push([0, 5, , 6]);
-                    roomAddress = void 0;
-                    return [4 /*yield*/, getDealRoomHubContract(params.dealRoomHubAddress, signer)];
+                    _c.trys.push([0, 4, , 5]);
+                    dealAddress = void 0;
+                    return [4 /*yield*/, getDealHubContract(params.dealHubAddress, signer)];
                 case 1:
-                    DealRoomHubContract = _c.sent();
-                    return [4 /*yield*/, DealRoomHubContract.functions.makeRoom(params)];
+                    dealHubContract = _c.sent();
+                    return [4 /*yield*/, dealHubContract.functions.makeDeal(params.buyer, params.seller, params.erc20, params.erc721, params.price, params.assetItems)];
                 case 2:
                     tx = _c.sent();
                     return [4 /*yield*/, tx.wait()
@@ -141,11 +147,11 @@ export function deployDealRoom(params, owner, signer) {
                     ];
                 case 3:
                     receipt = _c.sent();
-                    newRoomEvents = (_a = receipt.events) === null || _a === void 0 ? void 0 : _a.filter(function (evt) { return evt.event === 'NewRoomEvent'; });
-                    if (newRoomEvents) {
-                        if (newRoomEvents.length > 0) {
-                            if (newRoomEvents.length === 1) {
-                                roomAddress = ((_b = newRoomEvents[0]) === null || _b === void 0 ? void 0 : _b.args).addr;
+                    dealCreatedEvents = (_a = receipt.events) === null || _a === void 0 ? void 0 : _a.filter(function (evt) { return evt.event === 'DealCreated'; });
+                    if (dealCreatedEvents) {
+                        if (dealCreatedEvents.length > 0) {
+                            if (dealCreatedEvents.length === 1) {
+                                dealAddress = ((_b = dealCreatedEvents[0]) === null || _b === void 0 ? void 0 : _b.args).addr;
                             }
                             else {
                                 throw new Error(ERROR_MULTIPLE_EVENTS);
@@ -155,114 +161,80 @@ export function deployDealRoom(params, owner, signer) {
                     else {
                         throw new Error(ERROR_NO_EVENT_FOUND);
                     }
-                    return [4 /*yield*/, DealRoomHubContract.getRoom(roomAddress)];
+                    return [2 /*return*/, dealAddress];
                 case 4:
-                    dealRoomDetails = _c.sent();
-                    return [2 /*return*/, dealRoomDetails];
-                case 5:
                     e_3 = _c.sent();
-                    console.error("deployDealRoom()", e_3);
-                    return [3 /*break*/, 6];
-                case 6: return [2 /*return*/];
+                    console.error("deployDeal()", e_3);
+                    return [3 /*break*/, 5];
+                case 5: return [2 /*return*/];
             }
         });
     });
 }
-export function deployBasicDealRoom(params, owner, signer) {
-    var _a, _b;
-    return __awaiter(this, void 0, void 0, function () {
-        var roomAddress, DealRoomHubContract, tx, receipt, newRoomEvents, dealRoomDetails, e_4;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
-                case 0:
-                    _c.trys.push([0, 5, , 6]);
-                    roomAddress = void 0;
-                    return [4 /*yield*/, getDealRoomHubContract(params.dealRoomHubAddress, signer)];
-                case 1:
-                    DealRoomHubContract = _c.sent();
-                    return [4 /*yield*/, DealRoomHubContract.functions.makeBasicRoom(params.buyer, params.seller)];
-                case 2:
-                    tx = _c.sent();
-                    return [4 /*yield*/, tx.wait()
-                        //TODO: Make this a generic event finder
-                    ];
-                case 3:
-                    receipt = _c.sent();
-                    newRoomEvents = (_a = receipt.events) === null || _a === void 0 ? void 0 : _a.filter(function (evt) { return evt.event === 'NewRoomEvent'; });
-                    if (newRoomEvents) {
-                        if (newRoomEvents.length > 0) {
-                            if (newRoomEvents.length === 1) {
-                                roomAddress = ((_b = newRoomEvents[0]) === null || _b === void 0 ? void 0 : _b.args).addr;
-                            }
-                            else {
-                                throw new Error(ERROR_MULTIPLE_EVENTS);
-                            }
-                        }
-                    }
-                    else {
-                        throw new Error(ERROR_NO_EVENT_FOUND);
-                    }
-                    return [4 /*yield*/, DealRoomHubContract.getRoom(roomAddress)]; //functions.getRoom(roomAddress)
-                case 4:
-                    dealRoomDetails = _c.sent() //functions.getRoom(roomAddress)
-                    ;
-                    return [2 /*return*/, dealRoomDetails];
-                case 5:
-                    e_4 = _c.sent();
-                    console.error("deployDealRoom()", e_4);
-                    return [3 /*break*/, 6];
-                case 6: return [2 /*return*/];
+/*
+export async function deployBasicDealRoom(params: DealRoomBasicCreateParams, owner: string, signer: Signer): Promise<DealRoomDetails>  {
+    try {
+        let roomAddress: string
+        const DealRoomHubContract = await getDealRoomHubContract(params.dealRoomHubAddress, signer)
+        const tx = await DealRoomHubContract.functions.makeBasicRoom(params.buyer, params.seller)
+        const receipt = await tx.wait()
+
+        //TODO: Make this a generic event finder
+        const newRoomEvents = receipt.events?.filter(evt => evt.event === 'NewRoomEvent')
+        if (newRoomEvents) {
+            if (newRoomEvents.length > 0) {
+                if (newRoomEvents.length === 1) {
+                    roomAddress = (newRoomEvents[0]?.args as any).addr
+                } else {
+                    throw new Error(ERROR_MULTIPLE_EVENTS)
+                }
             }
-        });
-    });
+        } else {
+            throw new Error(ERROR_NO_EVENT_FOUND)
+        }
+
+        const dealRoomDetails = await DealRoomHubContract.getRoom(roomAddress)//functions.getRoom(roomAddress)
+        return dealRoomDetails;
+    }
+    catch (e) {
+        console.error("deployDealRoom()", e)
+    }
 }
-export function deployRoomAndDeal(roomParams, deal, signer) {
-    var _a, _b;
-    return __awaiter(this, void 0, void 0, function () {
-        var roomAddress, DealRoomHubContract, tx, receipt, newRoomEvents;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
-                case 0:
-                    console.log("deployRoomAndDeal " + 1);
-                    return [4 /*yield*/, getDealRoomHubContract(roomParams.dealRoomHubAddress, signer)];
-                case 1:
-                    DealRoomHubContract = _c.sent();
-                    console.log("deployRoomAndDeal " + 2);
-                    return [4 /*yield*/, DealRoomHubContract.functions.makeBasicRoomAndDeal(roomParams.buyer, roomParams.seller, deal.erc20, deal.erc721, BigNumber.from(deal.price), deal.assetItems)];
-                case 2:
-                    tx = _c.sent();
-                    console.log("deployRoomAndDeal " + 3);
-                    return [4 /*yield*/, tx.wait()];
-                case 3:
-                    receipt = _c.sent();
-                    console.log("deployRoomAndDeal " + 4);
-                    newRoomEvents = (_a = receipt.events) === null || _a === void 0 ? void 0 : _a.filter(function (evt) { return evt.event === 'NewRoomEvent'; });
-                    if (newRoomEvents) {
-                        console.log("deployRoomAndDeal " + 4.1);
-                        if (newRoomEvents.length > 0) {
-                            if (newRoomEvents.length === 1) {
-                                console.log("deployRoomAndDeal " + 4.2);
-                                roomAddress = ((_b = newRoomEvents[0]) === null || _b === void 0 ? void 0 : _b.args).addr;
-                            }
-                            else {
-                                console.log("deployRoomAndDeal " + 4.3);
-                                throw new Error(ERROR_MULTIPLE_EVENTS);
-                            }
-                        }
-                    }
-                    else {
-                        console.log("deployRoomAndDeal " + 4.4);
-                        throw new Error(ERROR_NO_EVENT_FOUND);
-                    }
-                    console.log("deployRoomAndDeal " + 5);
-                    return [2 /*return*/, {
-                            roomAddress: roomAddress,
-                            dealId: 0
-                        }];
+
+export async function deployRoomAndDeal(roomParams: DealRoomBasicCreateParams, deal: Deal, signer: Signer): Promise<{roomAddress: string, dealId: number}> {
+    console.log(`deployRoomAndDeal ${1}`)
+    let roomAddress: string
+    const DealRoomHubContract = await getDealRoomHubContract(roomParams.dealRoomHubAddress, signer)
+    console.log(`deployRoomAndDeal ${2}`)
+    const tx = await DealRoomHubContract.functions.makeBasicRoomAndDeal(roomParams.buyer, roomParams.seller, deal.erc20, deal.erc721, BigNumber.from(deal.price), deal.assetItems)
+    console.log(`deployRoomAndDeal ${3}`)
+    const receipt = await tx.wait()
+    console.log(`deployRoomAndDeal ${4}`)
+    
+    //TODO: Make this a generic event finder
+    const newRoomEvents = receipt.events?.filter(evt => evt.event === 'NewRoomEvent')
+    if (newRoomEvents) {
+        console.log(`deployRoomAndDeal ${4.1}`)
+        if (newRoomEvents.length > 0) {
+            if (newRoomEvents.length === 1) {
+                console.log(`deployRoomAndDeal ${4.2}`)
+                roomAddress = (newRoomEvents[0]?.args as any).addr
+            } else {
+                console.log(`deployRoomAndDeal ${4.3}`)
+                throw new Error(ERROR_MULTIPLE_EVENTS)
             }
-        });
-    });
+        }
+    } else {
+        console.log(`deployRoomAndDeal ${4.4}`)
+        throw new Error(ERROR_NO_EVENT_FOUND)
+    }
+    console.log(`deployRoomAndDeal ${5}`)
+    return {
+        roomAddress,
+        dealId: 0
+    }
 }
+*/
 export function deployAll(signer) {
     return __awaiter(this, void 0, void 0, function () {
         var result;
@@ -277,9 +249,9 @@ export function deployAll(signer) {
                     return [4 /*yield*/, deployTestAsset(signer)];
                 case 2:
                     _a.erc721 = _b.sent();
-                    return [4 /*yield*/, deployDealRoomHub(signer)];
+                    return [4 /*yield*/, deployDealHub(signer)];
                 case 3:
-                    result = (_a.DealRoomHub = _b.sent(),
+                    result = (_a.DealHub = _b.sent(),
                         _a);
                     return [2 /*return*/, result];
             }
