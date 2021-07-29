@@ -1,7 +1,6 @@
 
-import * as artifactDealRoomHub from "../abi/DealRoomHub.json"
 import * as artifactDealHub from "../abi/DealHub.json"
-import * as artifactDeal from "../abi/Deal.json"
+//import * as artifactDeal from "../abi/Deal.json"
 import * as artifactTestCoin from "../abi/TestCoin.json"
 import * as artifactTestAsset from "../abi/TestAsset.json"
 import * as artifactMultisig from "../abi/MultiSigHashed.json"

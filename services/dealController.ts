@@ -17,6 +17,10 @@ export type DealListing = {
     addr: string
     buyer: string
     seller: string
+    erc20: string
+    erc721: string
+    price: BigNumberish
+    assetItems: BigNumberish[]
     dealMultiSig: string
 }
 

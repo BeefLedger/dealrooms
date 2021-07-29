@@ -12,6 +12,10 @@ contract DealHub {
         address addr;
         address buyer;
         address seller;
+        IERC20 erc20;
+        IERC721 erc721;
+        uint256 price;
+        uint256[] assetItems;
         address dealMultiSig;
     }
 
@@ -53,6 +57,10 @@ contract DealHub {
         dealDetailsByAddress[address(deal)].addr = address(deal);
         dealDetailsByAddress[address(deal)].buyer = _buyer;
         dealDetailsByAddress[address(deal)].seller = _seller;
+        dealDetailsByAddress[address(deal)].erc20 = _erc20;
+        dealDetailsByAddress[address(deal)].erc721 = _erc721;
+        dealDetailsByAddress[address(deal)].price = _price;
+        dealDetailsByAddress[address(deal)].assetItems = _assetItems;
         dealDetailsByAddress[address(deal)].dealMultiSig = address(dealMultiSig);
 
         emit DealCreated(address(deal), _buyer, _seller, address(_erc20), address(_erc721), _price, _assetItems);

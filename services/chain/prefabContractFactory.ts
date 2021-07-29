@@ -22,7 +22,7 @@ export async function getDealHubContract(address: string, signerIdxOrAddressOrSi
 }
 
 export async function getErc20Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<IERC20> {
-    return getContract(address, Erc20DetailedCompiled.abi, signerIdxOrAddressOrSigner)
+    return getContract(address, Erc20DetailedCompiled.abi, signerIdxOrAddressOrSigner) 
 }
 
 export async function getErc721Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<IERC721> {
