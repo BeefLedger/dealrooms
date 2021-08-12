@@ -152,6 +152,14 @@ describe("Deploy basic dealroom", () => {
         expect(deal2.addr).toBeDefined()
     }, 10 * MINUTE_MS)
 
+    it("Retrieve my deals", async() => {
+
+        const buyerDeals = await DealController.getUserDeals(demoEnvironment.deployedEnvironment.DealHub.address, provider.getSigner(testBuyer))
+        const sellerDeals = await DealController.getUserDeals(demoEnvironment.deployedEnvironment.DealHub.address, provider.getSigner(testSeller))
+        expect(buyerDeals.length).toBe(2)
+        expect(sellerDeals.length).toBe(2)
+    }, 10 * MINUTE_MS)
+
     it("Agent: seller deposit assets", async() => {
         //@ts-ignore
         dealController = new DealController(dealHubAddress, provider.getSigner(testSeller))

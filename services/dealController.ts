@@ -137,15 +137,6 @@ export class DealController {
         return this.initWithDeal(this._dealAddress)
     }
 
-    private async init() {
-        //if (!this.deal) {
-        //    throw new Error(ERROR_DEAL_NOT_LOADED)
-        //
-        // Ask the deal room hub for all the details
-
-
-    }
-
     public async depositDealCoins(amount: BigNumberish): Promise<ContractReceipt> {
         return (await this.dealCoinContract.transfer(this.dealContract.address, amount)).wait()
     }
@@ -160,7 +151,9 @@ export class DealController {
     }
 
     public async getMyCoinBalance(): Promise<BigNumberish> {
-        return this.dealCoinContract.balanceOf(await this._signer.getAddress())
+        const addr = await this._signer.getAddress()
+        console.log(`Getting balance for ${addr}`)
+        return this.dealCoinContract.balanceOf(addr)
     }
 
     public async getMyAssetBalance(id: BigNumberish): Promise<BigNumberish> {
@@ -257,9 +250,9 @@ export class DealController {
         return results
     }
 
-    public async getDealMissingCoins(): Promise<number> {
+    public async getDealMissingCoins(): Promise<BigNumberish> {
         const contract = await this._getDealContract()
-        return (await contract.missingDealCoins()).toNumber()
+        return (await contract.missingDealCoins())
     }
 
     public async proposeSettleDeal(): Promise<string> {
