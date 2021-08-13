@@ -5,7 +5,7 @@ import { ADMIN, TESTRPC_ACCOUNTS } from "../../lib/settings"
 import { Deal, DealController, DealStatus } from "../../services/dealController"
 import { DeployDealParams } from "../../ethereum/deploy/deploy"
 import { DemoEnvironment, setupTest } from "../../lib/testSetup"
-import { BigNumber, ethers } from "ethers"
+import { BigNumber, ethers, Signer } from "ethers"
 import { getProvider } from "../../services/chain/providerFactory"
 import { DealHub } from "ethereum/types"
 
@@ -60,8 +60,9 @@ describe("Deploy basic dealroom", () => {
         //@ts-ignore
         dealController = new DealController(dealHubAddress, provider.getSigner(testBuyer))
         await dealController.initWithNewDeal(deployDealParams)
-        dealAddress = await dealController.getAddress()
+        
         deal1 = await dealController.getDeal()
+        dealAddress = deal1.addr
         expect(deal1).toBeDefined()
         expect(deal1.addr).toBeDefined()
         expect(deal1.addr.length).toEqual(42)
@@ -80,9 +81,9 @@ describe("Deploy basic dealroom", () => {
         expect(deal1.multisigConfirmations).toEqual(0)
         expect(deal1.status).toBe(DealStatus.Open)
         const missingAssets = await dealController.getDealMissingAssets()
-        const missingCoins = await dealController.getDealMissingCoins()
+        const missingCoins = BigNumber.from(await dealController.getDealMissingCoins())
         expect(missingAssets).toEqual(deal1.assetItems.length)
-        expect(missingCoins).toEqual(BigNumber.from(deal1.price).toNumber())
+        expect(missingCoins.eq(BigNumber.from(deal1.price))).toBeTruthy()
     }, 10 * MINUTE_MS)
 
     it("Agent: buyer deposits coins", async() => {
@@ -90,7 +91,7 @@ describe("Deploy basic dealroom", () => {
         dealController = new DealController(dealHubAddress, provider.getSigner(testBuyer))
         await dealController.initWithDeal(dealAddress)
         await dealController.depositDealCoins(deal1.price)
-        const missingCoins = await dealController.getDealMissingCoins()
+        const missingCoins = BigNumber.from(await dealController.getDealMissingCoins()).toNumber()
         expect(missingCoins).toEqual(0)
     }, 1 * MINUTE_MS)
 
@@ -106,7 +107,7 @@ describe("Deploy basic dealroom", () => {
     it("Agent: buyer can withdraw coins before settlement", async() => {
         //@ts-ignore
         let failed = false
-        dealController = new DealController(dealHubAddress, provider.getSigner(testBuyer))
+        dealController = new DealController(dealHubAddress, provider.getSigner(testBuyer) as Signer)
         await dealController.initWithDeal(dealAddress)
         try {
             await dealController.withdrawDealCoins()
@@ -115,7 +116,7 @@ describe("Deploy basic dealroom", () => {
             failed = true
             console.log(e)
         }
-        let missingCoins = await dealController.getDealMissingCoins()
+        const missingCoins = BigNumber.from(await dealController.getDealMissingCoins()).toNumber()
         expect(failed).toBe(false)
         expect(missingCoins).toEqual(BigNumber.from(deal1.price).toNumber())
     }, 1 * MINUTE_MS)
@@ -140,7 +141,7 @@ describe("Deploy basic dealroom", () => {
             price: BigNumber.from(100),
             assetItems: demoEnvironment.erc721Allocations[testSeller]
         }
-        dealController = new DealController(dealHubAddress, provider.getSigner(testSeller))
+        dealController = new DealController(dealHubAddress, provider.getSigner(testSeller) as Signer)
         await dealController.initWithNewDeal(deployDealParams)
         expect(dealController).toBeDefined()
 
@@ -154,8 +155,8 @@ describe("Deploy basic dealroom", () => {
 
     it("Retrieve my deals", async() => {
 
-        const buyerDeals = await DealController.getUserDeals(demoEnvironment.deployedEnvironment.DealHub.address, provider.getSigner(testBuyer))
-        const sellerDeals = await DealController.getUserDeals(demoEnvironment.deployedEnvironment.DealHub.address, provider.getSigner(testSeller))
+        const buyerDeals = await DealController.getUserDeals(demoEnvironment.deployedEnvironment.DealHub.address, provider.getSigner(testBuyer) as Signer)
+        const sellerDeals = await DealController.getUserDeals(demoEnvironment.deployedEnvironment.DealHub.address, provider.getSigner(testSeller) as Signer)
         expect(buyerDeals.length).toBe(2)
         expect(sellerDeals.length).toBe(2)
     }, 10 * MINUTE_MS)
@@ -188,7 +189,7 @@ describe("Deploy basic dealroom", () => {
         dealController = new DealController(dealHubAddress, provider.getSigner(testBuyer))
         await dealController.initWithDeal(deal2.addr)
         await dealController.depositDealCoins(deal2.price)
-        const missingCoins = await dealController.getDealMissingCoins()
+        const missingCoins = BigNumber.from(await dealController.getDealMissingCoins()).toNumber()
         expect(missingCoins).toEqual(0)
     }, 1 * MINUTE_MS)
 
@@ -209,7 +210,7 @@ describe("Deploy basic dealroom", () => {
         dealController = new DealController(dealHubAddress, provider.getSigner(testBuyer))
         await dealController.initWithDeal(deal2.addr)
         const missingAssets = await dealController.getDealMissingAssets()
-        const missingCoins = await dealController.getDealMissingCoins()
+        const missingCoins = BigNumber.from(await dealController.getDealMissingCoins()).toNumber()
         expect(missingAssets).toEqual(0)
         expect(missingCoins).toEqual(0)
         deal2 = await dealController.getDeal() 
@@ -246,7 +247,7 @@ describe("Deploy basic dealroom", () => {
             failed = true
         }
         expect(failed).toBeTruthy()
-        let missingCoins = await dealController.getDealMissingCoins()
+        const missingCoins = BigNumber.from(await dealController.getDealMissingCoins()).toNumber()
         expect(missingCoins).toEqual(0)
     }, 1 * MINUTE_MS)
 
@@ -268,7 +269,7 @@ describe("Deploy basic dealroom", () => {
     it("Agent: buyer can withdraw assets after settlement", async() => {
         let failed = false
 
-        dealController = new DealController(dealHubAddress, provider.getSigner(testBuyer))
+        dealController = new DealController(dealHubAddress, provider.getSigner(testBuyer) as Signer)
         await dealController.initWithDeal(deal2.addr)
         try {
             await dealController.withdrawDealAssets()

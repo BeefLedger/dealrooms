@@ -104,6 +104,78 @@ export class DealController {
         return Deployer.deployDeal(params, await signer.getAddress(), signer)
     }
 
+    public static async getDeal(dealHub: string, dealAddress: string, signer: Signer): Promise<Deal> {
+        
+        try {
+            const hubContract: DealHub = await ContractFactory.getDealHubContract(dealHub, signer)
+            const dealContract = await ContractFactory.getDealContract(dealAddress, signer)
+            let dealStruct: any
+            try {
+                dealStruct = await dealContract.getDeal()       
+            } catch (e) {
+                throw new Error(`Deal not found: ${e}`)
+            }
+            const dealListing: DealListing = await hubContract.getDeal(dealAddress)
+
+            
+            // Get multisig from hub    
+            const dealMultiSig: MultiSigController = new MultiSigController(dealListing.dealMultiSig, signer)
+            await dealMultiSig.init()
+    
+            
+            // Get deal transaction and confirmations (if any) from main multisig
+            const dealTransaction = await DealController.getDealSettleTransaction(dealMultiSig)
+            let multisigConfirmations: number = 0
+            if (dealTransaction) {
+                multisigConfirmations = (await dealMultiSig.getConfirmations(dealTransaction.hash)).length
+            }
+
+            // Return the Deal
+            return {
+                addr: dealAddress,
+                buyer: dealStruct.buyer,
+                seller: dealStruct.seller,
+                erc20: dealStruct.erc20,
+                erc721: dealStruct.erc721,
+                price: dealStruct.price,
+                assetItems: dealStruct.assetItems.map(item=>item.toNumber()),
+                dealTransaction,
+                multisigConfirmations,
+                status: dealStruct.status,
+            } as Deal
+        }
+        catch (e) {
+            throw new Error(`Failed to find deal: ${e}`)
+        }      
+    }
+
+    private static async _getDealContract(dealAddress: string, signer: Signer): Promise<DealContract> {
+        try {
+            //Connect to the contract with my signer
+            const contract = await ContractFactory.getDealContract(dealAddress, signer)
+            return contract
+        }
+        catch (e) {
+            throw Error(`Failed to get DealRoom contract: ${e}`)
+        }
+    }
+
+    private static async getDealSettleTransaction(multiSigController: MultiSigController): Promise<MultiSigTransaction | null> {
+        // Find transaction that corresponds to settle(dealId)
+        let result: MultiSigTransaction = null
+        const transactions = await multiSigController.getTransactions()
+        if (transactions.length) {
+            result = transactions.find((transaction: MultiSigTransaction) => {
+                const decodedTransaction = MultiSigController.decodeDealRoomTransaction(transaction.data)
+                if (decodedTransaction.name === "settle") 
+                return true
+            })        
+            return result ?? null
+        } else {
+            return null
+        }  
+    }
+
     //--- Instance methods, for use with a Controller constructed with a specific instance of a Room
 
     constructor(hubAddress: string, signer: Signer) {
@@ -116,11 +188,12 @@ export class DealController {
         if (!this.dealHubContract) {
             this.dealHubContract = await ContractFactory.getDealHubContract(this._dealHubAddress, this._signer)
         }
+        this.dealContract = await DealController._getDealContract(dealAddress, this._signer)
         this._dealAddress = dealAddress
         //this.dealContract = await ContractFactory.getDealContract(dealAddress, this._signer)
         this.dealListing = await this._getDealListing()
-        this.deal = await this.getDeal()
-        this.dealContract = await this._getDealContract()
+        this.deal = await DealController.getDeal(this._dealHubAddress, dealAddress, this._signer)
+        this.dealContract = await DealController._getDealContract(dealAddress, this._signer)
         this.dealHubContract = await this._getDealHubContract();
         
         this.dealAssetContract = await this._getDealAssetContract()
@@ -164,8 +237,8 @@ export class DealController {
         return this.dealAssetContract.ownerOf(assetId)
     }
 
-    public async getDealContract(): Promise<DealContract> {
-        return this._getDealContract()
+    public getDealContract(): DealContract {
+        return this.dealContract;
     }
 
     public async getBuyer(): Promise<string> {
@@ -176,20 +249,9 @@ export class DealController {
         return await this.dealContract.getSeller()
     }
 
-    public async getAddress(): Promise<string> {
-        //If already cached, return it
-        if (this._dealAddress) {
-            return this._dealAddress
-        } 
-        //Otherwise, fetch it (which will cache it for next time)
-        else {
-            const contract = await this._getDealContract()
-            return contract.address
-        }
-    }
     public async getDeal(): Promise<Deal> {
         if (!this.dealContract) {
-            this.dealContract = await this._getDealContract()
+            this.dealContract = await DealController._getDealContract(this._dealAddress, this._signer)
         }
         try {
             let dealStruct: any
@@ -251,8 +313,7 @@ export class DealController {
     }
 
     public async getDealMissingCoins(): Promise<BigNumberish> {
-        const contract = await this._getDealContract()
-        return (await contract.missingDealCoins())
+        return (await this.dealContract.missingDealCoins())
     }
 
     public async proposeSettleDeal(): Promise<string> {
@@ -301,18 +362,6 @@ export class DealController {
 
     private async signerAddress(): Promise<string> {
         return this._signer.getAddress();
-    }
-    
-    // TODO: Cache the contract
-    private async _getDealContract(): Promise<DealContract> {
-        try {
-            //Connect to the contract with my signer
-            const contract = await ContractFactory.getDealContract(this._dealAddress, this._signer)
-            return contract
-        }
-        catch (e) {
-            throw Error(`Failed to get DealRoom contract: ${e}`)
-        }
     }
 
     private async _getDealHubContract(): Promise<DealHub> {
@@ -367,18 +416,7 @@ export class DealController {
     private async _getDealSettleTransaction(): Promise<MultiSigTransaction | null> {
         let result: MultiSigTransaction = null
         const multiSigContract = await this._getDealMultiSig()
-        // Find transaction that corresponds to settle(dealId)
-        const transactions = await multiSigContract.getTransactions()
-        if (transactions.length) {
-            result = transactions.find((transaction: MultiSigTransaction) => {
-                const decodedTransaction = MultiSigController.decodeDealRoomTransaction(transaction.data)
-                if (decodedTransaction.name === "settle") 
-                return true
-            })        
-            return result ?? null
-        } else {
-            return null
-        }    
+        return DealController.getDealSettleTransaction(multiSigContract)
     }
 
     /*private async _getAgentDealSettleTransaction(dealId: BigNumberish): Promise<MultiSigTransaction | null> {

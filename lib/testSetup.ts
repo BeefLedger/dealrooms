@@ -1,3 +1,4 @@
+import { Signer } from "ethers"
 import { deployAll, DeployedEnvironment } from "../ethereum/deploy/deploy";
 import { sendEth } from "../ethereum/utils";
 import { getProvider } from "../services/chain/providerFactory";
@@ -21,12 +22,12 @@ export async function setupTest(adminAddress: string, accounts: any[] ): Promise
     // Create ERC-20 contract
     // Create DealRoomHub
     console.log("Setting up")
-    demoEnvironment.deployedEnvironment = await deployAll(provider.getSigner(adminAddress))
+    demoEnvironment.deployedEnvironment = await deployAll(provider.getSigner(adminAddress) as Signer)
 
     let assetId = 0
     for (const acct of accounts) {
         demoEnvironment.erc721Allocations[acct.address] = []
-        await sendEth(acct.address, 0.1, provider.getSigner(adminAddress))
+        await sendEth(acct.address, 0.1, provider.getSigner(adminAddress) as Signer)
         await demoEnvironment.deployedEnvironment.erc20.mint(acct.address, ERC20_DEMO_AMOUNT)
         demoEnvironment.erc20Allocations[acct.address] = ERC20_DEMO_AMOUNT
         for (let i=0; i<5; i++) {

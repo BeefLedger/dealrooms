@@ -14,21 +14,26 @@ import { getContract } from "./contractFactory"
 import { Signer } from "ethers"
 
 export async function getDealContract(address: string, signer: Signer): Promise<Deal> {
+    //@ts-ignore
     return getContract<Deal>(address, DealCompiled.abi, signer)
 }
 
 export async function getDealHubContract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<DealHub> {
+    //@ts-ignore
     return getContract<DealHub>(address, DealHubCompiled.abi, signerIdxOrAddressOrSigner) as Promise<DealHub>
 }
 
 export async function getErc20Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<IERC20> {
-    return getContract(address, Erc20DetailedCompiled.abi, signerIdxOrAddressOrSigner) 
+    //@ts-ignore
+    return getContract<IERC20>(address, Erc20DetailedCompiled.abi, signerIdxOrAddressOrSigner) 
 }
 
 export async function getErc721Contract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<IERC721> {
-    return getContract(address, Erc721DetailedCompiled.abi, signerIdxOrAddressOrSigner)
+    //@ts-ignore
+    return getContract<IERC20>(address, Erc721DetailedCompiled.abi, signerIdxOrAddressOrSigner)
 }
 
 export async function getMultiSigContract(address: string, signerIdxOrAddressOrSigner?: number | string | Signer): Promise<MultiSigHashed> {
-    return getContract(address, MultiSigHashedCompiled.abi, signerIdxOrAddressOrSigner)
+    //@ts-ignore
+    return getContract<MultiSigHashed>(address, MultiSigHashedCompiled.abi, signerIdxOrAddressOrSigner)
 }

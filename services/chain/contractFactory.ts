@@ -1,4 +1,5 @@
-import { Contract, ContractFactory, Signer } from "ethers";
+import { Contract, ContractFactory } from "ethers";
+import { Signer } from "ethers";
 import { getProvider } from "./providerFactory";
 import { getSigner } from "./signerFactory";
 
@@ -28,7 +29,7 @@ export async function getContract <T extends Contract>(
         if (!["string", "number"].includes(typeof(addressOrIndexOrSigner))) {
             signer = addressOrIndexOrSigner as unknown as Signer
         } else if (signer instanceof Signer) {
-            signer = await getSigner(addressOrIndexOrSigner as string | number)
+            signer = await getSigner(addressOrIndexOrSigner as string | number) as Signer
         }
         return new Contract(address, abi, signer) as T
     } else {
