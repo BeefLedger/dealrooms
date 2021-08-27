@@ -1,6 +1,6 @@
 {
   "name": "dealrooms",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "license": "MIT",
   "author": "Barry Earsman",
   "description": "Allow the safe exchange of fungible ERC-20 tokens for non-fungible ERC-721 tokens which represent real-world assets.",
