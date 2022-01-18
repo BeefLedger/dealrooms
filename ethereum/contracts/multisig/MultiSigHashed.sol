@@ -250,8 +250,8 @@ contract MultiSigHashed {
 
     /// @dev Returns the confirmation status of a transaction.
     /// @param hash Transaction ID.
-    /// @return Confirmation status.
-    function isConfirmed(bytes32 hash) public view returns (bool) {
+    /// @return result Confirmation status.
+    function isConfirmed(bytes32 hash) public view returns (bool result) {
         uint256 count = 0;
         for (uint256 i = 0; i < owners.length; i++) {
             if (confirmations[hash][owners[i]])

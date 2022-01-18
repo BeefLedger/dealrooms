@@ -22,12 +22,15 @@ export type DealListing = {
     price: BigNumberish
     assetItems: BigNumberish[]
     dealMultiSig: string
+    agentMultiSig: string
 }
 
 export type Deal = {
     addr?: string
     buyer: string
     seller: string
+    arbitrator?: string
+    sensor?: string
     erc20?: string
     erc721?: string
     price?: BigNumberish
@@ -317,7 +320,18 @@ export class DealController {
     }
 
     public async proposeSettleDeal(): Promise<string> {
-        return this._proposeMainSettleDeal()
+        // If this is an advanced deal,
+        if (this.deal.arbitrator) {
+            const _signerAddress = await this.signerAddress()
+            if ([this.deal.buyer, this.deal.seller, this.deal.arbitrator].includes(_signerAddress)) {
+                return this._proposeAgentSettleDeal()
+            } else {
+                return this._proposeMainSettleDeal()
+            }
+        }
+        else {
+            return this._proposeMainSettleDeal()
+        }
     }
 
     public async withdrawDealCoins(): Promise<ContractReceipt> {
@@ -397,17 +411,15 @@ export class DealController {
         return msController
     }
 
-    /*private async _getAgentMultiSig(): Promise<MultiSigController> {
+    private async _getAgentMultiSig(): Promise<MultiSigController> {
         if (!this.dealListing) {
-            throw new Error(ERROR_ROOM_NOT_LOADED)
+            throw new Error(ERROR_DEAL_NOT_LOADED)
         }
-        if (!this.dealListing.agentMultiSig) {
-            throw new Error(ERROR_NO_AGENT_MULTISIG)
-        }
-        const msController: MultiSigController = new MultiSigController(this.details.agentMultiSig, this._signer)
+
+        const msController: MultiSigController = new MultiSigController(this.dealListing.agentMultiSig, this._signer)
         await msController.init()
         return msController
-    }*/
+    }
 
     private async _getDealListing(): Promise<DealListing> {
         return this.dealHubContract.getDeal(this._dealAddress)
@@ -453,22 +465,20 @@ export class DealController {
     }
 
     // Send a new transaction to the agents multisig to "approve" the deal in the main multisig
-    /*private async _proposeAgentsSettleDeal(dealId: BigNumberish): Promise<string> {
+    private async _proposeAgentSettleDeal(): Promise<string> {
 
-        const deal: Deal = await this.getDeal(dealId)
-        const agentMultiSig: MultiSigController = await this._getAgentMultiSig();
-        
         //Submit a transaction to approve a transaction
-        const roomContract = await this._getDealContract()
+        const dealContract: DealContract = await this.getDealContract()
+        const agentMultiSig: MultiSigController = await this._getAgentMultiSig();
 
         // Make a new agent proposal to approve deal settlement proposal
         const hash = await agentMultiSig.submitDuplexMultiSigProposal(
             this.getDealMultiSigContractAddress(),
-            roomContract.address,
+            dealContract.address,
             DealCompiled.abi,
             "settle",
-            [dealId],
+            [],
         )
         return hash
-    }*/
+    }
 }
