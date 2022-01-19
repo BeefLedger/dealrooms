@@ -16,6 +16,7 @@
     "test": "jest --runInBand",
     "test:sigtree": "jest sigTree_test.ts --runInBand",
     "test:basic": "jest basicDealRoom_test.ts --runInBand",
+    "test:advanced": "jest advDealRoom_test.ts --runInBand",
     "test:dealroom": "jest dealRoom_test.ts --runInBand",
     "contracts:type": "typechain --target ./node_modules/@typechain/ethers-v5 --out-dir ./ethereum/types './ethereum/abi/**/*.json'",
     "contracts:clear": "rm -rf ./ethereum/abi && rm -rf ./ethereum/types",

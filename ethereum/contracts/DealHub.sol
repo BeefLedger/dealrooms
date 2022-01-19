@@ -12,9 +12,9 @@ contract DealHub {
         address addr;
         address buyer;
         address seller;
-        //address arbitrator;
-        //address sensor;
-        //address documentApprover;
+        address arbitrator;
+        address sensor;
+        address documentApprover;
         IERC20 erc20;
         IERC721 erc721;
         uint256 price;
@@ -50,7 +50,7 @@ contract DealHub {
         deal.changeOwner(address(dealMultiSig));
 
         //Index
-        indexDeal(address(deal), _buyer, _seller, _erc20, _erc721, _price, _assetItems, address(dealMultiSig), address(0));
+        indexDeal(address(deal), _buyer, _seller, address(0), address(0), address(0), _erc20, _erc721, _price, _assetItems, address(dealMultiSig), address(0));
 
         emit DealCreated(address(deal), _buyer, _seller, address(_erc20), address(_erc721), _price, _assetItems);
 
@@ -61,6 +61,9 @@ contract DealHub {
         address _dealAddress, 
         address _buyer,
         address _seller,
+        address _arbitrator,
+        address _sensor,
+        address _documentApprover,
         IERC20 _erc20,
         IERC721 _erc721,
         uint256 _price,
@@ -75,11 +78,17 @@ contract DealHub {
         //Index by buyer and seller
         dealsByUser[_buyer].push(_dealAddress);
         dealsByUser[_seller].push(_dealAddress);
+        dealsByUser[_arbitrator].push(_dealAddress);
+        dealsByUser[_sensor].push(_dealAddress);
+        dealsByUser[_documentApprover].push(_dealAddress);
         //Index by address
         dealDetailsByAddress[address(_dealAddress)] = DealDetails(
             _dealAddress,
             _buyer,
             _seller,
+            _arbitrator,
+            _sensor,
+            _documentApprover,
             _erc20,
             _erc721,
             _price,
@@ -87,15 +96,6 @@ contract DealHub {
             _dealMultiSig,
             _agentMultiSig
         );
-        /*dealDetailsByAddress[address(_dealAddress)].addr = _dealAddress;
-        dealDetailsByAddress[address(_dealAddress)].buyer = _buyer;
-        dealDetailsByAddress[address(_dealAddress)].seller = _seller;
-        dealDetailsByAddress[address(_dealAddress)].erc20 = _erc20;
-        dealDetailsByAddress[address(_dealAddress)].erc721 = _erc721;
-        dealDetailsByAddress[address(_dealAddress)].price = _price;
-        dealDetailsByAddress[address(_dealAddress)].assetItems = _assetItems;
-        dealDetailsByAddress[address(_dealAddress)].dealMultiSig = _dealMultiSig;
-        dealDetailsByAddress[address(_dealAddress)].agentMultiSig = _agentMultiSig;*/
     }
 
     function makeAdvancedDeal(
@@ -121,7 +121,7 @@ contract DealHub {
         deal.changeOwner(address(dealMultiSig));
 
         //Save deal details
-        indexDeal(address(deal), _buyer, _seller, _erc20, _erc721, _price, _assetItems, address(dealMultiSig), address(agentMultiSig));
+        indexDeal(address(deal), _buyer, _seller, _arbitrator, _sensor, _documentApprover, _erc20, _erc721, _price, _assetItems, address(dealMultiSig), address(agentMultiSig));
 
         emit DealCreated(address(deal), _buyer, _seller, address(_erc20), address(_erc721), _price, _assetItems);
 

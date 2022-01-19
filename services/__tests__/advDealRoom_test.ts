@@ -7,12 +7,14 @@ import { DeployDealParams } from "../../ethereum/deploy/deploy"
 import { DemoEnvironment, setupTest } from "../../lib/testSetup"
 import { BigNumber, ethers, Signer } from "ethers"
 import { getProvider } from "../../services/chain/providerFactory"
-import { DealHub } from "ethereum/types"
 
 // { BigNumber } from "ethers/utils"
 
 const testBuyer = TESTRPC_ACCOUNTS[5].address
 const testSeller = TESTRPC_ACCOUNTS[6].address
+const testArbitrator = TESTRPC_ACCOUNTS[2].address
+const testSensor = TESTRPC_ACCOUNTS[3].address
+const testDocApprover = TESTRPC_ACCOUNTS[4].address
 
 let dealController: DealController
 let demoEnvironment: DemoEnvironment
@@ -29,7 +31,7 @@ let dealAddress: string
 let dealId: string
 
 
-describe("Deploy basic deal", () => {
+describe("Deploy advanced deal", () => {
 
     beforeAll(async () => {
         console.log("*** Running beforeAll()")
@@ -52,6 +54,9 @@ describe("Deploy basic deal", () => {
             dealHubAddress,
             buyer: testBuyer,
             seller: testSeller,
+            arbitrator: testArbitrator,
+            sensor: testSensor,
+            docApprover: testDocApprover,
             erc20: demoEnvironment.deployedEnvironment.erc20.address,
             erc721: demoEnvironment.deployedEnvironment.erc721.address,
             price: 100,
@@ -136,6 +141,9 @@ describe("Deploy basic deal", () => {
             dealHubAddress,
             buyer: testBuyer,
             seller: testSeller,
+            arbitrator: testArbitrator,
+            sensor: testSensor,
+            docApprover: testDocApprover,
             erc20: demoEnvironment.deployedEnvironment.erc20.address,
             erc721: demoEnvironment.deployedEnvironment.erc721.address,
             price: BigNumber.from(100),
@@ -146,6 +154,7 @@ describe("Deploy basic deal", () => {
         expect(dealController).toBeDefined()
 
         deal2 = await dealController.getDeal()
+        expect(deal2.sensor).toBeDefined()
         dealAddress = deal2.addr
 
         expect(deal2.multisigConfirmations).toEqual(0)
@@ -201,7 +210,29 @@ describe("Deploy basic deal", () => {
         await dealController.proposeSettleDeal()
         deal2 = await dealController.getDeal()
 
+        expect(deal2.multisigConfirmations).toEqual(0)
+        expect(deal2.status).toBe(DealStatus.Open)
+    }, 1 * MINUTE_MS)
+
+    it("Agent: sensor signature", async() => {
+        //@ts-ignore
+        dealController = new DealController(dealHubAddress, provider.getSigner(testSensor))
+        await dealController.initWithDeal(deal2.addr)
+        await dealController.proposeSettleDeal()
+        deal2 = await dealController.getDeal()
+
         expect(deal2.multisigConfirmations).toEqual(1)
+        expect(deal2.status).toBe(DealStatus.Open)
+    }, 1 * MINUTE_MS)
+
+    it("Agent: docApprover signature", async() => {
+        //@ts-ignore
+        dealController = new DealController(dealHubAddress, provider.getSigner(testDocApprover))
+        await dealController.initWithDeal(deal2.addr)
+        await dealController.proposeSettleDeal()
+        deal2 = await dealController.getDeal()
+
+        expect(deal2.multisigConfirmations).toEqual(2)
         expect(deal2.status).toBe(DealStatus.Open)
     }, 1 * MINUTE_MS)
 
@@ -216,7 +247,7 @@ describe("Deploy basic deal", () => {
         deal2 = await dealController.getDeal() 
         await dealController.proposeSettleDeal()
         deal2 = await dealController.getDeal()
-        expect(deal2.multisigConfirmations).toEqual(2)
+        expect(deal2.multisigConfirmations).toEqual(3)
         expect(deal2.status).toBe(DealStatus.Settled)
     }, 1 * MINUTE_MS)
 

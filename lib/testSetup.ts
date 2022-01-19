@@ -20,7 +20,7 @@ export async function setupTest(adminAddress: string, accounts: any[] ): Promise
     const provider = await getProvider()
     // Create ERC-721 contract
     // Create ERC-20 contract
-    // Create DealRoomHub
+    // Create DealHub
     console.log("Setting up")
     demoEnvironment.deployedEnvironment = await deployAll(provider.getSigner(adminAddress) as Signer)
 

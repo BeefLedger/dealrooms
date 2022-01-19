@@ -392,7 +392,10 @@ export class MultiSigHashed extends BaseContract {
      * Returns the confirmation status of a transaction.
      * @param hash Transaction ID.
      */
-    isConfirmed(hash: BytesLike, overrides?: CallOverrides): Promise<[boolean]>;
+    isConfirmed(
+      hash: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[boolean] & { result: boolean }>;
 
     makeHash(
       destination: string,

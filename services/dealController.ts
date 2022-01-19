@@ -31,6 +31,7 @@ export type Deal = {
     seller: string
     arbitrator?: string
     sensor?: string
+    docApprover?: string
     erc20?: string
     erc721?: string
     price?: BigNumberish
@@ -99,6 +100,9 @@ export class DealController {
             dealHubAddress: hub.address,
             buyer: deal.buyer,
             seller: deal.seller,
+            arbitrator: deal.arbitrator,
+            sensor: deal.sensor,
+            docApprover: deal.docApprover,
             erc20: deal.erc20,
             erc721: deal.erc721,
             price: deal.price,
@@ -107,7 +111,8 @@ export class DealController {
         return Deployer.deployDeal(params, await signer.getAddress(), signer)
     }
 
-    public static async getDeal(dealHub: string, dealAddress: string, signer: Signer): Promise<Deal> {
+    /*
+    public static async fetchDeal(dealHub: string, dealAddress: string, signer: Signer): Promise<Deal> {
         
         try {
             const hubContract: DealHub = await ContractFactory.getDealHubContract(dealHub, signer)
@@ -138,6 +143,9 @@ export class DealController {
                 addr: dealAddress,
                 buyer: dealStruct.buyer,
                 seller: dealStruct.seller,
+                arbitrator: dealStruct.arbitrator,
+                sensor: dealStruct.sensor,
+                docApprover: dealStruct.docApprover,
                 erc20: dealStruct.erc20,
                 erc721: dealStruct.erc721,
                 price: dealStruct.price,
@@ -150,7 +158,7 @@ export class DealController {
         catch (e) {
             throw new Error(`Failed to find deal: ${e}`)
         }      
-    }
+    }*/
 
     private static async _getDealContract(dealAddress: string, signer: Signer): Promise<DealContract> {
         try {
@@ -195,7 +203,7 @@ export class DealController {
         this._dealAddress = dealAddress
         //this.dealContract = await ContractFactory.getDealContract(dealAddress, this._signer)
         this.dealListing = await this._getDealListing()
-        this.deal = await DealController.getDeal(this._dealHubAddress, dealAddress, this._signer)
+        this.deal = await this.getDeal() // DealController.getDeal(this._dealHubAddress, dealAddress, this._signer)
         this.dealContract = await DealController._getDealContract(dealAddress, this._signer)
         this.dealHubContract = await this._getDealHubContract();
         
@@ -252,14 +260,20 @@ export class DealController {
         return await this.dealContract.getSeller()
     }
 
+    public isAdvancedDeal(): boolean {
+        return this.deal.arbitrator !== "0x0000000000000000000000000000000000000000"
+    }
+    
     public async getDeal(): Promise<Deal> {
         if (!this.dealContract) {
             this.dealContract = await DealController._getDealContract(this._dealAddress, this._signer)
         }
         try {
-            let dealStruct: any
+            let dealListing: any
             try {
-                dealStruct = await this.dealContract.getDeal()       
+                const dealStruct = await this.dealHubContract.getDeal(this._dealAddress)// await this.dealContract.getDeal()   
+                const deal = await this.dealContract.getDeal()
+                dealListing = { ...dealStruct, status: deal.status }
             } catch (e) {
                 throw new Error(`Deal not found: ${e}`)
             }
@@ -273,19 +287,22 @@ export class DealController {
             if (dealTransaction) {
                 multisigConfirmations = (await dealMultiSig.getConfirmations(dealTransaction.hash)).length
             }
-
+            
             // Return the Deal
             return {
                 addr: this._dealAddress,
-                buyer: dealStruct.buyer,
-                seller: dealStruct.seller,
-                erc20: dealStruct.erc20,
-                erc721: dealStruct.erc721,
-                price: dealStruct.price,
-                assetItems: dealStruct.assetItems.map(item=>item.toNumber()),
+                buyer: dealListing.buyer,
+                seller: dealListing.seller,
+                arbitrator: dealListing.arbitrator,
+                sensor: dealListing.sensor,
+                docApprover: dealListing.documentApprover,
+                erc20: dealListing.erc20,
+                erc721: dealListing.erc721,
+                price: dealListing.price,
+                assetItems: dealListing.assetItems.map(item=>item.toNumber()),
                 dealTransaction,
                 multisigConfirmations,
-                status: dealStruct.status,
+                status: dealListing.status,
             } as Deal
         }
         catch (e) {
@@ -321,15 +338,18 @@ export class DealController {
 
     public async proposeSettleDeal(): Promise<string> {
         // If this is an advanced deal,
-        if (this.deal.arbitrator) {
+        if (this.isAdvancedDeal()) {
             const _signerAddress = await this.signerAddress()
             if ([this.deal.buyer, this.deal.seller, this.deal.arbitrator].includes(_signerAddress)) {
+                console.log("Proposing settlement of agent multisig")
                 return this._proposeAgentSettleDeal()
             } else {
+                console.log("Proposing settlement of deal multisig")
                 return this._proposeMainSettleDeal()
             }
         }
         else {
+            console.log("Proposing settlement of simple deal multisig")
             return this._proposeMainSettleDeal()
         }
     }

@@ -16,13 +16,8 @@ import { DealHub } from "../types/DealHub"
 import { MultiSigHashed } from "../types/MultiSigHashed"
 import { TestContract } from "../types/TestContract"
 
-import { BigNumberish, Signer } from "ethers"
+import { BigNumberish, ContractTransaction, Signer } from "ethers"
 import { getDealHubContract } from "../../services/chain/prefabContractFactory"
-//import { Deal, DealRoomDetails } from "../../services/dealRoomController"
-
-//import { BigNumber } from "ethers"
-//import { DealListing } from "services/chain/dealController"
-
 
 export type DeployedEnvironment = {
     DealHub?: DealHub
@@ -85,7 +80,12 @@ export async function deployDeal(params: DeployDealParams, owner: string, signer
     try {
         let dealAddress: string
         const dealHubContract = await getDealHubContract(params.dealHubAddress, signer)
-        const tx = await dealHubContract.functions.makeDeal(params.buyer, params.seller, params.erc20, params.erc721, params.price, params.assetItems)
+        let tx: ContractTransaction
+        if (params.sensor) {
+            tx = await dealHubContract.functions.makeAdvancedDeal(params.buyer, params.seller, params.arbitrator, params.sensor, params.docApprover, params.erc20, params.erc721, params.price, params.assetItems)
+        } else {
+            tx = await dealHubContract.functions.makeDeal(params.buyer, params.seller, params.erc20, params.erc721, params.price, params.assetItems)
+        }
         const receipt = await tx.wait()
 
         //TODO: Make this a generic event finder
